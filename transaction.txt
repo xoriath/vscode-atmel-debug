@@ -1,0 +1,517 @@
+10 13 40 980: msg send(18):R 1
+10 13 41 088: msg recv(18):E Locator peerAdded {"Port":"49468","Host":"127.0.0.1","ID":"LocalHIL0","Name":"Local HIL","OSName":"Windows","TransportName":"TCP"}
+10 15 05 074: msg recv(18):C 2 Tool pollForTools true
+10 15 05 154: msg send(18):R 2
+10 15 05 476: msg send(18):E Tool attachedToolsChanged [{"ToolType":"com.atmel.avrdbg.tool.simulator","ConnectionType":"","ConnectionProperties":{}}]
+10 15 09 444: msg send(18):E Tool attachedToolsChanged [{"ToolType":"com.atmel.avrdbg.tool.simulator","ConnectionType":"","ConnectionProperties":{}},{"ToolType":"com.atmel.avrdbg.tool.jtagicemk3","ConnectionType":"com.atmel.avrdbg.connection.jungousb","ConnectionProperties":{"Type":"com.atmel.avrdbg.connection.jungousb","SerialNumber":"J30200000098","UsbVendorId":1003,"UsbProductId":8464}}]
+
+
+08 29 47 592: msg recv(0):C 107 Tool setupTool "com.atmel.avrdbg.tool.simulator" "" {}
+08 29 47 592: msg send(0):E Tool contextAdded [{"ID":"Sim_10","Name":"com.atmel.avrdbg.tool.simulator"}]
+08 29 47 593: msg send(0):R 107  "Sim_10"
+08 29 47 593: msg recv(0):C 108 Tool getContext "Sim_10"
+08 29 47 593: msg send(0):R 108  {"ID":"Sim_10","Name":"com.atmel.avrdbg.tool.simulator"}
+08 29 47 594: msg recv(0):C 109 Tool connect "Sim_10"
+08 29 47 594: msg send(0):R 109
+08 29 48 135: msg recv(0):C 110 Tool setProperties "Sim_10" {"InterfaceProperties":{"KeepTimersRunning":true,"ProjectFolder":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2"},"DeviceName":"ATmega128","PackPath":"C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"}
+08 29 49 486: msg send(0):E Device contextAdded [{"ID":"SimDev_3","Name":"ATmega128","Session":0,"MemoryIDs":[],"RunControlID":""}]
+08 29 49 487: msg send(0):E Tool contextChanged [{"ID":"Sim_10","Name":"com.atmel.avrdbg.tool.simulator","DeviceId":"SimDev_3"}]
+08 29 49 487: msg send(0):R 110
+08 29 50 118: msg recv(0):F -100
+08 29 50 118: msg recv(0):C 111 Tool getContext "Sim_10"
+08 29 50 118: msg send(0):R 111  {"ID":"Sim_10","Name":"com.atmel.avrdbg.tool.simulator","DeviceId":"SimDev_3"}
+08 29 50 121: msg recv(0):C 112 Device getContext "SimDev_3"
+08 29 50 121: msg send(0):R 112  {"ID":"SimDev_3","Name":"ATmega128","Session":0,"MemoryIDs":[],"RunControlID":""}
+08 29 50 127: msg recv(0):C 113 Processes launch "c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug\\GccApplication2.elf" "SimDev_3" {"LaunchSuspended":true,"LaunchAttached":true,"CacheFlash":true,"EraseRule":0,"PreserveEeprom":false,"RamSnippetAddress":"0x20000000","ProgFlashFromRam":true,"UseGdb":true,"GdbLocation":"C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe","BootSegment":2,"PackPath":"C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"}
+08 29 50 128: msg send(0):P 113 {"Description":"Launching...","ProgressComplete":0,"ProgressTotal":100}
+08 29 50 128: msg send(0):P 113 {"Description":"Starting programming session...","ProgressComplete":1,"ProgressTotal":100}
+08 29 50 128: msg send(0):P 113 {"Description":"Erasing device...","ProgressComplete":5,"ProgressTotal":100}
+08 29 50 128: msg send(0):E Memory contextAdded [{"ID":"Mem_prog_43","BigEndian":false,"AddressSize":1,"Name":"prog","StartBound":0,"EndBound":131071},{"ID":"Mem_signatures_44","BigEndian":false,"AddressSize":1,"Name":"signatures","StartBound":0,"EndBound":2},{"ID":"Mem_fuses_45","BigEndian":false,"AddressSize":1,"Name":"fuses","StartBound":0,"EndBound":2},{"ID":"Mem_lockbits_46","BigEndian":false,"AddressSize":1,"Name":"lockbits","StartBound":0,"EndBound":0},{"ID":"Mem_data_47","BigEndian":false,"AddressSize":1,"Name":"data","StartBound":0,"EndBound":65535},{"ID":"Mem_eeprom_48","BigEndian":false,"AddressSize":1,"Name":"eeprom","StartBound":0,"EndBound":4095},{"ID":"Mem_io_49","BigEndian":false,"AddressSize":1,"Name":"io","StartBound":0,"EndBound":63}]
+08 29 50 128: msg send(0):E Memory memoryChanged "Mem_prog_43" [{"addr":1,"size":0}]
+08 29 50 128: msg send(0):E Memory memoryChanged "Mem_eeprom_48" [{"addr":1,"size":0}]
+08 29 50 128: msg send(0):E Memory memoryChanged "Mem_lockbits_46" [{"addr":1,"size":0}]
+08 29 50 128: msg send(0):E Memory contextRemoved ["Mem_prog_43","Mem_signatures_44","Mem_fuses_45","Mem_lockbits_46","Mem_data_47","Mem_eeprom_48","Mem_io_49"]
+08 29 50 128: msg send(0):E Memory contextAdded [{"ID":"Mem_prog_50","BigEndian":false,"AddressSize":1,"Name":"prog","StartBound":0,"EndBound":131071},{"ID":"Mem_signatures_51","BigEndian":false,"AddressSize":1,"Name":"signatures","StartBound":0,"EndBound":2},{"ID":"Mem_fuses_52","BigEndian":false,"AddressSize":1,"Name":"fuses","StartBound":0,"EndBound":2},{"ID":"Mem_lockbits_53","BigEndian":false,"AddressSize":1,"Name":"lockbits","StartBound":0,"EndBound":0},{"ID":"Mem_data_54","BigEndian":false,"AddressSize":1,"Name":"data","StartBound":0,"EndBound":65535},{"ID":"Mem_eeprom_55","BigEndian":false,"AddressSize":1,"Name":"eeprom","StartBound":0,"EndBound":4095},{"ID":"Mem_io_56","BigEndian":false,"AddressSize":1,"Name":"io","StartBound":0,"EndBound":63}]
+08 29 50 128: msg send(0):P 113 {"Description":"Loading module...","ProgressComplete":5,"ProgressTotal":100}
+08 29 50 129: msg send(0):P 113 {"Description":"Loading executable ...","ProgressComplete":14,"ProgressTotal":100}
+08 29 50 129: dbg Writing contents of 'c:\users\morten\Documents\Atmel Studio\7.0\GccApplication2\GccApplication2\Debug\GccApplication2.elf' to target 'ATmega128'...
+08 29 50 129: dbg Writing segment 0x0:0xE2 mapped as 0x0:0xE2 in 'prog'.
+08 29 50 129: msg send(0):E Memory memoryChanged "Mem_prog_50" [{"addr":0,"size":226}]
+08 29 50 129: msg send(0):P 113 {"Description":"Loading symbol info...","ProgressComplete":95,"ProgressTotal":100}
+08 29 50 130: msg send(0):E Memory contextRemoved ["Mem_prog_50","Mem_signatures_51","Mem_fuses_52","Mem_lockbits_53","Mem_data_54","Mem_eeprom_55","Mem_io_56"]
+08 29 50 138: msg send(0):E Registers contextAdded [{"ID":"Reg_CYCLE_COUNTER_81","ProcessID":"Proc_3","Name":"CYCLE_COUNTER","Size":8},{"ID":"Reg_PC_82","ProcessID":"Proc_3","Name":"PC","Size":4},{"ID":"Reg_SREG_83","ProcessID":"Proc_3","Name":"SREG","Size":1},{"ID":"Reg_FP_84","ProcessID":"Proc_3","Name":"FP","Size":2},{"ID":"Reg_X_85","ProcessID":"Proc_3","Name":"X","Size":2},{"ID":"Reg_Y_86","ProcessID":"Proc_3","Name":"Y","Size":2},{"ID":"Reg_Z_87","ProcessID":"Proc_3","Name":"Z","Size":2},{"ID":"Reg_SP_88","ProcessID":"Proc_3","Name":"SP","Size":2},{"ID":"Reg_R0_89","ProcessID":"Proc_3","Name":"R0","Size":1},{"ID":"Reg_R1_90","ProcessID":"Proc_3","Name":"R1","Size":1},{"ID":"Reg_R2_91","ProcessID":"Proc_3","Name":"R2","Size":1},{"ID":"Reg_R3_92","ProcessID":"Proc_3","Name":"R3","Size":1},{"ID":"Reg_R4_93","ProcessID":"Proc_3","Name":"R4","Size":1},{"ID":"Reg_R5_94","ProcessID":"Proc_3","Name":"R5","Size":1},{"ID":"Reg_R6_95","ProcessID":"Proc_3","Name":"R6","Size":1},{"ID":"Reg_R7_96","ProcessID":"Proc_3","Name":"R7","Size":1...
+08 29 50 158: msg send(0):E Registers contextAdded [{"ID":"Reg_CYCLE_COUNTER_81","ProcessID":"Proc_3","Name":"CYCLE_COUNTER","Size":8},{"ID":"Reg_PC_82","ProcessID":"Proc_3","Name":"PC","Size":4},{"ID":"Reg_SREG_83","ProcessID":"Proc_3","Name":"SREG","Size":1},{"ID":"Reg_FP_84","ProcessID":"Proc_3","Name":"FP","Size":2},{"ID":"Reg_X_85","ProcessID":"Proc_3","Name":"X","Size":2},{"ID":"Reg_Y_86","ProcessID":"Proc_3","Name":"Y","Size":2},{"ID":"Reg_Z_87","ProcessID":"Proc_3","Name":"Z","Size":2},{"ID":"Reg_SP_88","ProcessID":"Proc_3","Name":"SP","Size":2},{"ID":"Reg_R0_89","ProcessID":"Proc_3","Name":"R0","Size":1},{"ID":"Reg_R1_90","ProcessID":"Proc_3","Name":"R1","Size":1},{"ID":"Reg_R2_91","ProcessID":"Proc_3","Name":"R2","Size":1},{"ID":"Reg_R3_92","ProcessID":"Proc_3","Name":"R3","Size":1},{"ID":"Reg_R4_93","ProcessID":"Proc_3","Name":"R4","Size":1},{"ID":"Reg_R5_94","ProcessID":"Proc_3","Name":"R5","Size":1},{"ID":"Reg_R6_95","ProcessID":"Proc_3","Name":"R6","Size":1},{"ID":"Reg_R7_96","ProcessID":"Proc_3","Name":"R7","Size":1...
+08 29 50 187: msg send(0):E Memory contextAdded [{"ID":"Mem_prog_57","BigEndian":false,"AddressSize":1,"Name":"prog","StartBound":0,"EndBound":131071},{"ID":"Mem_signatures_58","BigEndian":false,"AddressSize":1,"Name":"signatures","StartBound":0,"EndBound":2},{"ID":"Mem_fuses_59","BigEndian":false,"AddressSize":1,"Name":"fuses","StartBound":0,"EndBound":2},{"ID":"Mem_lockbits_60","BigEndian":false,"AddressSize":1,"Name":"lockbits","StartBound":0,"EndBound":0},{"ID":"Mem_data_61","BigEndian":false,"AddressSize":1,"Name":"data","StartBound":0,"EndBound":65535},{"ID":"Mem_eeprom_62","BigEndian":false,"AddressSize":1,"Name":"eeprom","StartBound":0,"EndBound":4095},{"ID":"Mem_io_63","BigEndian":false,"AddressSize":1,"Name":"io","StartBound":0,"EndBound":63}]
+08 29 50 345: msg send(0):E RunControl contextAdded [{"ID":"GdbRC_1","CanSuspend":true,"CanResume":262143,"CanCount":262143,"IsContainer":false,"HasState":true,"CanTerminate":true}]
+08 29 50 357: prx Waiting on TCP port 54200
+08 29 50 395: gdb --->1-interpreter-exec console "set target-async on"
+08 29 50 447: gdb =thread-group-added,id="i1"
+08 29 50 447: gdb ~"GNU gdb (AVR_8_bit_GNU_Toolchain_3.5.3_1700) 7.8\n"
+08 29 50 447: gdb ~"Copyright (C) 2014 Free Software Foundation, Inc.\n"
+08 29 50 447: gdb ~"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.  Type \"show copying\"\nand \"show warranty\" for details.\n"
+08 29 50 447: gdb ~"This GDB was configured as \"--host=i686-w64-mingw32 --target=avr\".\nType \"show configuration\" for configuration details."
+08 29 50 447: gdb ~"\nFor bug reporting instructions, please see:\n"
+08 29 50 447: gdb ~"<http://www.atmel.com>.\n"
+08 29 50 447: gdb ~"Find the GDB manual and other documentation resources online at:\n<http://www.gnu.org/software/gdb/documentation/>.\n"
+08 29 50 447: gdb ~"For help, type \"help\".\n"
+08 29 50 447: gdb ~"Type \"apropos word\" to search for commands related to \"word\".\n"
+08 29 50 447: gdb (gdb)
+08 29 50 448: gdb =cmd-param-changed,param="mi-async",value="on"
+08 29 50 448: gdb 1^done
+08 29 50 448: gdb (gdb)
+08 29 50 448: gdb --->2-interpreter-exec console "target remote localhost:54200"
+08 29 50 458: gdb ~"Remote debugging using localhost:54200\n"
+08 29 50 475: prx Connection on port 54200
+08 29 50 476: prx avr8-gdbserver: proxy_open()
+08 29 50 476: prx avr8-gdbserver: proxy_connect()
+08 29 50 476: prx avr8-gdbserver: proxy_stop()
+08 29 50 476: prx avr8-gdbserver: packet received: qSupported:multiprocess+;qRelocInsn+
+08 29 50 476: prx avr8-gdbserver: sending packet: 42 bytes: $PacketSize=4000;qXfer:memory-map:read-#76...
+08 29 50 477: prx avr8-gdbserver: packet received: Hg0
+08 29 50 477: prx avr8-gdbserver: proxy_set_gen_thread()
+08 29 50 477: prx avr8-gdbserver: sending packet: 6 bytes: $OK#9a...
+08 29 50 477: prx avr8-gdbserver: packet received: qTStatus
+08 29 50 477: prx avr8-gdbserver: proxy_raw_query()
+08 29 50 477: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 477: prx avr8-gdbserver: packet received: ?
+08 29 50 477: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:00000000;21:0000;#aa...
+08 29 50 477: prx avr8-gdbserver: packet received: qfThreadInfo
+08 29 50 477: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 477: prx avr8-gdbserver: packet received: qL1200000000000000000
+08 29 50 477: prx avr8-gdbserver: proxy_list_query()
+08 29 50 477: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 477: prx avr8-gdbserver: packet received: Hc-1
+08 29 50 477: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 477: prx avr8-gdbserver: packet received: qC
+08 29 50 478: prx avr8-gdbserver: proxy_current_thread_query()
+08 29 50 478: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 478: prx avr8-gdbserver: packet received: qAttached
+08 29 50 478: prx avr8-gdbserver: proxy_raw_query()
+08 29 50 478: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 478: gdb =thread-group-started,id="i1",pid="42000"
+08 29 50 478: gdb =thread-created,id="1",group-id="i1"
+08 29 50 479: gdb ~"0x00000000 in ?? ()\n"
+08 29 50 479: gdb *stopped,frame={addr="0x00000000",func="??",args=[]},thread-id="1",stopped-threads="all"
+08 29 50 479: msg send(0):E RunControl contextSuspended "GdbRC_1" 0 "Reset" {}
+08 29 50 479: gdb 2^done
+08 29 50 479: gdb (gdb)
+08 29 50 479: gdb --->3-file-exec-and-symbols "c:/users/morten/Documents/Atmel Studio/7.0/GccApplication2/GccApplication2/Debug/GccApplication2.elf"
+08 29 50 515: prx avr8-gdbserver: packet received: qSymbol::
+08 29 50 515: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 545: prx avr8-gdbserver: packet received: g
+08 29 50 545: prx avr8-gdbserver: proxy_read_registers()
+08 29 50 546: prx avr8-gdbserver: sending packet: 82 bytes: $000000000000000000000000000000000000000000000000000000000000000000000000000000#a0...
+08 29 50 546: gdb 3^done
+08 29 50 546: gdb (gdb)
+08 29 50 546: msg send(0):E Processes contextAdded [{"ID":"Proc_3","Name":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug\\GccApplication2.elf","RunControlId":"GdbRC_1"}]
+08 29 50 546: msg send(0):P 113 {"Description":"Launch complete","ProgressComplete":0,"ProgressTotal":0}
+08 29 50 546: msg send(0):R 113  "Proc_3"
+08 29 50 547: msg recv(0):C 114 Processes getContext "Proc_3"
+08 29 50 548: msg send(0):R 114  {"ID":"Proc_3","Name":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug\\GccApplication2.elf","RunControlId":"GdbRC_1"}
+08 29 50 549: msg recv(0):C 115 RunControl getContext "GdbRC_1"
+08 29 50 549: msg send(0):R 115  {"ID":"GdbRC_1","CanSuspend":false,"CanResume":262143,"CanCount":262143,"IsContainer":false,"HasState":true,"CanTerminate":true}
+08 29 50 550: msg recv(0):C 116 Memory getChildren "Proc_3"
+08 29 50 550: msg send(0):R 116  ["Mem_prog_57","Mem_signatures_58","Mem_fuses_59","Mem_lockbits_60","Mem_data_61","Mem_eeprom_62","Mem_io_63"]
+08 29 50 552: msg recv(0):C 117 RunControl setProperties "GdbRC_1" {"IsrStepInto":0}
+08 29 50 552: msg send(0):R 117
+08 29 50 553: msg recv(0):C 118 Memory getContext "Mem_prog_57"
+08 29 50 553: msg send(0):R 118  {"ID":"Mem_prog_57","BigEndian":false,"AddressSize":1,"Name":"prog","StartBound":0,"EndBound":131071}
+08 29 50 554: msg recv(0):C 119 Memory getContext "Mem_signatures_58"
+08 29 50 554: msg send(0):R 119  {"ID":"Mem_signatures_58","BigEndian":false,"AddressSize":1,"Name":"signatures","StartBound":0,"EndBound":2}
+08 29 50 555: msg recv(0):C 120 Memory getContext "Mem_fuses_59"
+08 29 50 555: msg send(0):R 120  {"ID":"Mem_fuses_59","BigEndian":false,"AddressSize":1,"Name":"fuses","StartBound":0,"EndBound":2}
+08 29 50 557: msg recv(0):C 121 Memory getContext "Mem_lockbits_60"
+08 29 50 557: msg send(0):R 121  {"ID":"Mem_lockbits_60","BigEndian":false,"AddressSize":1,"Name":"lockbits","StartBound":0,"EndBound":0}
+08 29 50 558: msg recv(0):C 122 Memory getContext "Mem_data_61"
+08 29 50 558: msg send(0):R 122  {"ID":"Mem_data_61","BigEndian":false,"AddressSize":1,"Name":"data","StartBound":0,"EndBound":65535}
+08 29 50 559: msg recv(0):C 123 Memory getContext "Mem_eeprom_62"
+08 29 50 559: msg send(0):R 123  {"ID":"Mem_eeprom_62","BigEndian":false,"AddressSize":1,"Name":"eeprom","StartBound":0,"EndBound":4095}
+08 29 50 563: msg recv(0):C 124 Memory getContext "Mem_io_63"
+08 29 50 563: msg send(0):R 124  {"ID":"Mem_io_63","BigEndian":false,"AddressSize":1,"Name":"io","StartBound":0,"EndBound":63}
+08 29 50 564: msg recv(0):C 125 RunControl resume "GdbRC_1" 16 0
+08 29 50 564: msg send(0):E RunControl contextResumed "GdbRC_1"
+08 29 50 564: gdb --->4-exec-continue
+08 29 50 567: gdb 4^running
+08 29 50 567: gdb *running,thread-id="all"
+08 29 50 567: gdb (gdb)
+08 29 50 567: prx avr8-gdbserver: packet received: vCont?
+08 29 50 567: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 567: msg send(0):R 125
+08 29 50 567: prx avr8-gdbserver: packet received: Hc0
+08 29 50 567: prx avr8-gdbserver: proxy_set_ctrl_thread()
+08 29 50 567: prx avr8-gdbserver: sending packet: 4 bytes: $#00...
+08 29 50 567: prx avr8-gdbserver: packet received: c
+08 29 50 567: prx avr8-gdbserver: proxy_resume_from_current(run, 0)
+08 29 50 567: gdb (gdb)
+08 29 50 567: prx avr8-gdbserver: proxy_wait_partial()
+08 29 50 567: prx avr8-gdbserver: sending packet: 27 bytes: $T0222:00000000;21:0000;#a7...
+08 29 50 568: gdb ~"\nProgram received signal "
+08 29 50 568: gdb ~"SIGINT, Interrupt.\n"
+08 29 50 568: gdb ~"0x00000000 in __vectors ()\n"
+08 29 50 568: gdb *stopped,reason="signal-received",signal-name="SIGINT",signal-meaning="Interrupt",frame={addr="0x00000000",func="__vectors",args=[]},thread-id="1",stopped-threads="all"
+08 29 50 568: msg send(0):E RunControl contextSuspended "GdbRC_1" 0 "Step" {}
+08 29 50 569: msg recv(0):C 126 StackTrace getChildren "Proc_3"
+08 29 50 569: gdb --->5-stack-list-frames
+08 29 50 578: gdb 5^done,stack=[frame={level="0",addr="0x00000000",func="__vectors"}]
+08 29 50 578: gdb (gdb)
+08 29 50 578: gdb --->6-stack-list-arguments 2
+08 29 50 588: gdb 6^done,stack-args=[frame={level="0",args=[]}]
+08 29 50 588: gdb (gdb)
+08 29 50 588: msg send(0):R 126  ["gdbProc_3:0:0"]
+08 29 50 588: msg recv(0):C 127 StackTrace getContext ["gdbProc_3:0:0"]
+08 29 50 589: msg send(0):R 127  [{"ID":"gdbProc_3:0:0","Level":0,"IP":0,"ArgsString":"","Func":"__vectors","File":"","Line":0,"Args":[]}]
+08 29 50 590: msg recv(0):C 128 Expressions compute "gdbProc_3:0:0" "C" "main"
+08 29 50 590: gdb --->7-var-create  --thread 1 --frame 0 g_0 * "main"
+08 29 50 599: prx avr8-gdbserver: packet received: md2,1
+08 29 50 599: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 1, ptr)
+08 29 50 599: prx avr8-gdbserver: sending packet: 6 bytes: $cf#c9...
+08 29 50 600: gdb 7^done,name="g_0",numchild="0",value="{int (void)} 0xd2 <main>",type="int (void)",has_more="0"
+08 29 50 600: gdb (gdb)
+08 29 50 600: gdb --->8-var-show-attributes g_0
+08 29 50 610: gdb 8^done,attr="noneditable"
+08 29 50 610: gdb (gdb)
+08 29 50 610: gdb --->9-interpreter-exec console "info address main"
+08 29 50 610: gdb ~"Symbol \"main\" is a function at address 0xd2.\n"
+08 29 50 610: gdb 9^done
+08 29 50 610: gdb (gdb)
+08 29 50 610: gdb --->10-interpreter-exec console "print sizeof(main)"
+08 29 50 610: gdb ~"$1 = 1"
+08 29 50 610: gdb ~"\n"
+08 29 50 610: gdb 10^done
+08 29 50 610: gdb (gdb)
+08 29 50 610: msg send(0):R 128  {"ID":"g_0","Numchildren":0,"Val":"0xd2","CanAssign":false,"Expression":"main","ExprPath":"main","FormatString":"","Type":"int (void)(a function at address 0xd2.\n)","Size":1}
+08 29 50 611: msg recv(0):C 129 Expressions dispose "g_0"
+08 29 50 611: gdb --->11-var-delete g_0
+08 29 50 620: gdb 11^done,ndeleted="1"
+08 29 50 620: gdb (gdb)
+08 29 50 620: msg send(0):R 129
+08 29 50 623: msg recv(0):C 130 RunControl resume "GdbRC_1" 17 210
+08 29 50 623: msg send(0):E RunControl contextResumed "GdbRC_1"
+08 29 50 623: gdb --->12-exec-continue
+08 29 50 630: gdb 12^running
+08 29 50 630: gdb *running,thread-id="all"
+08 29 50 630: gdb (gdb)
+08 29 50 630: prx avr8-gdbserver: packet received: c
+08 29 50 630: msg send(0):R 130
+08 29 50 630: prx avr8-gdbserver: proxy_resume_from_current(run, 0)
+08 29 50 630: gdb (gdb)
+08 29 50 640: prx avr8-gdbserver: proxy_wait_partial()
+08 29 50 640: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:d2000000;21:fd10;#4b...
+08 29 50 640: gdb ~"\nProgram received signal "
+08 29 50 640: gdb ~"SIGTRAP, Trace/breakpoint trap.\n"
+08 29 50 640: gdb ~"main () at .././main.c:24\n"
+08 29 50 640: gdb ~"24\t{\n"
+08 29 50 640: gdb *stopped,reason="signal-received",signal-name="SIGTRAP",signal-meaning="Trace/breakpoint trap",frame={addr="0x000000d2",func="main",args=[],file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="24"},thread-id="1",stopped-threads="all"
+08 29 50 641: msg send(0):E RunControl contextSuspended "GdbRC_1" 210 "Step" {}
+08 29 50 811: msg recv(0):C 131 StackTrace getChildren "Proc_3"
+08 29 50 811: gdb --->13-stack-list-frames
+08 29 50 812: gdb 13^done,stack=[frame={level="0",addr="0x000000d2",func="main",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="24"}]
+08 29 50 812: gdb (gdb)
+08 29 50 812: gdb --->14-stack-list-arguments 2
+08 29 50 822: gdb 14^done,stack-args=[frame={level="0",args=[]}]
+08 29 50 822: gdb (gdb)
+08 29 50 822: msg send(0):R 131  ["gdbProc_3:0:210"]
+08 29 50 823: msg recv(0):C 132 StackTrace getContext ["gdbProc_3:0:210"]
+08 29 50 823: msg send(0):R 132  [{"ID":"gdbProc_3:0:210","Level":0,"IP":210,"ArgsString":"","Func":"main","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":24,"Args":[]}]
+08 29 50 860: trc recv(0):C 133 Trace createSession "SimDev_3"
+08 29 50 860: msg send(0):R 133  "TraceContext_1"
+08 29 50 862: trc recv(0):C 134 Trace getContext "TraceContext_1"
+08 29 50 862: msg send(0):R 134  {"ID":"TraceContext_1"}
+08 29 50 862: msg recv(0):F -99
+08 29 50 865: trc recv(0):C 135 Trace getSupportedTraceSourceTypes "TraceContext_1"
+08 29 50 865: msg send(0):R 135  [1,7,8]
+08 29 50 872: trc recv(0):C 136 Trace destroySession "TraceContext_1"
+08 29 50 872: msg send(0):R 136
+08 29 53 313: msg recv(0):C 137 RunControl resume "GdbRC_1" 4 0
+08 29 53 313: msg send(0):E RunControl contextResumed "GdbRC_1"
+08 29 53 313: gdb --->15-exec-step
+08 29 53 317: gdb 15^running
+08 29 53 317: gdb *running,thread-id="all"
+08 29 53 317: gdb (gdb)
+08 29 53 317: msg send(0):R 137
+08 29 53 317: prx avr8-gdbserver: packet received: s
+08 29 53 317: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 53 317: gdb (gdb)
+08 29 53 317: prx avr8-gdbserver: proxy_wait_partial()
+08 29 53 317: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:d4000000;21:fc10;#4c...
+08 29 53 317: prx avr8-gdbserver: packet received: md2,2
+08 29 53 317: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 2, ptr)
+08 29 53 317: prx avr8-gdbserver: sending packet: 8 bytes: $cf93#35...
+08 29 53 318: prx avr8-gdbserver: packet received: s
+08 29 53 318: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 53 318: prx avr8-gdbserver: proxy_wait_partial()
+08 29 53 318: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:d6000000;21:fb10;#4d...
+08 29 53 318: prx avr8-gdbserver: packet received: md2,4
+08 29 53 318: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 4, ptr)
+08 29 53 318: prx avr8-gdbserver: sending packet: 12 bytes: $cf93df93#6b...
+08 29 53 318: prx avr8-gdbserver: packet received: s
+08 29 53 318: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 53 318: prx avr8-gdbserver: proxy_wait_partial()
+08 29 53 318: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:d8000000;21:fb10;#4f...
+08 29 53 318: prx avr8-gdbserver: packet received: md2,6
+08 29 53 318: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 6, ptr)
+08 29 53 318: prx avr8-gdbserver: sending packet: 16 bytes: $cf93df93cdb7#cb...
+08 29 53 319: prx avr8-gdbserver: packet received: s
+08 29 53 319: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 53 319: prx avr8-gdbserver: proxy_wait_partial()
+08 29 53 319: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:da000000;21:fb10;#78...
+08 29 53 319: prx avr8-gdbserver: packet received: md2,8
+08 29 53 319: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 8, ptr)
+08 29 53 319: prx avr8-gdbserver: sending packet: 20 bytes: $cf93df93cdb7deb7#2d...
+08 29 53 319: gdb *stopped,reason="end-stepping-range",frame={addr="0x000000da",func="main",args=[],file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="28"},thread-id="1",stopped-threads="all"
+08 29 53 319: msg send(0):E RunControl contextSuspended "GdbRC_1" 218 "Step" {}
+08 29 54 375: msg recv(0):C 138 StackTrace getChildren "Proc_3"
+08 29 54 375: gdb --->16-stack-list-frames
+08 29 54 377: gdb 16^done,stack=[frame={level="0",addr="0x000000da",func="main",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="28"}]
+08 29 54 377: gdb (gdb)
+08 29 54 377: gdb --->17-stack-list-arguments 2
+08 29 54 388: gdb 17^done,stack-args=[frame={level="0",args=[]}]
+08 29 54 388: gdb (gdb)
+08 29 54 388: msg send(0):R 138  ["gdbProc_3:0:218"]
+08 29 54 388: msg recv(0):C 139 StackTrace getContext ["gdbProc_3:0:218"]
+08 29 54 388: msg send(0):R 139  [{"ID":"gdbProc_3:0:218","Level":0,"IP":218,"ArgsString":"","Func":"main","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":28,"Args":[]}]
+08 29 54 392: trc recv(0):C 140 Trace createSession "SimDev_3"
+08 29 54 392: msg send(0):R 140  "TraceContext_2"
+08 29 54 393: trc recv(0):C 141 Trace getContext "TraceContext_2"
+08 29 54 394: msg send(0):R 141  {"ID":"TraceContext_2"}
+08 29 54 395: trc recv(0):C 142 Trace getSupportedTraceSourceTypes "TraceContext_2"
+08 29 54 395: msg send(0):R 142  [1,7,8]
+08 29 54 395: trc recv(0):C 143 Trace destroySession "TraceContext_2"
+08 29 54 395: msg send(0):R 143
+08 29 54 880: msg recv(0):C 144 RunControl resume "GdbRC_1" 4 0
+08 29 54 880: msg send(0):E RunControl contextResumed "GdbRC_1"
+08 29 54 880: gdb --->18-exec-step
+08 29 54 889: gdb 18^running
+08 29 54 889: gdb *running,thread-id="all"
+08 29 54 889: gdb (gdb)
+08 29 54 889: prx avr8-gdbserver: packet received: s
+08 29 54 889: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 54 889: msg send(0):R 144
+08 29 54 889: gdb (gdb)
+08 29 54 900: prx avr8-gdbserver: proxy_wait_partial()
+08 29 54 900: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:c2000000;21:f910;#1f...
+08 29 54 900: prx avr8-gdbserver: packet received: m8010fa,2
+08 29 54 900: prx avr8-gdbserver: proxy_read_mem(0x8010FA, ptr, 2, ptr)
+08 29 54 900: prx avr8-gdbserver: sending packet: 8 bytes: $006e#fb...
+08 29 54 900: prx avr8-gdbserver: packet received: md2,a
+08 29 54 900: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 10, ptr)
+08 29 54 900: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df93cdb7deb7f3df#90...
+08 29 54 900: prx avr8-gdbserver: packet received: Z0,ca,2
+08 29 54 900: prx avr8-gdbserver: proxy_add_break(0, 0xca, 2) (@202)
+08 29 54 900: prx avr8-gdbserver: sending packet: 6 bytes: $OK#9a...
+08 29 54 900: prx avr8-gdbserver: packet received: c
+08 29 54 900: prx avr8-gdbserver: proxy_resume_from_current(run, 0)
+08 29 54 911: prx avr8-gdbserver: proxy_wait_partial()
+08 29 54 911: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:ca000000;21:f710;#4c...
+08 29 54 911: prx avr8-gdbserver: packet received: mc2,8
+08 29 54 911: prx avr8-gdbserver: proxy_read_mem(0xC2, ptr, 8, ptr)
+08 29 54 911: prx avr8-gdbserver: sending packet: 20 bytes: $cf93df93cdb7deb7#2d...
+08 29 54 911: prx avr8-gdbserver: packet received: z0,ca,2
+08 29 54 911: prx avr8-gdbserver: proxy_remove_break(0, 0xca, 2) (@202)
+08 29 54 911: prx avr8-gdbserver: sending packet: 6 bytes: $OK#9a...
+08 29 54 911: prx avr8-gdbserver: packet received: m8010fa,2
+08 29 54 911: prx avr8-gdbserver: proxy_read_mem(0x8010FA, ptr, 2, ptr)
+08 29 54 911: prx avr8-gdbserver: sending packet: 8 bytes: $006e#fb...
+08 29 54 911: prx avr8-gdbserver: packet received: md2,a
+08 29 54 911: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 10, ptr)
+08 29 54 911: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df93cdb7deb7f3df#90...
+08 29 54 912: gdb *stopped,reason="end-stepping-range",frame={addr="0x000000ca",func="testfunc1",args=[],file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="19"},thread-id="1",stopped-threads="all"
+08 29 54 912: msg send(0):E RunControl contextSuspended "GdbRC_1" 202 "Step" {}
+08 29 54 978: msg recv(0):C 145 StackTrace getChildren "Proc_3"
+08 29 54 979: gdb --->19-stack-list-frames
+08 29 54 983: gdb 19^done,stack=[frame={level="0",addr="0x000000ca",func="testfunc1",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="19"},frame={level="1",addr="0x000000dc",func="main",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="28"}]
+08 29 54 983: gdb (gdb)
+08 29 54 983: gdb --->20-stack-list-arguments 2
+08 29 54 993: gdb 20^done,stack-args=[frame={level="0",args=[]},frame={level="1",args=[]}]
+08 29 54 993: gdb (gdb)
+08 29 54 993: msg send(0):R 145  ["gdbProc_3:0:202","gdbProc_3:1:220"]
+08 29 54 994: msg recv(0):C 146 StackTrace getContext ["gdbProc_3:0:202","gdbProc_3:1:220"]
+08 29 54 994: msg send(0):R 146  [{"ID":"gdbProc_3:0:202","Level":0,"IP":202,"ArgsString":"","Func":"testfunc1","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":19,"Args":[]},{"ID":"gdbProc_3:1:220","Level":1,"IP":220,"ArgsString":"","Func":"main","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":28,"Args":[]}]
+08 29 54 998: trc recv(0):C 147 Trace createSession "SimDev_3"
+08 29 54 998: msg send(0):R 147  "TraceContext_3"
+08 29 54 999: trc recv(0):C 148 Trace getContext "TraceContext_3"
+08 29 54 999: msg send(0):R 148  {"ID":"TraceContext_3"}
+08 29 55 002: trc recv(0):C 149 Trace getSupportedTraceSourceTypes "TraceContext_3"
+08 29 55 002: msg send(0):R 149  [1,7,8]
+08 29 55 003: trc recv(0):C 150 Trace destroySession "TraceContext_3"
+08 29 55 003: msg send(0):R 150
+08 29 55 580: msg recv(0):C 151 RunControl resume "GdbRC_1" 4 0
+08 29 55 580: msg send(0):E RunControl contextResumed "GdbRC_1"
+08 29 55 580: gdb --->21-exec-step
+08 29 55 582: gdb 21^running
+08 29 55 582: gdb *running,thread-id="all"
+08 29 55 582: gdb (gdb)
+08 29 55 582: prx avr8-gdbserver: packet received: s
+08 29 55 582: msg send(0):R 151
+08 29 55 582: prx avr8-gdbserver: proxy_resume_from_current(step, 0)
+08 29 55 582: gdb (gdb)
+08 29 55 592: prx avr8-gdbserver: proxy_wait_partial()
+08 29 55 592: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:ae000000;21:f510;#4c...
+08 29 55 592: prx avr8-gdbserver: packet received: m8010f6,2
+08 29 55 592: prx avr8-gdbserver: proxy_read_mem(0x8010F6, ptr, 2, ptr)
+08 29 55 592: prx avr8-gdbserver: sending packet: 8 bytes: $0066#cc...
+08 29 55 592: prx avr8-gdbserver: packet received: mc2,a
+08 29 55 592: prx avr8-gdbserver: proxy_read_mem(0xC2, ptr, 10, ptr)
+08 29 55 592: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df93cdb7deb7f1df#8e...
+08 29 55 592: prx avr8-gdbserver: packet received: Z0,b8,2
+08 29 55 592: prx avr8-gdbserver: proxy_add_break(0, 0xb8, 2) (@184)
+08 29 55 592: prx avr8-gdbserver: sending packet: 6 bytes: $OK#9a...
+08 29 55 592: prx avr8-gdbserver: packet received: c
+08 29 55 592: prx avr8-gdbserver: proxy_resume_from_current(run, 0)
+08 29 55 603: prx avr8-gdbserver: proxy_wait_partial()
+08 29 55 603: prx avr8-gdbserver: sending packet: 27 bytes: $T0522:b8000000;21:f210;#1d...
+08 29 55 603: prx avr8-gdbserver: packet received: mae,a
+08 29 55 603: prx avr8-gdbserver: proxy_read_mem(0xAE, ptr, 10, ptr)
+08 29 55 603: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df931f92cdb7deb7#2f...
+08 29 55 603: prx avr8-gdbserver: packet received: z0,b8,2
+08 29 55 603: prx avr8-gdbserver: proxy_remove_break(0, 0xb8, 2) (@184)
+08 29 55 603: prx avr8-gdbserver: sending packet: 6 bytes: $OK#9a...
+08 29 55 603: prx avr8-gdbserver: packet received: m8010f6,2
+08 29 55 603: prx avr8-gdbserver: proxy_read_mem(0x8010F6, ptr, 2, ptr)
+08 29 55 603: prx avr8-gdbserver: sending packet: 8 bytes: $0066#cc...
+08 29 55 603: prx avr8-gdbserver: packet received: mc2,a
+08 29 55 603: prx avr8-gdbserver: proxy_read_mem(0xC2, ptr, 10, ptr)
+08 29 55 603: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df93cdb7deb7f1df#8e...
+08 29 55 604: gdb *stopped,reason="end-stepping-range",frame={addr="0x000000b8",func="testfunc2",args=[],file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="14"},thread-id="1",stopped-threads="all"
+08 29 55 604: msg send(0):E RunControl contextSuspended "GdbRC_1" 184 "Step" {}
+08 29 55 665: msg recv(0):C 152 StackTrace getChildren "Proc_3"
+08 29 55 665: gdb --->22-stack-list-frames
+08 29 55 666: prx avr8-gdbserver: packet received: m8010fa,2
+08 29 55 666: prx avr8-gdbserver: proxy_read_mem(0x8010FA, ptr, 2, ptr)
+08 29 55 666: prx avr8-gdbserver: sending packet: 8 bytes: $006e#fb...
+08 29 55 666: prx avr8-gdbserver: packet received: m8010f6,2
+08 29 55 666: prx avr8-gdbserver: proxy_read_mem(0x8010F6, ptr, 2, ptr)
+08 29 55 666: prx avr8-gdbserver: sending packet: 8 bytes: $0066#cc...
+08 29 55 666: prx avr8-gdbserver: packet received: m8010fa,2
+08 29 55 666: prx avr8-gdbserver: proxy_read_mem(0x8010FA, ptr, 2, ptr)
+08 29 55 666: prx avr8-gdbserver: sending packet: 8 bytes: $006e#fb...
+08 29 55 666: prx avr8-gdbserver: packet received: md2,a
+08 29 55 666: prx avr8-gdbserver: proxy_read_mem(0xD2, ptr, 10, ptr)
+08 29 55 666: prx avr8-gdbserver: sending packet: 24 bytes: $cf93df93cdb7deb7f3df#90...
+08 29 55 667: gdb 22^done,stack=[frame={level="0",addr="0x000000b8",func="testfunc2",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="14"},frame={level="1",addr="0x000000cc",func="testfunc1",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="19"},frame={level="2",addr="0x000000dc",func="main",file=".././main.c",fullname="c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c",line="28"}]
+08 29 55 667: gdb (gdb)
+08 29 55 667: gdb --->23-stack-list-arguments 2
+08 29 55 677: gdb 23^done,stack-args=[frame={level="0",args=[]},frame={level="1",args=[]},frame={level="2",args=[]}]
+08 29 55 677: gdb (gdb)
+08 29 55 677: msg send(0):R 152  ["gdbProc_3:0:184","gdbProc_3:1:204","gdbProc_3:2:220"]
+08 29 55 678: msg recv(0):C 153 StackTrace getContext ["gdbProc_3:0:184","gdbProc_3:1:204","gdbProc_3:2:220"]
+08 29 55 678: msg send(0):R 153  [{"ID":"gdbProc_3:0:184","Level":0,"IP":184,"ArgsString":"","Func":"testfunc2","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":14,"Args":[]},{"ID":"gdbProc_3:1:204","Level":1,"IP":204,"ArgsString":"","Func":"testfunc1","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":19,"Args":[]},{"ID":"gdbProc_3:2:220","Level":2,"IP":220,"ArgsString":"","Func":"main","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c\n","Line":28,"Args":[]}]
+08 29 55 682: trc recv(0):C 154 Trace createSession "SimDev_3"
+08 29 55 682: msg send(0):R 154  "TraceContext_4"
+08 29 55 683: trc recv(0):C 155 Trace getContext "TraceContext_4"
+08 29 55 683: msg send(0):R 155  {"ID":"TraceContext_4"}
+08 29 55 684: trc recv(0):C 156 Trace getSupportedTraceSourceTypes "TraceContext_4"
+08 29 55 685: msg send(0):R 156  [1,7,8]
+08 29 55 685: trc recv(0):C 157 Trace destroySession "TraceContext_4"
+08 29 55 685: msg send(0):R 157
+08 29 57 169: msg recv(0):C 158 Expressions getChildren "gdbProc_3:0:184"
+08 29 57 170: gdb --->24-stack-list-variables --thread 1 --frame 0 --no-values
+08 29 57 171: gdb 24^done,variables=[{name="testfunc2_local"}]
+08 29 57 171: gdb (gdb)
+08 29 57 171: gdb --->25-var-create  --thread 1 --frame 0 g_1 * "testfunc2_local"
+08 29 57 181: prx avr8-gdbserver: packet received: g
+08 29 57 181: prx avr8-gdbserver: proxy_read_registers()
+08 29 57 181: prx avr8-gdbserver: sending packet: 82 bytes: $00000000000000000000000000000000000001000000000000000001f210000002f210b8000000#50...
+08 29 57 182: prx avr8-gdbserver: packet received: m8010f3,1
+08 29 57 182: prx avr8-gdbserver: proxy_read_mem(0x8010F3, ptr, 1, ptr)
+08 29 57 182: prx avr8-gdbserver: sending packet: 6 bytes: $00#60...
+08 29 57 182: gdb 25^done,name="g_1",numchild="0",value="0 '\\000'",type="uint8_t",thread-id="1",has_more="0"
+08 29 57 182: gdb (gdb)
+08 29 57 182: gdb --->26-var-show-attributes g_1
+08 29 57 192: gdb 26^done,attr="editable"
+08 29 57 192: gdb (gdb)
+08 29 57 192: gdb --->27-interpreter-exec console "info address testfunc2_local"
+08 29 57 192: gdb ~"Symbol \"testfunc2_local\" is a complex DWARF expression:\n"
+08 29 57 192: gdb ~"     0: DW_OP_breg28 1 [$r28]\n"
+08 29 57 192: gdb ~".\n"
+08 29 57 192: gdb 27^done
+08 29 57 192: gdb (gdb)
+08 29 57 192: gdb --->28-interpreter-exec console "print sizeof(testfunc2_local)"
+08 29 57 192: gdb ~"$2 = 1"
+08 29 57 192: gdb ~"\n"
+08 29 57 192: gdb 28^done
+08 29 57 192: gdb (gdb)
+08 29 57 192: msg send(0):R 158  ["g_1"]
+08 29 57 193: msg recv(0):C 159 Expressions getContext "g_1"
+08 29 57 193: msg send(0):R 159  {"ID":"g_1","Numchildren":0,"Val":"0 '\\000'\n","CanAssign":true,"Expression":"testfunc2_local","ExprPath":"testfunc2_local","FormatString":"","Type":"uint8_t(a complex DWARF expression:\n     0: DW_OP_breg28 1 [$r28]\n.\n)","Size":1}
+08 29 57 195: msg recv(0):C 160 Expressions getContext "g_1"
+08 29 57 195: msg send(0):R 160  {"ID":"g_1","Numchildren":0,"Val":"0 '\\000'\n","CanAssign":true,"Expression":"testfunc2_local","ExprPath":"testfunc2_local","FormatString":"","Type":"uint8_t(a complex DWARF expression:\n     0: DW_OP_breg28 1 [$r28]\n.\n)","Size":1}
+08 29 57 749: msg recv(0):C 161 LineNumbers mapToSource "Proc_3" 184 184
+08 29 57 749: msg send(0):R 161  [{"SLine":14,"ELine":14,"ECol":512,"Function":"testfunc2","File":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","SAddr":"184","EAddr":"185","IsStmt":1}]
+08 29 57 755: msg recv(0):C 162 Expressions compute "gdbProc_3:0:184" "c" "uint8_t"
+08 29 57 755: gdb --->29-var-create  --thread 1 --frame 0 g_2 * "uint8_t"
+08 29 57 763: gdb &"Attempt to use a type name as an expression.\n"
+08 29 57 763: gdb 29^error,msg="-var-create: unable to create variable object"
+08 29 57 763: gdb (gdb)
+08 29 57 788: msg send(0):R 162 {"Code":16,"Time":0,"Format":"could not evaluate","Severity":2,"AltOrg":"Atmel"}
+08 29 57 790: msg recv(0):C 163 Expressions compute "gdbProc_3:0:184" "c" "testfunc2_local"
+08 29 57 790: gdb --->30-var-create  --thread 1 --frame 0 g_3 * "testfunc2_local"
+08 29 57 794: prx avr8-gdbserver: packet received: m8010f3,1
+08 29 57 794: prx avr8-gdbserver: proxy_read_mem(0x8010F3, ptr, 1, ptr)
+08 29 57 794: prx avr8-gdbserver: sending packet: 6 bytes: $00#60...
+08 29 57 794: gdb 30^done,name="g_3",numchild="0",value="0 '\\000'",type="uint8_t",thread-id="1",has_more="0"
+08 29 57 794: gdb (gdb)
+08 29 57 794: gdb --->31-var-show-attributes g_3
+08 29 57 804: gdb 31^done,attr="editable"
+08 29 57 804: gdb (gdb)
+08 29 57 804: gdb --->32-interpreter-exec console "info address testfunc2_local"
+08 29 57 804: gdb ~"Symbol \"testfunc2_local\" is a complex DWARF expression:\n"
+08 29 57 804: gdb ~"     0: DW_OP_breg28 1 [$r28]\n"
+08 29 57 804: gdb ~".\n"
+08 29 57 804: gdb 32^done
+08 29 57 804: gdb (gdb)
+08 29 57 804: gdb --->33-interpreter-exec console "print sizeof(testfunc2_local)"
+08 29 57 814: gdb ~"$3 = 1"
+08 29 57 814: gdb ~"\n"
+08 29 57 814: gdb 33^done
+08 29 57 814: gdb (gdb)
+08 29 57 814: msg send(0):R 163  {"ID":"g_3","Numchildren":0,"Val":"0 '\\000'\n","CanAssign":true,"Expression":"testfunc2_local","ExprPath":"testfunc2_local","FormatString":"","Type":"uint8_t(a complex DWARF expression:\n     0: DW_OP_breg28 1 [$r28]\n.\n)","Size":1}
+08 29 57 815: msg recv(0):C 164 Expressions dispose "g_3"
+08 29 57 815: gdb --->34-var-delete g_3
+08 29 57 824: gdb 34^done,ndeleted="1"
+08 29 57 824: gdb (gdb)
+08 29 57 824: msg send(0):R 164
+08 29 57 827: msg recv(0):C 165 Expressions compute "gdbProc_3:0:184" "C" "testfunc2_local"
+08 29 57 827: gdb --->35-var-create  --thread 1 --frame 0 g_4 * "testfunc2_local"
+08 29 57 834: prx avr8-gdbserver: packet received: m8010f3,1
+08 29 57 834: prx avr8-gdbserver: proxy_read_mem(0x8010F3, ptr, 1, ptr)
+08 29 57 834: prx avr8-gdbserver: sending packet: 6 bytes: $00#60...
+08 29 57 834: gdb 35^done,name="g_4",numchild="0",value="0 '\\000'",type="uint8_t",thread-id="1",has_more="0"
+08 29 57 835: gdb (gdb)
+08 29 57 835: gdb --->36-var-show-attributes g_4
+08 29 57 845: gdb 36^done,attr="editable"
+08 29 57 845: gdb (gdb)
+08 29 57 845: gdb --->37-interpreter-exec console "info address testfunc2_local"
+08 29 57 845: gdb ~"Symbol \"testfunc2_local\" is a complex DWARF expression:\n"
+08 29 57 845: gdb ~"     0: DW_OP_breg28 1 [$r28]\n"
+08 29 57 845: gdb ~".\n"
+08 29 57 845: gdb 37^done
+08 29 57 845: gdb (gdb)
+08 29 57 845: gdb --->38-interpreter-exec console "print sizeof(testfunc2_local)"
+08 29 57 855: gdb ~"$4 = 1"
+08 29 57 855: gdb ~"\n"
+08 29 57 855: gdb 38^done
+08 29 57 855: gdb (gdb)
+08 29 57 855: msg send(0):R 165  {"ID":"g_4","Numchildren":0,"Val":"0 '\\000'\n","CanAssign":true,"Expression":"testfunc2_local","ExprPath":"testfunc2_local","FormatString":"","Type":"uint8_t(a complex DWARF expression:\n     0: DW_OP_breg28 1 [$r28]\n.\n)","Size":1}
+08 31 35 402: msg recv(0):C 166 Expressions dispose "g_4"
+08 31 35 402: gdb --->39-var-delete g_4
+08 31 35 410: gdb 39^done,ndeleted="1"
+08 31 35 410: gdb (gdb)
+08 31 35 410: msg send(0):R 166
+08 31 35 411: msg recv(0):C 167 Processes terminate "Proc_3"
+08 31 35 411: gdb --->40-target-disconnect
+08 31 35 420: prx avr8-gdbserver: error while reading from GDB
+08 31 35 420: prx avr8-gdbserver: debugger has terminated connection
+08 31 35 420: gdb =thread-group-exited,id="i1"
+08 31 35 420: gdb 40^done
+08 31 35 420: gdb (gdb)
+08 31 35 420: gdb --->41-interpreter-exec console "quit"
+08 31 35 574: msg send(0):E RunControl contextRemoved ["GdbRC_1"]
+08 31 35 575: msg send(0):E RunControl contextRemoved ["SimRC_3"]
+08 31 35 575: msg send(0):E Registers contextRemoved ["Reg_CYCLE_COUNTER_81","Reg_PC_82","Reg_SREG_83","Reg_FP_84","Reg_X_85","Reg_Y_86","Reg_Z_87","Reg_SP_88","Reg_R0_89","Reg_R1_90","Reg_R2_91","Reg_R3_92","Reg_R4_93","Reg_R5_94","Reg_R6_95","Reg_R7_96","Reg_R8_97","Reg_R9_98","Reg_R10_99","Reg_R11_100","Reg_R12_101","Reg_R13_102","Reg_R14_103","Reg_R15_104","Reg_R16_105","Reg_R17_106","Reg_R18_107","Reg_R19_108","Reg_R20_109","Reg_R21_110","Reg_R22_111","Reg_R23_112","Reg_R24_113","Reg_R25_114","Reg_R26_115","Reg_R27_116","Reg_R28_117","Reg_R29_118","Reg_R30_119","Reg_R31_120"]
+08 31 35 575: msg send(0):E Memory contextRemoved ["Mem_prog_57","Mem_signatures_58","Mem_fuses_59","Mem_lockbits_60","Mem_data_61","Mem_eeprom_62","Mem_io_63"]
+08 31 35 576: msg send(0):E Processes contextRemoved ["Proc_3"]
+08 31 35 576: msg send(0):R 167
+08 31 35 577: msg recv(0):C 168 Tool tearDownTool "Sim_10"
+08 31 35 577: msg send(0):E Device contextRemoved ["SimDev_3"]
+Signature overridden: 1e 97 0208 31 35 579: msg send(0):R 168

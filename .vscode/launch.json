@@ -41,13 +41,6 @@
 			"outDir": "${workspaceRoot}/out",
 			"cwd": "${workspaceRoot}",
 			"internalConsoleOptions": "openOnSessionStart"
-		},
-		{
-			"name": "Run Mock Sample",
-			"type": "mock",
-			"request": "launch",
-			"program": "${workspaceRoot}/README.md",
-			"stopOnEntry": true
 		}
 	]
 }

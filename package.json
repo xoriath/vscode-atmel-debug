@@ -1,93 +1,168 @@
 {
-	"name": "mock-debug",
-	"displayName": "Mock Debug",
-	"version": "0.13.0",
-	"publisher": "andreweinand",
-	"description": "Starter extension for developing debug adapters for VS Code.",
-	"author": {
-		"name": "Microsoft Corporation",
-		"email": "aweinand@microsoft.com"
-	},
-	"engines": {
-		"vscode": "^1.1.0",
-		"node": "^5.10.0"
-	},
-	"icon": "images/mock-debug-icon.svg",
-	"categories": [
-		"Debuggers"
-	],
-	"private": true,
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-mock-debug.git"
-	},
-	"bugs": {
-		"url": "https://github.com/Microsoft/vscode-mock-debug/issues"
-	},
-	"dependencies": {
-		"vscode-debugprotocol": "1.10.0",
-		"vscode-debugadapter": "1.10.0"
-	},
-	"devDependencies": {
-		"typescript": "^1.8.5",
-		"mocha": "^2.4.5",
-		"vscode": "^0.11.13",
-		"vscode-debugadapter-testsupport": "^1.10.0"
-	},
-	"scripts": {
-		"prepublish": "node ./node_modules/typescript/bin/tsc -p ./src",
-		"compile": "node ./node_modules/typescript/bin/tsc -p ./src",
-		"watch": "node ./node_modules/typescript/bin/tsc -w -p ./src",
-		"test": "node ./node_modules/mocha/bin/mocha -u tdd ./out/tests/",
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
-	"main": "./out/extension",
-	"activationEvents": [
-		"onCommand:extension.getProgramName"
-	],
-	"contributes": {
-		"debuggers": [
-			{
-				"type": "mock",
-				"label": "Mock Debug",
-
-				"enableBreakpointsFor": { "languageIds": [ "markdown" ] },
-
-				"program": "./out/mockDebug.js",
-				"runtime": "node",
-
-				"variables": {
-					"AskForProgramName": "extension.getProgramName"
-				},
-
-				"configurationAttributes": {
-					"launch": {
-						"required": [ "program" ],
-						"properties": {
-							"program": {
-								"type": "string",
-								"description": "Absolute path to a text file.",
-								"default": "${workspaceRoot}/${command.AskForProgramName}"
-							},
-							"stopOnEntry": {
-								"type": "boolean",
-								"description": "Automatically stop after launch.",
-								"default": true
-							}
-						}
-					}
-				},
-
-				"initialConfigurations": [
-					{
-						"name": "Mock-Debug",
-						"type": "mock",
-						"request": "launch",
-						"program": "${workspaceRoot}/${command.AskForProgramName}",
-						"stopOnEntry": true
-					}
-				]
-			}
-		]
-	}
+  "name": "atmel-debug",
+  "displayName": "Atmel Debug",
+  "version": "0.0.1",
+  "publisher": "xoriath",
+  "description": "Debug using the Atmel Studio backend",
+  "author": {
+    "name": "Morten Engelhardt Olsen",
+    "email": "moro.engelhardt@gmail.com"
+  },
+  "engines": {
+    "vscode": "^1.1.0",
+    "node": "^5.10.0"
+  },
+  "icon": "images/mock-debug-icon.svg",
+  "categories": [
+    "Debuggers"
+  ],
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xoriath/vscode-atmel-debug.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xoriath/vscode-atmel-debug/issues"
+  },
+  "dependencies": {
+    "vscode-debugadapter": "1.10.0",
+    "vscode-debugprotocol": "1.10.0",
+    "websocket": "^1.0.23",
+    "ws": "^1.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^1.8.5",
+    "mocha": "^2.4.5",
+    "vscode": "^0.11.13",
+    "vscode-debugadapter-testsupport": "^1.10.0"
+  },
+  "scripts": {
+    "prepublish": "node ./node_modules/typescript/bin/tsc -p ./src",
+    "compile": "node ./node_modules/typescript/bin/tsc -p ./src",
+    "watch": "node ./node_modules/typescript/bin/tsc -w -p ./src",
+    "test": "node ./node_modules/mocha/bin/mocha -u tdd ./out/tests/",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "main": "./out/extension",
+  "activationEvents": [
+    "onCommand:extension.getProgramName"
+  ],
+  "contributes": {
+    "debuggers": [
+      {
+        "type": "atbackend",
+        "label": "Atmel Debug",
+        "enableBreakpointsFor": {
+          "languageIds": [
+            "c",
+            "cpp"
+          ]
+        },
+        "program": "./out/atmelDebugAdapter.js",
+        "runtime": "node",
+        "variables": {
+          "AskForProgramName": "extension.getProgramName"
+        },
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "atbackendHost",
+              "atbackendPort",
+              "program",
+              "tool",
+              "launchSuspended",
+              "launchAttached"
+            ],
+            "properties": {
+              "atbackendHost": {
+                "type": "string",
+                "description": "Host where atbackend is running",
+                "default": "127.0.0.1"
+              },
+              "atbackendPort": {
+                "type": "number",
+                "description": "Port to connect to",
+                "default": 4712
+              },
+              "program": {
+                "type": "string",
+                "description": "Absolute path to elf.",
+                "default": "${workspaceRoot}/${command.AskForProgramName}"
+              },
+              "tool": {
+                "type": "string",
+                "description": "Identifier of tool to launch on.",
+                "default": "com.atmel.tool.simulator"
+              },
+              "launchSuspended": {
+                "type": "boolean",
+                "description": "Suspend after launch.",
+                "default": true
+              },
+              "launchAttached": {
+                "type": "boolean",
+                "description": "Attach after launch.",
+                "default": true
+              },
+              "cacheFlash": {
+                "type": "boolean",
+                "description": "Enable flash cache.",
+                "default": true
+              },
+              "eraseRule": {
+                "type": "number",
+                "description": "Which erase should be done during programming.",
+                "default": 0
+              },
+              "preserveEeprom": {
+                "type": "boolean",
+                "description": "Preserve EEPROM during launch.",
+                "default": false
+              },
+              "ramSnippetAddress": {
+                "type": "string",
+                "description": "If applicable, address of ram loader.",
+                "default": "0x20000000"
+              },
+              "progFlashFromRam": {
+                "type": "boolean",
+                "description": "Should ram loader be used.",
+                "default": false
+              },
+              "useGdb": {
+                "type": "boolean",
+                "description": "Use GDB as debug engine and evaluator.",
+                "default": true
+              },
+              "gdbLocation": {
+                "type": "string",
+                "description": "Path to the GDB instance to use.",
+                "default": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe"
+              },
+              "bootSegment": {
+                "type": "number",
+                "description": "Which memory segment to boot from",
+                "default": 2
+              },
+              "packPath": {
+                "type": "string",
+                "description": "Path to the Device Support Pack for the device.",
+                "default": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "name": "atmel-debug",
+            "type": "atbackend",
+            "request": "launch",
+            "program": "${workspaceRoot}/GccApplication2/Debug/GccApplication2.elf",
+            "stopOnEntry": true,
+            "tool": "com.atmel.tool.simulator"
+          }
+        ]
+      }
+    ]
+  }
 }
