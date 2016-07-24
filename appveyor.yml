@@ -4,5 +4,5 @@ install:
 build_script:
   - npm install
 
-test_script:
-  - npm test
+# test_script:
+#  - npm test
