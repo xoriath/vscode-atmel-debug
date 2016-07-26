@@ -22,7 +22,10 @@ import {
 	DebugProtocol
 } from 'vscode-debugprotocol';
 
-import atbackendAdapter from "./atbackendAdapter";
+import { Dispatcher } from './dispatcher';
+import { LocatorService } from './services/locatorService';
+import { ToolService } from './services/toolService';
+import { IService } from './services/iservice';
 
 /**
  * This interface should always match the schema found in the mock-debug extension manifest.
@@ -83,7 +86,7 @@ class AtmelDebugSession extends DebugSession {
 	 */
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 
-		this.sendEvent(new InitializedEvent());
+		// this.sendEvent(new InitializedEvent());
 
 		response.body.supportsConfigurationDoneRequest = true;
 		response.body.supportsEvaluateForHovers = true;
@@ -94,12 +97,24 @@ class AtmelDebugSession extends DebugSession {
 
 	}
 
-	private atbackend: atbackendAdapter;
+	private dispatcher: Dispatcher;
+	private remoteServices: Map<string, IService> = new Map<string, IService>();
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.atbackend = new atbackendAdapter(args.atbackendHost, args.atbackendPort);
-		this.atbackend.connect();
+		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort, (message: string) => {
+			this.sendEvent(new OutputEvent(message));
+		});
 
+		this.dispatcher.connect( (dispatcher: Dispatcher) => {
+			let locator = new LocatorService(dispatcher);
+
+			locator.hello( () => {
+				let toolService = new ToolService(dispatcher);
+				toolService.getSupportedToolTypes( (eventData: any) => {
+					this.sendEvent(new OutputEvent("" + eventData));
+				})
+			});
+		});
 	}
 
 	protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
