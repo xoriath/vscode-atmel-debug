@@ -18,12 +18,13 @@
 			"type": "node",
 			"request": "launch",
 			"runtimeArgs": [ "--nolazy" ],
-			"program": "${workspaceRoot}/src/mockDebug.ts",
+			"program": "${workspaceRoot}/src/atmelDebugAdapter.ts",
 			"stopOnEntry": false,
-			"args": [ "--server=4711" ],
+			"args": [ "--server=4710" ],
 			"sourceMaps": true,
 			"outDir": "${workspaceRoot}/out",
-			"cwd": "${workspaceRoot}"
+			"cwd": "${workspaceRoot}",
+			"preLaunchTask": "npm"
 		},
 		{
 			"name": "Run Tests",
