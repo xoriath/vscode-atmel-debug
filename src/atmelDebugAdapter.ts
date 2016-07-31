@@ -325,6 +325,13 @@ class AtmelDebugSession extends DebugSession {
 
 	}
 
+	private hashString(str: string): number {
+		return str.split("").reduce( function(a, b) {
+										a = ( (a<<5) - a ) + b.charCodeAt(0);
+										return a & a
+									}, 0);
+	}
+
     protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
 
 		let processService = <ProcessesService>this.services["Processes"];
@@ -333,10 +340,7 @@ class AtmelDebugSession extends DebugSession {
 		for (let index in processService.contexts) {
 			let context = <IProcessesContext>processService.contexts[index];
 			threads.push(new Thread(
-				context.ID.split("").reduce( function(a, b) {
-						a = ( (a<<5) - a ) + b.charCodeAt(0);
-						return a & a
-					}, 0),
+				this.hashString(context.ID),
 				context.Name));
 		}
 
