@@ -40,6 +40,8 @@ export class ExpressionContext implements IExpressionContext {
 	public Type: string;
 	public Size: number;
 
+	private service: ExpressionsService;
+
 	public setProperties(properties: any): void {
 
 	}
@@ -49,8 +51,10 @@ export class ExpressionContext implements IExpressionContext {
 	}
 
 
-	public static fromJson(data: IExpressionContext): ExpressionContext {
+	public static fromJson(service: ExpressionsService, data: IExpressionContext): ExpressionContext {
 		let context = new ExpressionContext();
+
+		context.service = service;
 
 		context.ID = data["ID"];
 		context.Numchildren = data["Numchildren"];
@@ -67,6 +71,10 @@ export class ExpressionContext implements IExpressionContext {
 
 	public toString(): string {
 		return `${this.ID}`;
+	}
+
+	public dispose(): void {
+		this.service.dispose(this.ID);
 	}
 }
 
@@ -88,16 +96,16 @@ export class ExpressionsService extends Service {
 	public getContext(contextId: string, callback: (expression: ExpressionContext) => void): void {
 		this.dispatcher.sendCommand(this.name, "getContext", [contextId], (errorReport, eventData) => {
 			let contextData = <ExpressionContext>JSON.parse(eventData[0]);
-			let newContext = ExpressionContext.fromJson(contextData);
+			let newContext = ExpressionContext.fromJson(this, contextData);
 
 			callback(newContext);
 		});
 	}
 
 	public compute(contextId: string, language: string, expression: string, callback: (expression: ExpressionContext) => void): void {
-		this.dispatcher.sendCommand(this.name, "compute", [language, expression], (errorReport, eventData) => {
+		this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression], (errorReport, eventData) => {
 			let contextData = <ExpressionContext>JSON.parse(eventData[0]);
-			let newContext = ExpressionContext.fromJson(contextData);
+			let newContext = ExpressionContext.fromJson(this, contextData);
 
 			callback(newContext);
 		})
