@@ -1,11 +1,106 @@
 'use strict';
 
 import { Dispatcher, Service } from './service';
+import { IContext } from './icontext';
+
+export interface IConnectionProperties {
+	Type: string;
+	SerialNumber: string;
+	UsbVendorId: string;
+	UsbProductId: number;
+}
+
+export interface IAttachedTool {
+	ToolType: string;
+	ConnectionProperties?: IConnectionProperties;
+}
+
+
+
+export interface IToolContext extends IContext {
+	Name: string;
+	DeviceId?: string;
+
+	toString(): string;
+
+}
+
+export class ToolContext implements IToolContext {
+
+	public ID: string;
+	public Name: string;
+
+	public DeviceId: string;
+
+	public toolService: ToolService;
+
+	public properties: any;
+
+	public setProperties(properties: any): void {
+		this.toolService.setProperties(this.ID, properties);
+	}
+
+	public getProperties(callback: (properties: any) => void): void {
+
+	}
+
+	public connect(callback: () => void) {
+
+	}
+
+	public static fromJson(service: ToolService, data: IToolContext): ToolContext {
+		let context = new ToolContext();
+
+		context.toolService = service;
+
+		context.ID = data["ID"];
+		context.Name = data["Name"];
+
+		if ("DeviceID" in data) {
+			context.DeviceId = data["DeviceId"];
+		}
+
+		return context;
+	}
+
+	public toString(): string {
+		return `${this.ID} (${this.Name})`;
+	}
+
+}
+
+export interface IToolListener {
+	contextAdded(contexts: IToolContext[]): void;
+	contextChanged(contexts: IToolContext[]): void;
+	contextRemoved(contextIds: string[]): void;
+	attachedToolsChanged(attachedTools: IAttachedTool[]): void;
+}
 
 export class ToolService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
 		super("Tool", dispatcher);
+	}
+
+	public supportedTools: Array<string> = new Array<string>();
+	public attachedTools: Array<IAttachedTool> = new Array<IAttachedTool>();
+
+	public contexts: Map<string, IToolContext> = new Map<string, IToolContext>();
+
+	private listeners: Array<IToolListener> = new  Array<IToolListener>();
+
+	public addListener(listener: IToolListener): void {
+		this.listeners.push(listener);
+	}
+
+	public removeListener(listener: IToolListener): void {
+		this.listeners = this.listeners.filter( (value, index, array): boolean => {
+			return value != listener;
+		})
+	}
+
+	public getContext(id: string): IToolContext {
+		return this.contexts[id];
 	}
 
 	public pollForTools(shouldPoll: boolean) {
@@ -14,7 +109,8 @@ export class ToolService extends Service {
 
 	public getSupportedToolTypes(callback: (eventData: string[]) => void) {
 		this.dispatcher.sendCommand(this.name, "getSupportedToolTypes", [], (eventData: any) => {
-			callback(JSON.parse(eventData));
+			this.supportedTools = JSON.parse(eventData);
+			callback(this.supportedTools);
 		});
 	}
 

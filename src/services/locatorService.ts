@@ -2,9 +2,23 @@
 
 import { Dispatcher, Service } from './service';
 
+// From http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Specification.html#LocatorPeer
+export interface IPeer {
+	ID: string;
+	ServiceManagerID?: string;
+	AgentID?: string;
+	Name?: string;
+	OSName?: string;
+	TransportName?: string;
+	Host?: string;
+	Aliases?: string;
+	Addresses?: string;
+	Port?: string;
+}
+
 export class LocatorService extends Service {
 
-	public peers: Array<string> = new Array<string>();
+	public peers: Array<IPeer> = new Array<IPeer>();
 	public services: Array<string> = new Array<string>();
 
 	private onHelloCallback: () => void;

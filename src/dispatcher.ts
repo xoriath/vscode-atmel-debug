@@ -16,8 +16,8 @@ export class Dispatcher {
 	private nil: string = '\x00';
 	private eom: string = '\x03\x01';
 
-	private pendingHandlers: Map<number, (eventData: string) => void>
-		= new Map<number, (eventData: string) => void>();
+	private pendingHandlers: Map<number, (errorReport: string, eventData: string) => void>
+		= new Map<number, (errorReport: string, eventData: string) => void>();
 	private eventHandlers: Map<string, IEventHandler>
 		= new Map<string, IEventHandler>();
 
@@ -40,7 +40,7 @@ export class Dispatcher {
 		}
 	}
 
-	public connect(callback:(dispatcher: Dispatcher) => void): void {
+	public connect(callback: (dispatcher: Dispatcher) => void): void {
 		let url = "ws://" + this.host + ":" + this.port;
 		this.log(`[Dispatcher] Connect to: ${url}`);
 
@@ -54,7 +54,7 @@ export class Dispatcher {
 			this.log(`[Dispatcher] WS:close: ${code} => ${message}`);
 		});
 
-		this.ws.on('message', (data:string, flags) => {
+		this.ws.on('message', (data: string, flags) => {
 			this.handleMessage(data);
 		});
 
@@ -65,8 +65,8 @@ export class Dispatcher {
 	}
 
 	public escapeNil(str: string): string {
-		var ret = "";
-		for(var i = 0; i < str.length; ++i) {
+		let ret = "";
+		for (let i = 0; i < str.length; ++i) {
 			if (str.charAt(i) == this.nil)
 				ret += (' ');
 			else if (str.charAt(i) == '\x03')
@@ -86,12 +86,12 @@ export class Dispatcher {
 	}
 
 	private sendMessage(message: string): void {
-		this.log(`>> ${this.escapeNil(message).substring(0, 80)}`);
+		this.log(`>> ${this.escapeNil(message)}`);
 
 		this.ws.send(message);
 	}
 
-	public sendCommand(serviceName: string, commandName: string, args: any[], callback?: (eventData: any) => void): void {
+	public sendCommand(serviceName: string, commandName: string, args: any[], callback?: (errorReport: string, eventData: any) => void): void {
 		let token = this.sendToken++;
 
 		if (callback)
@@ -105,9 +105,9 @@ export class Dispatcher {
 	}
 
 	private stringify(args: any[]): string {
-		var str = "";
+		let str = "";
 		if (args) {
-			for(var index in args) {
+			for (let index in args) {
 				str += JSON.stringify(args[index]) + this.nil;
 			}
 		}
@@ -116,9 +116,9 @@ export class Dispatcher {
 	}
 
 	private unstringify(data: string[]): any[] {
-		var args = []
-		for(var index in data) {
-			var element = data[index];
+		let args = []
+		for (let index in data) {
+			let element = data[index];
 			if (element == "")
 				args.push(null);
 			else

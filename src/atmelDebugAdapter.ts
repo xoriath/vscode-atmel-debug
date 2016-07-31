@@ -24,7 +24,10 @@ import {
 
 import { Dispatcher } from './dispatcher';
 import { LocatorService } from './services/locatorService';
-import { ToolService } from './services/toolService';
+import { ToolService, IToolContext, IToolListener, IAttachedTool } from './services/toolService';
+import { DeviceService, IDeviceContext, IDeviceListener } from './services/deviceService';
+import { ProcessesService, IProcessesContext, IProcessesListener } from './services/processesService';
+import { MemoryService } from './services/memoryService';
 import { IService } from './services/iservice';
 
 /**
@@ -70,6 +73,40 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	packPath: string;
 }
 
+class DeviceLauncher implements IDeviceListener {
+	public processService: ProcessesService;
+	public module: string;
+
+	public constructor(module: string, processService: ProcessesService) {
+		this.processService = processService;
+		this.module = module;
+	}
+
+	public contextAdded(contexts: IDeviceContext[]): void {
+				// Launch here!
+				let context = contexts[0];
+
+				this.processService.launch(this.module, context, {
+					"LaunchSuspended":true,
+					"LaunchAttached":true,
+					"CacheFlash":true,
+					"EraseRule":0,
+					"PreserveEeprom":false,
+					"RamSnippetAddress":"0x20000000",
+					"ProgFlashFromRam":true,
+					"UseGdb":true,
+					"GdbLocation":"C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
+					"BootSegment":2,
+					"PackPath":"C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+				});
+	}
+
+	public contextChanged(contexts: IDeviceContext[]): void {
+	}
+	public contextRemoved(contextIds: string[]): void {
+	}
+}
+
 class AtmelDebugSession extends DebugSession {
 
 	public constructor() {
@@ -105,14 +142,39 @@ class AtmelDebugSession extends DebugSession {
 			this.sendEvent(new OutputEvent(message));
 		});
 
+
+		let toolListener: IToolListener = {
+			contextAdded(contexts: IToolContext[]): void {
+				let context = contexts[0];
+				context.setProperties( {
+					"InterfaceProperties":
+						{"KeepTimersRunning":true,
+						"ProjectFolder":"c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2"},
+						"DeviceName":"ATmega128",
+						"PackPath":"C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"})
+			},
+			contextChanged(contexts: IToolContext[]): void {
+			},
+			contextRemoved(contextIds: string[]): void {
+			},
+			attachedToolsChanged(attachedTools: IAttachedTool[]): void {
+			}
+		};
+
+
 		this.dispatcher.connect( (dispatcher: Dispatcher) => {
 			let locator = new LocatorService(dispatcher);
 
 			locator.hello( () => {
 				let toolService = new ToolService(dispatcher);
-				toolService.getSupportedToolTypes( (eventData: any) => {
-					this.sendEvent(new OutputEvent("" + eventData));
-				})
+				let deviceService = new DeviceService(dispatcher);
+				let processService = new ProcessesService(dispatcher);
+				let memoryService = new MemoryService(dispatcher);
+
+				toolService.addListener(toolListener);
+				deviceService.addListener(new DeviceLauncher(args.program, processService));
+
+				toolService.setupTool("com.atmel.avrdbg.tool.simulator", "", {});
 			});
 		});
 	}
