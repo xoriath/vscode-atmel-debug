@@ -1,5 +1,7 @@
 'use strict';
 
+// http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Memory.html
+
 import { Dispatcher, Service } from './service';
 import { IContext } from './icontext';
 
@@ -189,7 +191,7 @@ export class MemoryService extends Service {
 	}
 
 	private handleMemoryChanged(eventData: string[]): void {
-		let contextId = eventData[0];
+		let contextId = JSON.parse(eventData[0]);
 		let ranges = <IAddressRange[]>JSON.parse(eventData[1]);
 
 		this.log(`MemoryChanged: ${eventData}`);
