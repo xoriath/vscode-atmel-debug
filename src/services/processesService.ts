@@ -1,5 +1,7 @@
 'use strict';
 
+// http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Processes.html
+
 import { Dispatcher, Service } from './service';
 import { IContext } from './icontext';
 
@@ -15,6 +17,8 @@ export interface IProcessesContext extends IContext {
 	StdOutID: string;
 	StdErrID: string;
 	RunControlId: string;
+
+	terminate(): void;
 }
 
 export class ProcessesContext implements IProcessesContext {
@@ -58,6 +62,14 @@ export class ProcessesContext implements IProcessesContext {
 		return context;
 	}
 
+	public toString(): string {
+		return `${this.ID}`
+	}
+
+	public terminate(): void {
+		this.processesService.terminate(this.ID);
+	}
+
 }
 
 export interface IProcessesListener {
@@ -94,6 +106,10 @@ export class ProcessesService extends Service {
 
 	public getContext(id: string): IProcessesContext {
 		return this.contexts[id];
+	}
+
+	public terminate(id: string): void {
+		this.dispatcher.sendCommand(this.name, "terminate", [id]);
 	}
 
 

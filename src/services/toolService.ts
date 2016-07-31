@@ -23,6 +23,8 @@ export interface IToolContext extends IContext {
 
 	toString(): string;
 
+	connect(): void;
+	tearDownTool(): void;
 }
 
 export class ToolContext implements IToolContext {
@@ -32,26 +34,30 @@ export class ToolContext implements IToolContext {
 
 	public DeviceId: string;
 
-	public toolService: ToolService;
+	public service: ToolService;
 
 	public properties: any;
 
 	public setProperties(properties: any): void {
-		this.toolService.setProperties(this.ID, properties);
+		this.service.setProperties(this.ID, properties);
 	}
 
 	public getProperties(callback: (properties: any) => void): void {
 
 	}
 
-	public connect(callback: () => void) {
+	public connect() {
+		this.service.connect(this.ID);
+	}
 
+	public tearDownTool() {
+		this.service.tearDownTool(this.ID);
 	}
 
 	public static fromJson(service: ToolService, data: IToolContext): ToolContext {
 		let context = new ToolContext();
 
-		context.toolService = service;
+		context.service = service;
 
 		context.ID = data["ID"];
 		context.Name = data["Name"];
@@ -125,6 +131,14 @@ export class ToolService extends Service {
 				callback(this.getContext(context));
 			}
 		})
+	}
+
+	public connect(id: string): void {
+		this.dispatcher.sendCommand(this.name, "connect", [id]);
+	}
+
+	public tearDownTool(id: string): void {
+		this.dispatcher.sendCommand(this.name, "tearDownTool", [id]);
 	}
 
 	public setProperties(contextId: string, properties: any): void {
