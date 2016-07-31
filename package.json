@@ -25,6 +25,8 @@
     "url": "https://github.com/xoriath/vscode-atmel-debug/issues"
   },
   "dependencies": {
+    "bufferutil": "^1.2.1",
+    "utf-8-validate": "^1.2.1",
     "vscode-debugadapter": "1.10.0",
     "vscode-debugprotocol": "1.10.0",
     "websocket": "^1.0.23",
@@ -76,12 +78,12 @@
             "properties": {
               "atbackendHost": {
                 "type": "string",
-                "description": "Host where atbackend is running",
+                "description": "Host where atbackend is running.",
                 "default": "127.0.0.1"
               },
               "atbackendPort": {
                 "type": "number",
-                "description": "Port to connect to",
+                "description": "Port to connect to.",
                 "default": 4712
               },
               "program": {
@@ -93,6 +95,11 @@
                 "type": "string",
                 "description": "Identifier of tool to launch on.",
                 "default": "com.atmel.tool.simulator"
+              },
+              "device": {
+                "type": "string",
+                "description": "Name of device.",
+                "default": ""
               },
               "launchSuspended": {
                 "type": "boolean",
@@ -141,7 +148,7 @@
               },
               "bootSegment": {
                 "type": "number",
-                "description": "Which memory segment to boot from",
+                "description": "Which memory segment to boot from.",
                 "default": 2
               },
               "packPath": {
@@ -159,7 +166,8 @@
             "request": "launch",
             "program": "${workspaceRoot}/GccApplication2/Debug/GccApplication2.elf",
             "stopOnEntry": true,
-            "tool": "com.atmel.tool.simulator"
+            "tool": "com.atmel.tool.simulator",
+            "device": "ATmega128"
           }
         ]
       }
