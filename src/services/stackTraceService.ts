@@ -103,7 +103,7 @@ export class StackTraceService extends Service {
 
 	public getContext(contextIds: string[], callback: (frames: StackTraceContext[]) => void): void {
 		this.dispatcher.sendCommand(this.name, "getContext", [contextIds], (errorReport, eventData) => {
-			let contextsData = <StackTraceContext[]>JSON.parse(eventData[0]);
+			let contextsData = <StackTraceContext[]>JSON.parse(eventData);
 			let newContexts = [];
 
 			for (let index in contextsData) {
