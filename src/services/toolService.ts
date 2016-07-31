@@ -22,7 +22,20 @@ export class ToolService extends Service {
 		this.dispatcher.sendCommand(this.name, "getAttachedTools", [toolType], callback);
 	}
 
-	public eventHandler(event: string, eventData: string): void {
+	public setupTool(toolType: string, connectionType: string, connectionProperties: any, callback?: (context: IToolContext) => void ): void {
+		this.dispatcher.sendCommand(this.name, "setupTool", [toolType, connectionType, connectionProperties], (errorReport: string, eventData: any) => {
+			let context = JSON.parse(eventData);
+			if (callback) {
+				callback(this.getContext(context));
+			}
+		})
+	}
+
+	public setProperties(contextId: string, properties: any): void {
+		this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+	}
+
+	public eventHandler(event: string, eventData: string[]): void {
 		switch(event) {
 			case "attachedToolsChanged":
 				this.handleAttachedToolsChanged(eventData);
@@ -41,28 +54,75 @@ export class ToolService extends Service {
 		}
 	}
 
-	private handleAttachedToolsChanged(eventData: string): void {
-		// TODO:
-
+	private handleAttachedToolsChanged(eventData: string[]): void {
+		this.attachedTools = <IAttachedTool[]>JSON.parse(eventData[0]);
 		this.log(`AttachedToolsChanged: ${eventData}`);
+
+
+		for (let index in this.listeners) {
+			let listener: IToolListener = this.listeners[index];
+
+			listener.attachedToolsChanged(this.attachedTools);
+		}
 	}
 
-	private handleContextAdded(eventData: string): void {
+	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
+		let contextsData = <ToolContext[]>JSON.parse(eventData[0])
+		let newContexts = []
 
-		this.log(`ContextAdded: ${eventData}`);
+		for (var index in contextsData) {
+			let context = ToolContext.fromJson(this, contextsData[index]);
+			this.contexts[context.ID] = context;
+			newContexts.push(context);
+		}
+
+		this.log(`ContextAdded: ${newContexts}`);
+
+		for (let index in this.listeners) {
+			let listener = this.listeners[index];
+
+			listener.contextAdded(newContexts);
+		}
 	}
 
-	private handleContextChanged(eventData: string): void {
+	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
+		let contextsData = <ToolContext[]>JSON.parse(eventData[0])
+		let newContexts = []
 
-		this.log(`ContextChanged: ${eventData}`);
+		for (var index in contextsData) {
+			let context = ToolContext.fromJson(this, contextsData[index]);
+			this.contexts[context.ID] = context;
+			newContexts.push(context);
+		}
+
+		this.log(`ContextAdded: ${newContexts}`);
+
+		for (let index in this.listeners) {
+			let listener = this.listeners[index];
+
+			listener.contextChanged(newContexts);
+		}
 	}
 
-	private handleContextRemoved(eventData: string): void {
+	private handleContextRemoved(eventData: string[]): void {
 		// TODO: into Service
 
-		this.log(`ContextRemoved: ${eventData}`);
+		let ids = <string[]>JSON.parse(eventData[0]);
+		for(var index in ids) {
+			let id = ids[index];
+			if (id in this.contexts)
+				delete this.contexts[id];
+		}
+
+		this.log(`ContextRemoved: ${ids}`);
+
+		for (let index in this.listeners) {
+			let listener: IToolListener = this.listeners[index];
+
+			listener.contextRemoved(ids);
+		}
 	}
 
 }

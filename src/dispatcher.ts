@@ -129,22 +129,22 @@ export class Dispatcher {
 	}
 
 	private handleMessage(data: string): void {
-		this.log(`<< ${this.escapeNil(data).substring(0, 80)}`);
+		this.log(`<< ${this.escapeNil(data)}`);
 
 		let elements = data.split(this.nil);
 
 		if (elements.length < 3) {
-			throw "Message has too few parts";
+			throw `Message has too few parts`;
 		}
 		if (elements.pop() != this.eom) {
-			throw "Message has bad termination";
+			throw `Message has bad termination`;
 		}
 
 		let message = elements.shift();
 
 		switch (message) {
 			case 'E':
-			    this.decodeEvent(elements);
+				this.decodeEvent(elements);
 				break;
 			case 'P':
 				this.decodeIntermediateResult(elements);
@@ -159,15 +159,15 @@ export class Dispatcher {
 				this.decodeFlowControl(elements);
 				break;
 			default:
-				this.log("Unkown TCF message: '" + message + "'\n");
+				this.log(`Unkown TCF message: ${message}`);
 				break;
 		}
 	}
 
 	private decodeEvent(data: string[]): void {
-		let serviceName = data[0];
-		let eventName = data[1];
-		let eventData = data[2];
+		let serviceName = data.shift();
+		let eventName = data.shift();
+		let eventData = data;
 
 		this.handleEvent(serviceName, eventName, eventData);
 	}
@@ -182,9 +182,10 @@ export class Dispatcher {
 
 	private decodeFinalResult(data: string[]): void {
 		let token = +data[0];
-		let eventData = data.pop();
+		let errorReport = data[1]
+		let eventData = data[2];
 
-		this.handleResponse(token, eventData);
+		this.handleResponse(token, errorReport, eventData);
 	}
 
 	private decodeUnknown(data: string[]): void {
@@ -198,21 +199,26 @@ export class Dispatcher {
 
 	}
 
-	private handleEvent(serviceName: string, eventName: string, eventData: string): void {
+	private handleEvent(serviceName: string, eventName: string, eventData: string[]): void {
 		if (serviceName in this.eventHandlers) {
-			this.eventHandlers[serviceName].eventHandler(eventName, eventData);
+			let handler: IEventHandler = this.eventHandlers[serviceName];
+			handler.eventHandler(eventName, eventData);
 		}
 		else {
 			this.log(`[Dispatcher] Event handler for ${serviceName} is not registered`);
 		}
 	}
 
-	private handleResponse(token: number, args: string) {
+	private handleResponse(token: number, errorReport: string, args: string) {
+		if (errorReport) {
+			this.log(`[Dispatcher] Response error (${token}): ${errorReport}`)
+		}
+
 		if (token in this.pendingHandlers) {
-			var handler = this.pendingHandlers[token];
+			let handler = this.pendingHandlers[token];
 			delete this.pendingHandlers[token];
 
-			handler(args);
+			handler(errorReport, args);
 		}
 	}
 }

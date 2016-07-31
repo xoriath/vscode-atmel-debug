@@ -16,7 +16,7 @@ class Service implements IService {
 		this.dispatcher.eventHandler(name, (<IEventHandler>this));
 	}
 
-	public eventHandler(event: string, eventData: string): void {
+	public eventHandler(event: string, eventData: string[]): void {
 		this.log(`Event handler not implemented for ${this.name}`);
 	}
 

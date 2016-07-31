@@ -24,32 +24,33 @@ export class LocatorService extends Service {
 			this.onHelloCallback = callback;
 	}
 
-	private handlePeerAdded(eventData: string): void {
-		this.peers.push(eventData);
+	private handlePeerAdded(eventData: string[]): void {
+		let peer = <IPeer>JSON.parse(eventData[0]);
+		this.peers.push(peer);
 
-		this.log(`New peer: ${eventData}`);
+		this.log(`New peer: ${peer}`);
 	}
 
-	private handlePeerChanged(eventData: string): void {
+	private handlePeerChanged(eventData: string[]): void {
 		// TODO:
 
 		this.log(`Changed peer: ${eventData}`);
 	}
 
-	private handlePeerRemoved(eventData: string): void {
+	private handlePeerRemoved(eventData: string[]): void {
 		// TODO:
 
 		this.log(`Removed peer: ${eventData}`);
 	}
 
-	private handlePeerHeartBeat(eventData: string): void {
+	private handlePeerHeartBeat(eventData: string[]): void {
 		// TODO:
 
 		this.log(`Heartbeat: ${eventData}`);
 	}
 
-	private handleHello(eventData: string): void {
-		this.services = JSON.parse(eventData);
+	private handleHello(eventData: string[]): void {
+		this.services = JSON.parse(eventData[0]);
 
 		this.log(`Hello: ${this.services}`);
 
@@ -58,7 +59,7 @@ export class LocatorService extends Service {
 		}
 	}
 
-	public eventHandler(event: string, eventData: string): void {
+	public eventHandler(event: string, eventData: string[]): void {
 		switch(event) {
 			case "peerAdded":
 				this.handlePeerAdded(eventData);
