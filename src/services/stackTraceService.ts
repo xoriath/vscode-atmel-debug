@@ -21,7 +21,14 @@ export interface IStackTraceContext extends IContext {
 	Func: string;
 	File: string;
 	Line: number;
-	Args: any[];
+	Args: IStackTraceContextArgs[];
+}
+
+export interface IStackTraceContextArgs {
+	Name: string;
+	Order: number;
+	Type: string;
+	Value: string;
 }
 
 
@@ -35,8 +42,7 @@ export class StackTraceContext implements IStackTraceContext {
 	public File: string;
 	public Line: number;
 
-	// TODO; this has a type
-	public Args: any[];
+	public Args: IStackTraceContextArgs[];
 
 	public setProperties(properties: any): void {
 
@@ -57,7 +63,7 @@ export class StackTraceContext implements IStackTraceContext {
 		context.Func = data["Func"];
 		context.File = data["File"];
 		context.Line = data["Line"];
-		context.Args = data["Args"];
+		context.Args = <IStackTraceContextArgs[]>data["Args"];
 
 		return context;
 	}
@@ -103,14 +109,21 @@ export class StackTraceService extends Service {
 
 	public getContext(contextIds: string[], callback: (frames: StackTraceContext[]) => void): void {
 		this.dispatcher.sendCommand(this.name, "getContext", [contextIds], (errorReport, eventData) => {
-			let contextsData = <StackTraceContext[]>JSON.parse(eventData);
-			let newContexts = [];
-
-			for (let index in contextsData) {
-				newContexts.push(StackTraceContext.fromJson(contextsData[index]))
+			if (!eventData) {
+				let error = JSON.parse(errorReport);
+				throw `${error["Service"]}: ${error["Format"]}`;
 			}
 
-			callback(newContexts);
+			else {
+				let contextsData = <StackTraceContext[]>JSON.parse(eventData);
+				let newContexts = [];
+
+				for (let index in contextsData) {
+					newContexts.push(StackTraceContext.fromJson(contextsData[index]))
+				}
+
+				callback(newContexts);
+			}
 		});
 	}
 
