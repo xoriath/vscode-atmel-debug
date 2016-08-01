@@ -106,7 +106,7 @@ export enum ResumeMode {
 	ReverseStepOverRange = 14,
 	ReverseStepIntoRange = 15,
 	UntilActive = 16,
-	ReverseUntilActive = 17
+	Goto = 17
 }
 
 export class RunControlService extends Service {
