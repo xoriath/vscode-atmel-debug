@@ -411,6 +411,26 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
 		this.log("evaluateRequest");
+	private hashes: Map<number, string>;
+
+	private hashString(str: string): number {
+		if (!this.hashes)
+			this.hashes = new Map<number, string>();
+
+		let hash = Math.abs(str.split("").reduce(function (a, b) {
+			a = ((a << 5) - a) + b.charCodeAt(0);
+			return a & a
+		}, 0))
+
+		this.hashes[hash] = str;
+
+		return hash;
+	}
+
+	private getStringFromHash(hash: number): string {
+		if (hash in this.hashes)
+			return this.hashes[hash];
+		return "";
 	}
 
 	// IRunControlListener
