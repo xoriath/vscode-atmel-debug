@@ -313,7 +313,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 			breakpointsService.getProperties(`${breakpointId}`, (breakpoint) => {
 				let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
-				bp.id = breakpointId;
+
 				response.body.breakpoints.push(bp);
 
 				if (--breakpointsToProcess == 0) {
