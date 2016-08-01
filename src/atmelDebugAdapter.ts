@@ -126,7 +126,7 @@ class ProcessListener implements IProcessesListener {
 	}
 
 	public contextAdded(contexts: IProcessesContext[]): void {
-		this.session.gotoMain(0);
+		this.session.goto("main");
 	}
 	public contextChanged(contexts: IProcessesContext[]): void {
 
@@ -454,9 +454,9 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.sendEvent(new OutputEvent(`${message}\n`));
 	}
 
-	public gotoMain(pc: number): void {
+	public goto(func: string): void {
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
-		let runControlService = <RunControlService>this.services["RunControlService"];
+		let runControlService = <RunControlService>this.services["RunControl"];
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
 
@@ -471,12 +471,11 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		}
 
 		stackTraceService.getChildren(processContext.ID, (children) => {
-			expressionsService.compute(children.shift(), "C", "main", (expressionContext) => {
+			expressionsService.compute(children.shift(), "C", func, (expressionContext) => {
 				let address = parseInt(expressionContext.Val.replace("0x", ""), 16);
 				expressionContext.dispose();
 
-				runControlContext.resume(ResumeMode.ReverseUntilActive, address - pc)
-
+				runControlContext.resume(ResumeMode.Goto, address)
 			});
 		});
 
