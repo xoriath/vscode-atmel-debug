@@ -36,6 +36,7 @@ import { RegistersService } from './services/registersService';
 import { ExpressionsService, ExpressionContext } from './services/expressionsService';
 import { LineNumbersService, LineNumbersContext } from './services/lineNumbersService';
 import { StackTraceService, StackTraceContext } from './services/stackTraceService';
+import { BreakpointsService, BreakpointContext } from './services/breakpointsService';
 import { RunControlService, RunControlContext, IRunControlListener, ResumeMode } from './services/runControlService';
 import { IService } from './services/iservice';
 
@@ -224,6 +225,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				let stackTraceService = new StackTraceService(dispatcher);
 				let expressionsService = new ExpressionsService(dispatcher);
 				let lineNumbersService = new LineNumbersService(dispatcher);
+				let breakpointsService = new BreakpointsService(dispatcher);
 
 				this.services = new Map<string, IService>();
 				this.services["Tool"] = toolService;
@@ -235,6 +237,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				this.services["StackTrace"] = stackTraceService;
 				this.services["Expressions"] = expressionsService;
 				this.services["LineNumbers"] = lineNumbersService;
+				this.services["Breakpoints"] = breakpointsService;
 
 				toolService.addListener(toolListener);
 				deviceService.addListener(new DeviceListener(args.program, processService));
@@ -255,13 +258,81 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		super.attachRequest(response, args);
 	}
 
+	// 09 04 39 824: msg recv(c8):C 207 Breakpoints add {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0}
+	// 09 04 39 831: msg send(c8):R 207
+	// 09 04 39 832: msg recv(c8):C 208 Breakpoints getProperties "9264_bp_00000005"
+	// 09 04 39 833: msg send(c8):R 208  {"ID":"9264_bp_00000005","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Address":"246","HitCount":0}
+	// 09 04 39 853: msg recv(c8):C 209 Breakpoints getProperties "9264_bp_00000005"
+	// 09 04 39 853: msg send(c8):R 209  {"ID":"9264_bp_00000005","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Address":"246","HitCount":0}
+	// 09 04 49 130: msg recv(c8):C 210 Breakpoints change {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Condition":"x == 5","IsTrue":true}
+	// 09 04 49 130: msg send(c8):R 210
+	// 09 04 49 135: msg recv(c8):C 211 Breakpoints change {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"IsTrue":true,"Condition":"x == 5"}
+	// 09 04 49 135: msg send(c8):R 211
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
 		this.log("[NOT IMPLEMENTED] setBreakPointsRequest");
-		super.setBreakPointsRequest(response, args);
+
+		let processService = <ProcessesService>this.services["Processes"];
+		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
+
+		response.body = {
+			breakpoints: []
+		};
+
+		let processContext: IProcessesContext;
+		for (let index in processService.contexts) {
+			processContext = processService.contexts[index];
+		}
+
+		let breakpointsToProcess = args.breakpoints.length;
+
+		args.breakpoints.forEach( breakpointArgs => {
+			let breakpointId = breakpointsService.getNextBreakpointId();
+
+			let breakpoint = {
+				"ContextIds": [ processContext.ID ],
+				"AccessMode": 4,
+				"ID": `${breakpointId}`,
+				"Enabled": true,
+				"IgnoreCount": 1,
+				"IgnoreType": "allways",
+				"Line": breakpointArgs.line,
+			};
+
+			if (args.source.path) {
+				breakpoint["File"] = args.source.path;
+			} // else use args.source.sourceReference
+			if (breakpointArgs.column) {
+				breakpoint["Column"] = breakpointArgs.column;
+			}
+			if (breakpointArgs.condition) {
+				breakpoint["Condition"] = breakpointArgs.condition;
+				breakpoint["Istrue"] = true;
+			}
+
+			breakpointsService.add(breakpoint);
+
+			breakpointsService.getProperties(`${breakpointId}`, (breakpoint) => {
+				let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
+				bp.id = breakpointId;
+				response.body.breakpoints.push(bp);
+
+				if (--breakpointsToProcess == 0) {
+					this.sendResponse(response);
+				}
+			})
+
+		});
 	}
 
+	// 09 03 23 224: msg recv(c8):C 203 Breakpoints add {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000004","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","Condition":"x == 5","IsTrue":true,"Function":"testfunc1","FunctionLine":1,"FunctionColumn":0}
+	// 09 03 23 266: msg send(c8):R 203
+	// 09 03 23 267: msg recv(c8):C 204 Breakpoints getProperties "9264_bp_00000004"
+	// 09 03 23 267: msg send(c8):R 204  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
+	// 09 03 23 281: msg recv(c8):C 205 Breakpoints getProperties "9264_bp_00000004"
+	// 09 03 23 281: msg send(c8):R 205  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
     protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
 		this.log("[NOT IMPLEMENTED] setFunctionBreakPointsRequest");
+
 		super.setFunctionBreakPointsRequest(response, args);
 	}
 
