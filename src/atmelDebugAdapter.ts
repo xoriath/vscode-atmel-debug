@@ -150,7 +150,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
 	private dispatcher: Dispatcher;
-	private services: Map<string, IService> = new Map<string, IService>();
+	private services: Map<string, IService>;
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		this.log("initializeRequest");
@@ -227,12 +227,13 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				let expressionsService = new ExpressionsService(dispatcher);
 				let lineNumbersService = new LineNumbersService(dispatcher);
 
+				this.services = new Map<string, IService>();
 				this.services["Tool"] = toolService;
 				this.services["Device"] = deviceService;
 				this.services["Processes"] = processService;
 				this.services["Memory"] = memoryService;
 				this.services["Registers"] = registersService;
-				this.services["RunControlService"] = runControlService;
+				this.services["RunControl"] = runControlService;
 				this.services["StackTrace"] = stackTraceService;
 				this.services["Expressions"] = expressionsService;
 				this.services["LineNumbers"] = lineNumbersService;
