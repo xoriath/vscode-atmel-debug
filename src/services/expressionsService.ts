@@ -50,6 +50,10 @@ export class ExpressionContext implements IExpressionContext {
 
 	}
 
+	public assign(value: string): void {
+		this.service.assign(this.ID, value);
+	}
+
 
 	public static fromJson(service: ExpressionsService, data: IExpressionContext): ExpressionContext {
 		let context = new ExpressionContext();
@@ -109,6 +113,10 @@ export class ExpressionsService extends Service {
 
 			callback(newContext);
 		})
+	}
+
+	public assign(contextId: string, value: string): void {
+		this.dispatcher.sendCommand(this.name, "assign", [contextId, value]);
 	}
 
 	public dispose(contextId: string): void {
