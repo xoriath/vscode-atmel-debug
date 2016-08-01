@@ -74,11 +74,17 @@ export class ExpressionContext implements IExpressionContext {
 	}
 
 	public toString(): string {
-		return `${this.ID}`;
+		if (this.ID) {
+			return `${this.ID}`;
+		}
+		else {
+			return "";
+		}
 	}
 
 	public dispose(): void {
-		this.service.dispose(this.ID);
+		if (this.service)
+			this.service.dispose(this.ID);
 	}
 }
 
@@ -99,7 +105,7 @@ export class ExpressionsService extends Service {
 
 	public getContext(contextId: string, callback: (expression: ExpressionContext) => void): void {
 		this.dispatcher.sendCommand(this.name, "getContext", [contextId], (errorReport, eventData) => {
-			let contextData = <ExpressionContext>JSON.parse(eventData[0]);
+			let contextData = <ExpressionContext>JSON.parse(eventData);
 			let newContext = ExpressionContext.fromJson(this, contextData);
 
 			callback(newContext);
@@ -108,10 +114,19 @@ export class ExpressionsService extends Service {
 
 	public compute(contextId: string, language: string, expression: string, callback: (expression: ExpressionContext) => void): void {
 		this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression], (errorReport, eventData) => {
-			let contextData = <ExpressionContext>JSON.parse(eventData);
-			let newContext = ExpressionContext.fromJson(this, contextData);
+			if (!eventData) {
+				// let error = JSON.parse(errorReport);
+				// let expression = new ExpressionContext();
+				// expression.Val = error["Format"];
+				// throw `${error["Serivce"]}: ${error["Format"]}`;
+			}
 
-			callback(newContext);
+			else {
+				let contextData = <ExpressionContext>JSON.parse(eventData);
+				let newContext = ExpressionContext.fromJson(this, contextData);
+
+				callback(newContext);
+			}
 		})
 	}
 
