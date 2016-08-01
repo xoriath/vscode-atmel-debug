@@ -106,9 +106,9 @@ class DeviceListener implements IDeviceListener {
 			"RamSnippetAddress": "0x20000000",
 			"ProgFlashFromRam": true,
 			"UseGdb": true,
-			"GdbLocation": "D:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
+			"GdbLocation": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
 			"BootSegment": 2,
-			"PackPath": "D:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+			"PackPath": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
 		});
 	}
 
@@ -154,7 +154,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	private services: Map<string, IService>;
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
-		this.log("initializeRequest");
 		this.sendEvent(new InitializedEvent());
 
 		response.body.supportsConfigurationDoneRequest = false;
@@ -167,7 +166,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
-		this.log("disconnectRequest");
 		if ("Processes" in this.services) {
 			let processService = <ProcessesService>this.services["Processes"];
 			for (let index in processService.contexts) {
@@ -186,7 +184,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.log("launchRequest");
 		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort, (message: string) => {
 			this.sendEvent(new OutputEvent(message));
 		});
@@ -254,23 +251,28 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected attachRequest(response: DebugProtocol.AttachResponse, args: DebugProtocol.AttachRequestArguments): void {
-		this.log("attachRequest");
+		this.log("[NOT IMPLEMENTED] attachRequest");
+		super.attachRequest(response, args);
 	}
 
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		this.log("setBreakPointsRequest");
+		this.log("[NOT IMPLEMENTED] setBreakPointsRequest");
+		super.setBreakPointsRequest(response, args);
 	}
 
     protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		this.log("setFunctionBreakPointsRequest");
+		this.log("[NOT IMPLEMENTED] setFunctionBreakPointsRequest");
+		super.setFunctionBreakPointsRequest(response, args);
 	}
 
     protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
-		this.log("setExceptionBreakPointsRequest");
+		this.log("[NOT IMPLEMENTED] setExceptionBreakPointsRequest");
+		super.setExceptionBreakPointsRequest(response, args);
 	}
 
     protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
-		this.log("configurationDoneRequest");
+		this.log("[NOT IMPLEMENTED] configurationDoneRequest");
+		super.configurationDoneRequest(response, args);
 	}
 
 	private resume(mode: ResumeMode, threadID?: number): void {
@@ -296,50 +298,41 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
-		this.log("continueRequest");
 		this.resume(ResumeMode.Resume, args.threadId);
-
 		this.sendResponse(response);
 	}
 
     protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
-		this.log("nextRequest");
 		this.resume(ResumeMode.StepOverLine, args.threadId);
-
 		this.sendResponse(response);
 	}
 
     protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
-		this.log("stepInRequest");
 		this.resume(ResumeMode.StepIntoLine, args.threadId);
-
 		this.sendResponse(response);
 	}
 
     protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
-		this.log("stepOutRequest");
 		this.resume(ResumeMode.StepOut, args.threadId);
-
 		this.sendResponse(response);
 	}
 
     protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
-		this.log("stepBackRequest");
+		this.log("[NOT IMPLEMENTED] stepBackRequest");
+		super.stepBackRequest(response, args);
 	}
 
     protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
-		this.log("pauseRequest");
 		this.suspend(args.threadId);
-
 		this.sendResponse(response);
 	}
 
     protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
-		this.log("sourceRequest");
+		this.log("[NOT IMPLEMENTED] sourceRequest");
+		super.sourceRequest(response, args);
 	}
 
     protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-		this.log("threadsRequest");
 		let processService = <ProcessesService>this.services["Processes"];
 
 		response.body = {
@@ -357,8 +350,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		this.log("stackTraceRequest");
-
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
 
@@ -402,8 +393,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
-		this.log("scopesRequest");
-
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
 
@@ -433,8 +422,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		this.log("variablesRequest");
-
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
@@ -476,8 +463,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
-		this.log("setVariableRequest");
-
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 		let processesService = <ProcessesService>this.services["Processes"];
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
@@ -512,8 +497,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
-		this.log("evaluateRequest");
-
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 
 		response.body = {
