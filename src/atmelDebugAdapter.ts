@@ -16,6 +16,7 @@ import {
 	Thread,
 	StackFrame,
 	Scope,
+	Variable,
 	Source,
 	Handles,
 	Breakpoint
@@ -275,22 +276,22 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	private resume(mode: ResumeMode, threadID?: number): void {
 		let runControlService = <RunControlService>this.services["RunControl"];
 
-		// TODO, support threads?
-
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
-			context.resume(ResumeMode.Resume);
+			if (!threadID || threadID == this.hashString(context.ID)) {
+				context.resume(mode);
+			}
 		}
 	}
 
 	private suspend(threadID?: number): void {
 		let runControlService = <RunControlService>this.services["RunControl"];
 
-		// TODO, support threads?
-
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
-			context.suspend();
+			if (threadID == this.hashString(context.ID) || threadID == 0) {
+				context.suspend();
+			}
 		}
 	}
 
@@ -298,23 +299,20 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.log("continueRequest");
 		this.resume(ResumeMode.Resume, args.threadId);
 
-		response.body.allThreadsContinued = true;
 		this.sendResponse(response);
 	}
 
     protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
 		this.log("nextRequest");
-		this.resume(ResumeMode.StepOver, args.threadId);
+		this.resume(ResumeMode.StepOverLine, args.threadId);
 
-		response.body.allThreadsContinued = true;
 		this.sendResponse(response);
 	}
 
     protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
 		this.log("stepInRequest");
-		this.resume(ResumeMode.StepInto, args.threadId);
+		this.resume(ResumeMode.StepIntoLine, args.threadId);
 
-		response.body.allThreadsContinued = true;
 		this.sendResponse(response);
 	}
 
@@ -322,7 +320,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.log("stepOutRequest");
 		this.resume(ResumeMode.StepOut, args.threadId);
 
-		response.body.allThreadsContinued = true;
 		this.sendResponse(response);
 	}
 
@@ -333,52 +330,42 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
     protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
 		this.log("pauseRequest");
 		this.suspend(args.threadId);
+
+		this.sendResponse(response);
 	}
 
     protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
 		this.log("sourceRequest");
 	}
 
-	private hashString(str: string): number {
-		return Math.abs(str.split("").reduce(function (a, b) {
-			a = ((a << 5) - a) + b.charCodeAt(0);
-			return a & a
-		}, 0));
-	}
-
     protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
 		this.log("threadsRequest");
 		let processService = <ProcessesService>this.services["Processes"];
 
-		let threads = [];
+		response.body = {
+			threads: []
+		};
+
 		for (let index in processService.contexts) {
 			let context = <IProcessesContext>processService.contexts[index];
-			threads.push(new Thread(
+			response.body.threads.push(new Thread(
 				this.hashString(context.RunControlId),
 				context.Name));
 		}
 
-		if (!response.body) {
-			response.body = {
-				threads
-			};
-		}
-		response.body.threads = threads;
 		this.sendResponse(response);
 	}
 
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
 		this.log("stackTraceRequest");
 
-		if (!response.body) {
-			response.body = {
-				stackFrames: [],
-				totalFrames: 0
-			};
-		}
-
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
+
+		response.body = {
+			stackFrames: [],
+			totalFrames: 0
+		}
 
 		let threadId = args.threadId; // TODO; support threads
 		for (let index in processesService.contexts) {
@@ -387,8 +374,25 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			stackTraceService.getChildren(processContext.ID, (children) => {
 				stackTraceService.getContext(children, (frames) => {
 					frames.forEach(frame => {
+						let frameArgs: string[] = []
+						let sortedArgs = frame.Args.sort((a,b) => {
+							return a.Order - b.Order;
+						});
+
+						for (let frameArgIndex in sortedArgs) {
+							let frameArg = sortedArgs[frameArgIndex];
+							frameArgs.push(`${frameArg.Type.trim()} ${frameArg.Name.trim()} = ${frameArg.Value.trim()}`);
+						}
+
+						let frameName = `${frame.Func.trim()} (${frameArgs.join(", ")})`
+						let source = new Source(path.basename(frame.File.trim()),
+												path.normalize(frame.File.trim()),
+												this.hashString(frame.File.trim()),
+												frame.File,
+												frame.File);
+
 						response.body.stackFrames.push(
-							new StackFrame(this.hashString(frame.ID), frame.Func, new Source(path.basename(frame.File.trim()), path.normalize(frame.File.trim()), this.hashString(frame.File.trim()), frame.File, frame.File ), frame.Line));
+							new StackFrame(this.hashString(frame.ID), frameName, source, frame.Line));
 					});
 
 					this.sendResponse(response);
@@ -399,19 +403,143 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
     protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
 		this.log("scopesRequest");
-		args.frameId
+
+		let stackTraceService = <StackTraceService>this.services["StackTrace"];
+		let processesService = <ProcessesService>this.services["Processes"];
+
+		response.body = {
+			scopes: []
+		}
+
+		for (let index in processesService.contexts) {
+			let processContext = <IProcessesContext>processesService.contexts[index];
+
+			stackTraceService.getChildren(processContext.ID, (children) => {
+				stackTraceService.getContext(children, (frames) => {
+					frames.forEach(frame => {
+						if (frame.Level == 0) {
+							//response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
+						}
+
+						if (args.frameId == this.hashString(frame.ID)) {
+							response.body.scopes.push(new Scope("Local", this.hashString(frame.ID), false));
+						}
+					});
+
+					this.sendResponse(response);
+				});
+			});
+		}
 	}
 
     protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
 		this.log("variablesRequest");
+
+		let stackTraceService = <StackTraceService>this.services["StackTrace"];
+		let processesService = <ProcessesService>this.services["Processes"];
+		let expressionsService = <ExpressionsService>this.services["Expressions"];
+
+		response.body = {
+			variables: []
+		}
+
+		for (let index in processesService.contexts) {
+			let processContext = <IProcessesContext>processesService.contexts[index];
+
+			stackTraceService.getChildren(processContext.ID, (children) => {
+				stackTraceService.getContext(children, (frames) => {
+					frames.forEach(frame => {
+						if (args.variablesReference == this.hashString(frame.ID)) {
+							expressionsService.getChildren(frame.ID, (children) => {
+								let childrenToEvaluate = children.length;
+
+								if (childrenToEvaluate == 0) {
+									this.sendResponse(response);
+								}
+
+								children.forEach(expressionId => {
+									expressionsService.getContext(expressionId, (expression) => {
+										response.body.variables.push(new Variable(expression.Expression, expression.Val.trim()));
+										expression.dispose();
+
+										if (--childrenToEvaluate == 0) {
+											this.sendResponse(response);
+										}
+									})
+								});
+							});
+						}
+					});
+				});
+			});
+		}
 	}
 
     protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
 		this.log("setVariableRequest");
+
+		let expressionsService = <ExpressionsService>this.services["Expressions"];
+		let processesService = <ProcessesService>this.services["Processes"];
+		let stackTraceService = <StackTraceService>this.services["StackTrace"];
+
+		response.body = {
+			value: ""
+		};
+
+		let currentProcess: IProcessesContext;
+		for (let index in processesService.contexts) {
+			currentProcess = processesService.contexts[index];
+		}
+
+		stackTraceService.getChildren(currentProcess.ID, (children) => {
+			stackTraceService.getContext(children, (frames) => {
+				let sortedFrames = frames.sort( (a,b) => {
+					return a.Level - b.Level;
+				})
+
+				let bottom = sortedFrames.shift();
+				expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
+					expression.assign(args.value);
+					expression.dispose();
+
+					expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
+						response.body.value = expression.Val.trim();
+						this.sendResponse(response);
+					});
+				});
+			});
+		});
 	}
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
 		this.log("evaluateRequest");
+
+		let expressionsService = <ExpressionsService>this.services["Expressions"];
+
+		response.body = {
+			result: "",
+            type: "",
+            variablesReference: 0,
+            namedVariables: 0,
+            indexedVariables: 0
+		}
+
+		switch(args.context) {
+			case "watch":
+			case "hover":
+			case "repl":
+			default:
+				expressionsService.compute(this.hashes[args.frameId], "C", args.expression, (expression) => {
+					response.body.result = expression.Val.trim();
+					response.body.type = expression.Type;
+
+					expression.dispose();
+
+					this.sendResponse(response);
+				});
+		}
+	}
+
 	private hashes: Map<number, string>;
 
 	private hashString(str: string): number {
