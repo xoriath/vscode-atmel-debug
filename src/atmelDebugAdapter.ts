@@ -2,6 +2,8 @@
 /// <reference path='./typings/ws.d.ts' />
 'use strict';
 
+const path = require('path');
+
 import {
 	DebugSession,
 	InitializedEvent,
@@ -103,15 +105,37 @@ class DeviceListener implements IDeviceListener {
 			"RamSnippetAddress": "0x20000000",
 			"ProgFlashFromRam": true,
 			"UseGdb": true,
-			"GdbLocation": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
+			"GdbLocation": "D:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
 			"BootSegment": 2,
-			"PackPath": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+			"PackPath": "D:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
 		});
 	}
 
 	public contextChanged(contexts: IDeviceContext[]): void {
 	}
 	public contextRemoved(contextIds: string[]): void {
+	}
+}
+
+class ProcessListener implements IProcessesListener {
+
+	private session: AtmelDebugSession;
+
+	public constructor(session: AtmelDebugSession) {
+		this.session = session;
+	}
+
+	public contextAdded(contexts: IProcessesContext[]): void {
+		this.session.gotoMain(0);
+	}
+	public contextChanged(contexts: IProcessesContext[]): void {
+
+	}
+	public contextRemoved(contextIds: string[]): void {
+
+	}
+	public exited(id: string, exitCode: number): void {
+
 	}
 }
 
@@ -130,12 +154,13 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		this.log("initializeRequest");
-		// this.sendEvent(new InitializedEvent());
+		this.sendEvent(new InitializedEvent());
 
 		response.body.supportsConfigurationDoneRequest = false;
 		response.body.supportsEvaluateForHovers = true;
 		response.body.supportsFunctionBreakpoints = true;
 		response.body.supportsSetVariable = true;
+		response.body.supportsStepBack = false;
 
 		this.sendResponse(response);
 	}
@@ -215,6 +240,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				toolService.addListener(toolListener);
 				deviceService.addListener(new DeviceListener(args.program, processService));
 				runControlService.addListener(this);
+
+				processService.addListener(new ProcessListener(this));
 
 				toolService.setupTool(args.tool, "", {});
 			});
@@ -359,7 +386,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			stackTraceService.getChildren(processContext.ID, (children) => {
 				stackTraceService.getContext(children, (frames) => {
 					frames.forEach(frame => {
-						response.body.stackFrames.push(new StackFrame(this.hashString(frame.ID), frame.Func, new Source(frame.File, frame.File), frame.Line));
+						response.body.stackFrames.push(
+							new StackFrame(this.hashString(frame.ID), frame.Func, new Source(path.basename(frame.File.trim()), path.normalize(frame.File.trim()), this.hashString(frame.File.trim()), frame.File, frame.File ), frame.Line));
 					});
 
 					this.sendResponse(response);
@@ -378,7 +406,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
-
+		this.log("setVariableRequest");
 	}
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
@@ -399,12 +427,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
 	public contextSuspended(contextId: string, pc: number, reason: string, state: any): void {
-		if (reason == "Reset") {
-			this.gotoMain(pc);
-		}
-		else {
-			this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), state));
-		}
+		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), state));
 	}
 
 	public contextResumed(contextId: string): void {
@@ -431,7 +454,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.sendEvent(new OutputEvent(`${message}\n`));
 	}
 
-	private gotoMain(pc: number): void {
+	public gotoMain(pc: number): void {
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 		let runControlService = <RunControlService>this.services["RunControlService"];
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];

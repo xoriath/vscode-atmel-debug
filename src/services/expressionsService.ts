@@ -104,7 +104,7 @@ export class ExpressionsService extends Service {
 
 	public compute(contextId: string, language: string, expression: string, callback: (expression: ExpressionContext) => void): void {
 		this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression], (errorReport, eventData) => {
-			let contextData = <ExpressionContext>JSON.parse(eventData[0]);
+			let contextData = <ExpressionContext>JSON.parse(eventData);
 			let newContext = ExpressionContext.fromJson(this, contextData);
 
 			callback(newContext);
