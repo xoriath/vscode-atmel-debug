@@ -129,6 +129,7 @@ class ProcessListener implements IProcessesListener {
 	}
 
 	public contextAdded(contexts: IProcessesContext[]): void {
+		this.session.sendEvent(new InitializedEvent());
 		this.session.goto("main");
 	}
 	public contextChanged(contexts: IProcessesContext[]): void {
@@ -156,8 +157,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	private services: Map<string, IService>;
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
-		this.sendEvent(new InitializedEvent());
-
 		response.body.supportsConfigurationDoneRequest = false;
 		response.body.supportsEvaluateForHovers = true;
 		response.body.supportsFunctionBreakpoints = true;
