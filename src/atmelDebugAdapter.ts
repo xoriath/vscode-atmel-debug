@@ -36,7 +36,7 @@ import { RegistersService } from './services/registersService';
 import { ExpressionsService, ExpressionContext } from './services/expressionsService';
 import { LineNumbersService, LineNumbersContext } from './services/lineNumbersService';
 import { StackTraceService, StackTraceContext } from './services/stackTraceService';
-import { BreakpointsService, BreakpointContext } from './services/breakpointsService';
+import { BreakpointsService, BreakpointContext, AccessMode } from './services/breakpointsService';
 import { RunControlService, RunControlContext, IRunControlListener, ResumeMode } from './services/runControlService';
 import { IService } from './services/iservice';
 
@@ -107,9 +107,9 @@ class DeviceListener implements IDeviceListener {
 			"RamSnippetAddress": "0x20000000",
 			"ProgFlashFromRam": true,
 			"UseGdb": true,
-			"GdbLocation": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
+			"GdbLocation": "D:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
 			"BootSegment": 2,
-			"PackPath": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+			"PackPath": "D:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
 		});
 	}
 
@@ -290,7 +290,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 			let breakpoint = {
 				"ContextIds": [ processContext.ID ],
-				"AccessMode": 4,
+				"AccessMode": AccessMode.Execute,
 				"ID": `${breakpointId}`,
 				"Enabled": true,
 				"IgnoreCount": 1,

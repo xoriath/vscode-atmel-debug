@@ -1,14 +1,16 @@
 
 'use strict';
 
+ // http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Breakpoints.html
+
 import { Dispatcher, Service } from './service';
 import { IContext } from './icontext';
 
-enum AccessMode {
-	One = 1,
-	Two = 2,
-	Three = 3,
-	Four = 4
+export enum AccessMode {
+	Read = 0x01,
+	Write = 0x02,
+	Execute = 0x04,
+	Change = 0x08
 }
 
 export interface IBreakpoint extends IContext {
