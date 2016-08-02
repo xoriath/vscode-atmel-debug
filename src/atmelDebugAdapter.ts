@@ -380,23 +380,23 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
-		this.resume(ResumeMode.Resume, args.threadId);
 		this.sendResponse(response);
+		this.resume(ResumeMode.Resume, args.threadId);
 	}
 
     protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
-		this.resume(ResumeMode.StepOverLine, args.threadId);
 		this.sendResponse(response);
+		this.resume(ResumeMode.StepOverLine, args.threadId);
 	}
 
     protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
-		this.resume(ResumeMode.StepIntoLine, args.threadId);
 		this.sendResponse(response);
+		this.resume(ResumeMode.StepIntoLine, args.threadId);
 	}
 
     protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
-		this.resume(ResumeMode.StepOut, args.threadId);
 		this.sendResponse(response);
+		this.resume(ResumeMode.StepOut, args.threadId);
 	}
 
     protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
@@ -405,8 +405,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
-		this.suspend(args.threadId);
 		this.sendResponse(response);
+		this.suspend(args.threadId);
 	}
 
     protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
