@@ -46,7 +46,7 @@ export class BreakpointContext implements IBreakpoint {
 	}
 
 	public remove(): void {
-		this.service.remove(this.ID);
+		this.service.remove([this.ID]);
 	}
 
 	public static fromJson(service: BreakpointsService, data: IBreakpoint): BreakpointContext {
@@ -86,8 +86,10 @@ export class BreakpointsService extends Service {
 		this.contextCounter = 0;
 	}
 
-	public add(parameters: any): void {
-		this.dispatcher.sendCommand(this.name, "add", [parameters]);
+	public add(parameters: any, callback: (errorReport:string) => void): void {
+		this.dispatcher.sendCommand(this.name, "add", [parameters], (errorReport, eventData) => {
+			callback(errorReport);
+		});
 	}
 
 	public getProperties(contextId: string, callback: (breakpoint: BreakpointContext) => void): void {
@@ -105,12 +107,12 @@ export class BreakpointsService extends Service {
 		})
 	}
 
-	public remove(contextId: string): void {
-		this.dispatcher.sendCommand(this.name, "remove", [contextId]);
+	public remove(contextIds: string[]): void {
+		this.dispatcher.sendCommand(this.name, "remove", [contextIds]);
 	}
 
-	public getNextBreakpointId(): number {
-		return ++this.contextCounter;
+	public getNextBreakpointId(): string {
+		return `${++this.contextCounter}`;
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {

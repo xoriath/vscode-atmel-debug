@@ -272,8 +272,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	// 09 04 49 130: msg send(c8):R 210
 	// 09 04 49 135: msg recv(c8):C 211 Breakpoints change {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"IsTrue":true,"Condition":"x == 5"}
 	// 09 04 49 135: msg send(c8):R 211
+	private activeBreakpoints = [];
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		this.log("[NOT IMPLEMENTED] setBreakPointsRequest");
 
 		let processService = <ProcessesService>this.services["Processes"];
 		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
@@ -287,6 +287,9 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			processContext = processService.contexts[index];
 		}
 
+		breakpointsService.remove(this.activeBreakpoints);
+		this.activeBreakpoints = [];
+
 		let breakpointsToProcess = args.breakpoints.length;
 
 		args.breakpoints.forEach( breakpointArgs => {
@@ -295,35 +298,35 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			let breakpoint = {
 				"ContextIds": [ processContext.ID ],
 				"AccessMode": AccessMode.Execute,
-				"ID": `${breakpointId}`,
+				"ID": breakpointId,
 				"Enabled": true,
 				"IgnoreCount": 1,
-				"IgnoreType": "allways",
+				"IgnoreType": "always",
 				"Line": breakpointArgs.line,
+				"Column": breakpointArgs.column | 0
 			};
 
 			if (args.source.path) {
 				breakpoint["File"] = args.source.path;
 			} // else use args.source.sourceReference
-			if (breakpointArgs.column) {
-				breakpoint["Column"] = breakpointArgs.column;
-			}
+
 			if (breakpointArgs.condition) {
 				breakpoint["Condition"] = breakpointArgs.condition;
 				breakpoint["Istrue"] = true;
 			}
 
-			breakpointsService.add(breakpoint);
+			breakpointsService.add(breakpoint, (errorReport) => {
+				breakpointsService.getProperties(breakpointId, (breakpoint) => {
+					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
 
-			breakpointsService.getProperties(`${breakpointId}`, (breakpoint) => {
-				let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
+					response.body.breakpoints.push(bp);
+					this.activeBreakpoints.push(breakpointId);
 
-				response.body.breakpoints.push(bp);
-
-				if (--breakpointsToProcess == 0) {
-					this.sendResponse(response);
-				}
-			})
+					if (--breakpointsToProcess == 0) {
+						this.sendResponse(response);
+					}
+				});
+			});
 
 		});
 	}
