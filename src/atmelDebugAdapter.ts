@@ -707,7 +707,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
 	public contextSuspended(contextId: string, pc: number, reason: string, state: any): void {
-		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), state));
+		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), ""));
 	}
 
 	public contextResumed(contextId: string): void {
