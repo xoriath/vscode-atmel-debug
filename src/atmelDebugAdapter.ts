@@ -36,6 +36,7 @@ import { RegistersService } from './services/registersService';
 import { ExpressionsService, ExpressionContext } from './services/expressionsService';
 import { LineNumbersService, LineNumbersContext } from './services/lineNumbersService';
 import { StackTraceService, StackTraceContext } from './services/stackTraceService';
+import { StreamService } from './services/streamService';
 import { BreakpointsService, BreakpointContext, AccessMode } from './services/breakpointsService';
 import { RunControlService, RunControlContext, IRunControlListener, ResumeMode } from './services/runControlService';
 import { IService } from './services/iservice';
@@ -226,6 +227,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				let expressionsService = new ExpressionsService(dispatcher);
 				let lineNumbersService = new LineNumbersService(dispatcher);
 				let breakpointsService = new BreakpointsService(dispatcher);
+				let streamService = new StreamService(dispatcher);
 
 				this.services = new Map<string, IService>();
 				this.services["Tool"] = toolService;
@@ -238,6 +240,9 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				this.services["Expressions"] = expressionsService;
 				this.services["LineNumbers"] = lineNumbersService;
 				this.services["Breakpoints"] = breakpointsService;
+				this.services["Streams"] = streamService;
+
+				streamService.setLogBits(0xFFFFFFFF);
 
 				toolService.addListener(toolListener);
 				deviceService.addListener(new DeviceListener(args.program, processService));
