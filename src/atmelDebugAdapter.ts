@@ -278,7 +278,6 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	// 09 04 49 135: msg send(c8):R 211
 	private activeBreakpoints = [];
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-
 		let processService = <ProcessesService>this.services["Processes"];
 		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
 
@@ -341,8 +340,54 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	// 09 03 23 267: msg send(c8):R 204  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
 	// 09 03 23 281: msg recv(c8):C 205 Breakpoints getProperties "9264_bp_00000004"
 	// 09 03 23 281: msg send(c8):R 205  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
+	private activeFunctionBreakpoints = [];
     protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		this.log("[NOT IMPLEMENTED] setFunctionBreakPointsRequest");
+		let processService = <ProcessesService>this.services["Processes"];
+		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
+
+		response.body = {
+			breakpoints: []
+		};
+
+		let processContext: IProcessesContext;
+		for (let index in processService.contexts) {
+			processContext = processService.contexts[index];
+		}
+
+		breakpointsService.remove(this.activeFunctionBreakpoints);
+		this.activeFunctionBreakpoints = [];
+
+		let breakpointsToProcess = args.breakpoints.length;
+
+		args.breakpoints.forEach( breakpointArgs => {
+			let breakpointId = breakpointsService.getNextBreakpointId();
+
+			let breakpoint = {
+				"ContextIds": [ processContext.ID ],
+				"AccessMode": AccessMode.Execute,
+				"ID": breakpointId,
+				"Enabled": true,
+				"IgnoreCount": 1,
+				"IgnoreType": "always",
+				"Function": breakpointArgs.name,
+				"FunctionLine": 1,
+				"FunctionColumn": 0
+			};
+
+			breakpointsService.add(breakpoint, (errorReport) => {
+				breakpointsService.getProperties(breakpointId, (breakpoint) => {
+					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, /*breakpoint.Column*/ 0);
+
+					response.body.breakpoints.push(bp);
+					this.activeFunctionBreakpoints.push(breakpointId);
+
+					if (--breakpointsToProcess == 0) {
+						this.sendResponse(response);
+					}
+				});
+			});
+
+		});
 
 		super.setFunctionBreakPointsRequest(response, args);
 	}
