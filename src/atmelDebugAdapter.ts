@@ -160,10 +160,19 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsConfigurationDoneRequest = false;
+		response.body.supportsCompletionsRequest = false;
+
 		response.body.supportsEvaluateForHovers = true;
-		response.body.supportsFunctionBreakpoints = true;
 		response.body.supportsSetVariable = true;
+
+		response.body.supportsFunctionBreakpoints = true;
+		response.body.supportsConditionalBreakpoints = false;  // TODO: why doesn't this break?
+
+		response.body.supportsRestartFrame = false;
 		response.body.supportsStepBack = false;
+
+		response.body.supportsStepInTargetsRequest = false;
+		response.body.supportsGotoTargetsRequest = true;
 
 		this.sendResponse(response);
 	}
@@ -452,6 +461,18 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
     protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
 		this.sendResponse(response);
 		this.suspend(args.threadId);
+	}
+
+	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
+		this.log("[NOT IMPLEMENTED] gotoRequest");
+	}
+
+	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
+		this.log("[NOT IMPLEMENTED] gotoTargetsRequest");
+	}
+
+    protected completionsRequest(response: DebugProtocol.CompletionsResponse, args: DebugProtocol.CompletionsArguments): void {
+		this.log("[NOT IMPLEMENTED] completionsRequest");
 	}
 
     protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
