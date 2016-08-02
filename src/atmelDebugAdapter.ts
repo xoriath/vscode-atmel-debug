@@ -145,6 +145,8 @@ class ProcessListener implements IProcessesListener {
 
 class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
+	private DEBUG: boolean = false;
+
 	public constructor() {
 		super();
 
@@ -187,6 +189,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
     protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort, (message: string) => {
 			this.sendEvent(new OutputEvent(message));
+		}, (message: string) => {
+			this.debug(message);
 		});
 
 
@@ -662,6 +666,12 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 	private log(message: string): void {
 		this.sendEvent(new OutputEvent(`${message}\n`));
+	}
+
+	private debug(message: string): void {
+		if (this.DEBUG) {
+			this.sendEvent(new OutputEvent(`${message}\n`));
+		}
 	}
 
 	public goto(func: string): void {

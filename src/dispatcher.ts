@@ -22,13 +22,16 @@ export class Dispatcher {
 		= new Map<string, IEventHandler>();
 
 	private logger: (message: string) => void;
+	private debugLogger: (message: string) => void;
 
-	public constructor(host: string, port: number, logger?: (message: string) => void) {
+	public constructor(host: string, port: number, logger?: (message: string) => void, debugLogger?: (message: string) => void) {
 		this.host = host;
 		this.port = port;
 
 		if (logger)
 			this.logger = logger;
+		if (debugLogger)
+			this.debugLogger = debugLogger;
 	}
 
 	public log(data: string): void {
@@ -37,6 +40,12 @@ export class Dispatcher {
 		}
 		else {
 			console.error(`${data}\n\r`);
+		}
+	}
+
+	public debug(data: string): void {
+		if (this.debugLogger) {
+			this.debugLogger(`${data}\n\r`);
 		}
 	}
 
@@ -86,7 +95,7 @@ export class Dispatcher {
 	}
 
 	private sendMessage(message: string): void {
-		this.log(`>> ${this.escapeNil(message)}`);
+		this.debug(`>> ${this.escapeNil(message)}`);
 
 		this.ws.send(message);
 	}
@@ -129,7 +138,7 @@ export class Dispatcher {
 	}
 
 	private handleMessage(data: string): void {
-		this.log(`<< ${this.escapeNil(data)}`);
+		this.debug(`<< ${this.escapeNil(data)}`);
 
 		let elements = data.split(this.nil);
 
@@ -205,7 +214,7 @@ export class Dispatcher {
 			handler.eventHandler(eventName, eventData);
 		}
 		else {
-			this.log(`[Dispatcher] Event handler for ${serviceName} is not registered`);
+			this.debug(`[Dispatcher] Event handler for ${serviceName} is not registered`);
 		}
 	}
 
