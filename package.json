@@ -33,8 +33,8 @@
   "devDependencies": {
     "typescript": "^1.8.5",
     "mocha": "^2.4.5",
-    "vscode": "^0.11.13",
-    "vscode-debugadapter-testsupport": "^1.10.0"
+    "vscode": "0.11.14",
+    "vscode-debugadapter-testsupport": "1.11.0"
   },
   "scripts": {
     "prepublish": "node ./node_modules/typescript/bin/tsc -p ./src",
@@ -163,8 +163,7 @@
             "type": "atbackend",
             "request": "launch",
             "program": "${workspaceRoot}/GccApplication2/Debug/GccApplication2.elf",
-            "stopOnEntry": true,
-            "tool": "com.atmel.tool.simulator",
+            "tool": "com.atmel.avrdbg.tool.simulator",
             "device": "ATmega128"
           }
         ]

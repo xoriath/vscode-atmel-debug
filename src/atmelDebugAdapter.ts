@@ -6,7 +6,6 @@ const path = require('path');
 
 import {
 	DebugSession,
-	InitializedEvent,
 	TerminatedEvent,
 	StoppedEvent,
 	ContinuedEvent,
@@ -41,122 +40,25 @@ import { BreakpointsService, BreakpointContext, AccessMode } from './services/br
 import { RunControlService, RunControlContext, IRunControlListener, ResumeMode } from './services/runControlService';
 import { IService } from './services/iservice';
 
-/**
- * This interface should always match the schema found in the mock-debug extension manifest.
- */
+import { LaunchRequestArguments } from './launchRequestArguments';
+import { GoToMain } from './gotoMain';
+import { ProcessLauncher } from './processLauncher';
+import { DeviceLauncher } from './deviceLauncher';
 
-// 08 29 50 127: msg recv(0):C 113 Processes launch "c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug\\GccApplication2.elf" "SimDev_3"
-//{
-//	"LaunchSuspended":true,
-//  "LaunchAttached":true,
-//  "CacheFlash":true,
-//  "EraseRule":0,
-//  "PreserveEeprom":false,
-//  "RamSnippetAddress":"0x20000000",
-//  "ProgFlashFromRam":true,
-//  "UseGdb":true,
-//  "GdbLocation":"C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
-//  "BootSegment":2,
-//  "PackPath":"C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
-//}
-export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
+export class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
-	atbackendHost: string;
-	atbackendPort: number;
-
-	program: string;
-	tool: string;
-	device: string;
-
-	launchSuspended: boolean;
-	launchAttached: boolean;
-	cacheFlash: boolean;
-
-	eraseRule: number; // enum
-	preserveEeprom: boolean;
-	ramSnippetAddress: number;
-	progFlashFromRam: boolean;
-
-	useGdb: boolean;
-	gdbLocation: string;
-
-	bootSegment: number; // enum
-
-	packPath: string;
-}
-
-
-class DeviceListener implements IDeviceListener {
-	public processService: ProcessesService;
-	public module: string;
-
-	public constructor(module: string, processService: ProcessesService) {
-		this.processService = processService;
-		this.module = module;
-	}
-
-	public contextAdded(contexts: IDeviceContext[]): void {
-		// Launch here!
-		let context = contexts[0];
-
-		this.processService.launch(this.module, context, {
-			"LaunchSuspended": true,
-			"LaunchAttached": true,
-			"CacheFlash": true,
-			"EraseRule": 0,
-			"PreserveEeprom": false,
-			"RamSnippetAddress": "0x20000000",
-			"ProgFlashFromRam": true,
-			"UseGdb": true,
-			"GdbLocation": "D:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
-			"BootSegment": 2,
-			"PackPath": "D:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
-		});
-	}
-
-	public contextChanged(contexts: IDeviceContext[]): void {
-	}
-	public contextRemoved(contextIds: string[]): void {
-	}
-}
-
-class ProcessListener implements IProcessesListener {
-
-	private session: AtmelDebugSession;
-
-	public constructor(session: AtmelDebugSession) {
-		this.session = session;
-	}
-
-	public contextAdded(contexts: IProcessesContext[]): void {
-		this.session.sendEvent(new InitializedEvent());
-		this.session.goto("main");
-	}
-	public contextChanged(contexts: IProcessesContext[]): void {
-
-	}
-	public contextRemoved(contextIds: string[]): void {
-
-	}
-	public exited(id: string, exitCode: number): void {
-
-	}
-}
-
-class AtmelDebugSession extends DebugSession implements IRunControlListener {
-
+	/* Set to true to output debug log */
 	private DEBUG: boolean = false;
+
+	private dispatcher: Dispatcher;
+	private services: Map<string, IService>;
 
 	public constructor() {
 		super();
 
 		this.setDebuggerLinesStartAt1(false);
 		this.setDebuggerColumnsStartAt1(false);
-
 	}
-
-	private dispatcher: Dispatcher;
-	private services: Map<string, IService>;
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsConfigurationDoneRequest = false;
@@ -178,6 +80,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
+		/* Terminate the processes */
 		if ("Processes" in this.services) {
 			let processService = <ProcessesService>this.services["Processes"];
 			for (let index in processService.contexts) {
@@ -186,6 +89,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			}
 		}
 
+		/* Tear down the tools */
 		if ("Tools" in this.services) {
 			let toolService = <ToolService>this.services["Tools"];
 			for (let index in toolService.contexts) {
@@ -196,39 +100,22 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 	}
 
     protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort, (message: string) => {
-			this.sendEvent(new OutputEvent(message));
-		}, (message: string) => {
-			this.debug(message);
-		});
 
-
-		let toolListener: IToolListener = {
-			contextAdded(contexts: IToolContext[]): void {
-				let context = contexts[0];
-				context.setProperties({
-					"InterfaceProperties":
-					{
-						"KeepTimersRunning": true,
-						"ProjectFolder": "c:\\users\\morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2"
-					},
-					"DeviceName": args.device,
-					"PackPath": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
-				})
-			},
-			contextChanged(contexts: IToolContext[]): void {
-			},
-			contextRemoved(contextIds: string[]): void {
-			},
-			attachedToolsChanged(attachedTools: IAttachedTool[]): void {
-			}
-		};
-
+		/* Create the dispatcher */
+		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort,
+										(message: string) => {
+											this.sendEvent(new OutputEvent(message));
+										},
+										(message: string) => {
+											this.debug(message);
+										});
 
 		this.dispatcher.connect((dispatcher: Dispatcher) => {
 			let locator = new LocatorService(dispatcher);
 
 			locator.hello(() => {
+
+				/* Need to wait for hello before we can start the show */
 				let toolService = new ToolService(dispatcher);
 				let deviceService = new DeviceService(dispatcher);
 				let processService = new ProcessesService(dispatcher);
@@ -254,14 +141,32 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 				this.services["Breakpoints"] = breakpointsService;
 				this.services["Streams"] = streamService;
 
-				streamService.setLogBits(0xFFFFFFFF);
+				/* Crank up the atbackend logging if we run in debug */
+				if (this.DEBUG) {
+					streamService.setLogBits(0xFFFFFFFF);
+				}
 
-				toolService.addListener(toolListener);
-				deviceService.addListener(new DeviceListener(args.program, processService));
+				/* Let the session be the runcontroller, since it handles most of the debug events anyway */
 				runControlService.addListener(this);
 
-				processService.addListener(new ProcessListener(this));
+				/*
+					Once the process is running, we need to get into a start place
 
+					Normally, launching involves resetting the device being debugged, so
+					as the process is made we're at whatever the device resets to.
+
+					Use this listener to run to main.
+
+				*/
+				processService.addListener(new GoToMain(this));
+
+				/* Once a device has been instantiated, we need to actually launch with a module */
+				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
+
+				/* Once the tool is ready, start creating the device instance */
+				toolService.addListener(new DeviceLauncher(args.device, args.packPath));
+
+				/* Ignition! TODO: need more properties for USB/IP tools */
 				toolService.setupTool(args.tool, "", {});
 			});
 		});
@@ -270,22 +175,23 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 	}
 
+	/*
+		Not all Atmel devices can be attached to, and most devices needs to be set up to allow this
+
+		For ATmega and ATtiny, this involves setting the OCDEN fuse to keep the OCD on.
+		For XMEGA
+		For AVR32 UC3, attach is not supported
+		For SAM, attach is supported without prior setup
+
+	*/
     protected attachRequest(response: DebugProtocol.AttachResponse, args: DebugProtocol.AttachRequestArguments): void {
 		this.log("[NOT IMPLEMENTED] attachRequest");
 		super.attachRequest(response, args);
 	}
 
-	// 09 04 39 824: msg recv(c8):C 207 Breakpoints add {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0}
-	// 09 04 39 831: msg send(c8):R 207
-	// 09 04 39 832: msg recv(c8):C 208 Breakpoints getProperties "9264_bp_00000005"
-	// 09 04 39 833: msg send(c8):R 208  {"ID":"9264_bp_00000005","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Address":"246","HitCount":0}
-	// 09 04 39 853: msg recv(c8):C 209 Breakpoints getProperties "9264_bp_00000005"
-	// 09 04 39 853: msg send(c8):R 209  {"ID":"9264_bp_00000005","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Address":"246","HitCount":0}
-	// 09 04 49 130: msg recv(c8):C 210 Breakpoints change {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"Condition":"x == 5","IsTrue":true}
-	// 09 04 49 130: msg send(c8):R 210
-	// 09 04 49 135: msg recv(c8):C 211 Breakpoints change {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000005","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\main.c","Line":29,"Column":0,"IsTrue":true,"Condition":"x == 5"}
-	// 09 04 49 135: msg send(c8):R 211
 	private activeBreakpoints = [];
+
+	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
 		let processService = <ProcessesService>this.services["Processes"];
 		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
@@ -294,11 +200,13 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			breakpoints: []
 		};
 
+		/* Fetch the running process */
 		let processContext: IProcessesContext;
 		for (let index in processService.contexts) {
 			processContext = processService.contexts[index];
 		}
 
+		/* Remove all active breakpoints */
 		breakpointsService.remove(this.activeBreakpoints);
 		this.activeBreakpoints = [];
 
@@ -334,22 +242,18 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 					response.body.breakpoints.push(bp);
 					this.activeBreakpoints.push(breakpointId);
 
+					/* Since we need to bind all the requested breakpoints before responding, wait until the last is bound */
 					if (--breakpointsToProcess == 0) {
 						this.sendResponse(response);
 					}
 				});
 			});
-
 		});
 	}
 
-	// 09 03 23 224: msg recv(c8):C 203 Breakpoints add {"ContextIds":["Proc_2"],"AccessMode":4,"ID":"9264_bp_00000004","Enabled":true,"IgnoreCount":1,"IgnoreType":"always","Condition":"x == 5","IsTrue":true,"Function":"testfunc1","FunctionLine":1,"FunctionColumn":0}
-	// 09 03 23 266: msg send(c8):R 203
-	// 09 03 23 267: msg recv(c8):C 204 Breakpoints getProperties "9264_bp_00000004"
-	// 09 03 23 267: msg send(c8):R 204  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
-	// 09 03 23 281: msg recv(c8):C 205 Breakpoints getProperties "9264_bp_00000004"
-	// 09 03 23 281: msg send(c8):R 205  {"ID":"9264_bp_00000004","Enabled":true,"AccessMode":4,"File":"C:\\Users\\Morten\\Documents\\Atmel Studio\\7.0\\GccApplication2\\GccApplication2\\Debug/.././main.c","Line":20,"Column":512,"Address":"224","HitCount":0}
 	private activeFunctionBreakpoints = [];
+
+	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
     protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
 		let processService = <ProcessesService>this.services["Processes"];
 		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
@@ -395,22 +299,32 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 					}
 				});
 			});
-
 		});
 
 		super.setFunctionBreakPointsRequest(response, args);
 	}
 
+	/*
+		Need to find the registered interrupt handlers here
+
+		This varies between
+			AVR (ISR macro from avr-libc => __vector_N functions)
+			AVR32 UC3
+			SAM (vector of functions with weak binding to default handler)
+
+	*/
     protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
 		this.log("[NOT IMPLEMENTED] setExceptionBreakPointsRequest");
 		super.setExceptionBreakPointsRequest(response, args);
 	}
 
+	/* TODO: should this be supported? */
     protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
 		this.log("[NOT IMPLEMENTED] configurationDoneRequest");
 		super.configurationDoneRequest(response, args);
 	}
 
+	/* Resume is any form of resume */
 	private resume(mode: ResumeMode, threadID?: number): void {
 		let runControlService = <RunControlService>this.services["RunControl"];
 
@@ -453,16 +367,12 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.resume(ResumeMode.StepOut, args.threadId);
 	}
 
-    protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
-		this.log("[NOT IMPLEMENTED] stepBackRequest");
-		super.stepBackRequest(response, args);
-	}
-
     protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
 		this.sendResponse(response);
 		this.suspend(args.threadId);
 	}
 
+	/* Goto is a resume with type goto and count = address of target */
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.log("[NOT IMPLEMENTED] gotoRequest");
 	}
@@ -471,15 +381,17 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.log("[NOT IMPLEMENTED] gotoTargetsRequest");
 	}
 
-    protected completionsRequest(response: DebugProtocol.CompletionsResponse, args: DebugProtocol.CompletionsArguments): void {
-		this.log("[NOT IMPLEMENTED] completionsRequest");
-	}
-
+	/* TODO: May do this through the fileSystem TCF service and the disassembly service (for locations without source) */
     protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
 		this.log("[NOT IMPLEMENTED] sourceRequest");
 		super.sourceRequest(response, args);
 	}
 
+	/*
+		TODO: For now, let's pretend that thread = process (usually holds for micro controllers)
+
+		The thread ID is based on the runcontroller of a process
+	*/
     protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
 		let processService = <ProcessesService>this.services["Processes"];
 
@@ -497,6 +409,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.sendResponse(response);
 	}
 
+	/* Stack frames are organized as children of a process (violates our thread assumptions) */
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
@@ -506,40 +419,54 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			totalFrames: 0
 		}
 
-		let threadId = args.threadId; // TODO; support threads
 		for (let index in processesService.contexts) {
 			let processContext = <IProcessesContext>processesService.contexts[index];
 
-			stackTraceService.getChildren(processContext.ID, (children) => {
-				stackTraceService.getContext(children, (frames) => {
-					frames.forEach(frame => {
-						let frameArgs: string[] = []
-						let sortedArgs = frame.Args.sort((a,b) => {
-							return a.Order - b.Order;
+			/* Support threads (in theory at least) */
+			if (this.hashString(processContext.RunControlId) == args.threadId) {
+
+				stackTraceService.getChildren(processContext.ID, (children) => {
+					stackTraceService.getContext(children, (frames) => {
+						frames.forEach(frame => {
+							let frameArgs: string[] = []
+
+							/* Sort frames based on the Order (depth in the stack) */
+							let sortedArgs = frame.Args.sort((a,b) => {
+								return a.Order - b.Order;
+							});
+
+							/* Create list of all arguments to the function frame */
+							for (let frameArgIndex in sortedArgs) {
+								let frameArg = sortedArgs[frameArgIndex];
+								frameArgs.push(
+									`${frameArg.Type.trim()} ${frameArg.Name.trim()} = ${frameArg.Value.trim()}`
+								);
+							}
+
+							/* Create frame name based on function and arguments */
+							let frameName = `${frame.Func.trim()} (${frameArgs.join(", ")})`
+
+							/* Create the source */
+							let source = new Source(path.basename(frame.File.trim()),
+													path.normalize(frame.File.trim()),
+													this.hashString(frame.File.trim()),
+													frame.File,
+													frame.File);
+
+							/* Push the frame */
+							response.body.stackFrames.push(
+								new StackFrame(this.hashString(frame.ID), frameName, source, frame.Line));
 						});
 
-						for (let frameArgIndex in sortedArgs) {
-							let frameArg = sortedArgs[frameArgIndex];
-							frameArgs.push(`${frameArg.Type.trim()} ${frameArg.Name.trim()} = ${frameArg.Value.trim()}`);
-						}
-
-						let frameName = `${frame.Func.trim()} (${frameArgs.join(", ")})`
-						let source = new Source(path.basename(frame.File.trim()),
-												path.normalize(frame.File.trim()),
-												this.hashString(frame.File.trim()),
-												frame.File,
-												frame.File);
-
-						response.body.stackFrames.push(
-							new StackFrame(this.hashString(frame.ID), frameName, source, frame.Line));
+						this.sendResponse(response);
 					});
-
-					this.sendResponse(response);
 				});
-			});
+			}
 		}
 	}
 
+	/* Scopes describes a collection of variables */
+	/* TODO: is registers a scope? Global scope? */
     protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
@@ -558,6 +485,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 							//response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
 						}
 
+						/* Create local scope if we are asked for a frame that we found */
 						if (args.frameId == this.hashString(frame.ID)) {
 							response.body.scopes.push(new Scope("Local", this.hashString(frame.ID), false));
 						}
@@ -569,6 +497,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		}
 	}
 
+	/* Variables belong to a scope (which is created above) */
     protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
 		let stackTraceService = <StackTraceService>this.services["StackTrace"];
 		let processesService = <ProcessesService>this.services["Processes"];
@@ -584,7 +513,11 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 			stackTraceService.getChildren(processContext.ID, (children) => {
 				stackTraceService.getContext(children, (frames) => {
 					frames.forEach(frame => {
+
+						/* Only evaluate if we are asked for this frame (local variables) */
 						if (args.variablesReference == this.hashString(frame.ID)) {
+
+							/* Get expressions for the frame */
 							expressionsService.getChildren(frame.ID, (children) => {
 								let childrenToEvaluate = children.length;
 
@@ -594,7 +527,11 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 								children.forEach(expressionId => {
 									expressionsService.getContext(expressionId, (expression) => {
-										response.body.variables.push(new Variable(expression.Expression, expression.Val.trim()));
+
+										/* Build the variable from the expression*/
+										response.body.variables.push(
+											new Variable(expression.Expression, expression.Val.trim())
+										);
 										expression.dispose();
 
 										if (--childrenToEvaluate == 0) {
@@ -610,6 +547,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		}
 	}
 
+	/* Set a variable to a value */
     protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 		let processesService = <ProcessesService>this.services["Processes"];
@@ -630,11 +568,14 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 					return a.Level - b.Level;
 				})
 
+				/* TODO: is this assumption correct? (evaluate the expression based on the lowest frame) */
 				let bottom = sortedFrames.shift();
 				expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
+					/* Assign value */
 					expression.assign(args.value);
 					expression.dispose();
 
+					/* Read back */
 					expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
 						response.body.value = expression.Val.trim();
 						this.sendResponse(response);
@@ -644,6 +585,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		});
 	}
 
+	/* Evaluate using the expression evaluator */
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 
@@ -677,10 +619,12 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		if (!this.hashes)
 			this.hashes = new Map<number, string>();
 
+		/* Java odd-shift object hash (more or less at least) */
+		/* TODO: change for something common? Need only to translate strings to numbers wihtout colliding */
 		let hash = Math.abs(str.split("").reduce(function (a, b) {
-			a = ((a << 5) - a) + b.charCodeAt(0);
-			return a & a
-		}, 0))
+				a = ((a << 5) - a) + b.charCodeAt(0);
+				return a & a
+			}, 0))
 
 		this.hashes[hash] = str;
 
@@ -693,19 +637,7 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		return "";
 	}
 
-	// IRunControlListener
-	public contextAdded(contexts: RunControlContext[]): void {
-
-	}
-
-	public contextChanged(contexts: RunControlContext[]): void {
-
-	}
-
-	public contextRemoved(contextIds: string[]): void {
-
-	}
-
+	/* IRunControlListener */
 	public contextSuspended(contextId: string, pc: number, reason: string, state: any): void {
 		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), ""));
 	}
@@ -714,22 +646,15 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		this.sendEvent(new ContinuedEvent(this.hashString(contextId)));
 	}
 
-	public contextException(contextId: string, description: string): void {
+	public contextAdded(contexts: RunControlContext[]): void {	}
+	public contextChanged(contexts: RunControlContext[]): void { }
+	public contextRemoved(contextIds: string[]): void {	}
+	public contextException(contextId: string, description: string): void {	}
+	public containerSuspended(contextId: string, pc: number, reason: string, state: any, contextIds: string[]): void { }
+	public containerResumed(contextIds: string[]): void { }
+	public contextStateChanged(contextIds: string[]): void { }
 
-	}
-
-	public containerSuspended(contextId: string, pc: number, reason: string, state: any, contextIds: string[]): void {
-
-	}
-
-	public containerResumed(contextIds: string[]): void {
-
-	}
-
-	public contextStateChanged(contextIds: string[]): void {
-
-	}
-
+	/* Log and debug helpers */
 	private log(message: string): void {
 		this.sendEvent(new OutputEvent(`${message}\n`));
 	}
@@ -740,6 +665,8 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		}
 	}
 
+	/* Goto helper */
+	/* TODO, doesn't really belong here... */
 	public goto(func: string): void {
 		let expressionsService = <ExpressionsService>this.services["Expressions"];
 		let runControlService = <RunControlService>this.services["RunControl"];
@@ -757,17 +684,16 @@ class AtmelDebugSession extends DebugSession implements IRunControlListener {
 		}
 
 		stackTraceService.getChildren(processContext.ID, (children) => {
+			/* Find address of function identifier */
 			expressionsService.compute(children.shift(), "C", func, (expressionContext) => {
+				/* Convert address to number */
 				let address = parseInt(expressionContext.Val.replace("0x", ""), 16);
 				expressionContext.dispose();
 
+				/* Goto address */
 				runControlContext.resume(ResumeMode.Goto, address)
 			});
 		});
-
-
-
-
 	}
 }
 
