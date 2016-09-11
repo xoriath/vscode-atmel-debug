@@ -41,8 +41,8 @@ export class BreakpointContext implements IBreakpoint {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return this.service.getProperties(this.ID);
 	}
 
 	public remove(): void {
@@ -86,29 +86,27 @@ export class BreakpointsService extends Service {
 		this.contextCounter = 0;
 	}
 
-	public add(parameters: any, callback: (errorReport:string) => void): void {
-		this.dispatcher.sendCommand(this.name, "add", [parameters], (errorReport, eventData) => {
-			callback(errorReport);
+	public add(parameters: any, callback: (errorReport:string) => void): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "add", [parameters]);
+	}
+
+	public getProperties(contextId: string): Promise<BreakpointContext> {
+		return new Promise<BreakpointContext>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getProperties", [contextId]).then( (eventData: string) => {
+				let data = <BreakpointContext>JSON.parse(eventData);
+				resolve(BreakpointContext.fromJson(this, data))
+			}).reject( (reason: Error) => {
+				reject(reason);
+			});
 		});
 	}
 
-	public getProperties(contextId: string, callback: (breakpoint: BreakpointContext) => void): void {
-		this.dispatcher.sendCommand(this.name, "getProperties", [contextId], (errorReport, eventData) => {
-			let data = <BreakpointContext>JSON.parse(eventData);
-			let breakpoint = BreakpointContext.fromJson(this, data);
-
-			callback(breakpoint);
-		})
+	public getError(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "getError", [contextId]);
 	}
 
-	public getError(contextId: string, callback: (error:any) => void): void {
-		this.dispatcher.sendCommand(this.name, "getError", [contextId], (errorReport, eventData) => {
-			callback(eventData); // TODO; what is in this field?
-		})
-	}
-
-	public remove(contextIds: string[]): void {
-		this.dispatcher.sendCommand(this.name, "remove", [contextIds]);
+	public remove(contextIds: string[]): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "remove", [contextIds]);
 	}
 
 	public getNextBreakpointId(): string {

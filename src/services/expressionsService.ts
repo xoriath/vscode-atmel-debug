@@ -46,12 +46,12 @@ export class ExpressionContext implements IExpressionContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve(); // TODO?
 	}
 
-	public assign(value: string): void {
-		this.service.assign(this.ID, value);
+	public assign(value: string): Promise<string> {
+		return this.service.assign(this.ID, value);
 	}
 
 
@@ -94,48 +94,48 @@ export class ExpressionsService extends Service {
 		super("Expressions", dispatcher);
 	}
 
-	public getChildren(parentContext: string, callback: (children: string[]) => void): void {
-
-		this.dispatcher.sendCommand(this.name, "getChildren", [parentContext], (errorReport, eventData) => {
-			let contextIds = <string[]>JSON.parse(eventData);
-			callback(contextIds);
-
+	public getChildren(parentContext: string): Promise<string[]> {
+		return new Promise<string[]>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getChildren", [parentContext]).then( (data: string) => {
+				resolve(<string[]>JSON.parse(data));
+			}).catch( (error: Error) => {
+				reject(error);
+			});
 		});
 	}
 
-	public getContext(contextId: string, callback: (expression: ExpressionContext) => void): void {
-		this.dispatcher.sendCommand(this.name, "getContext", [contextId], (errorReport, eventData) => {
-			let contextData = <ExpressionContext>JSON.parse(eventData);
-			let newContext = ExpressionContext.fromJson(this, contextData);
+	public getContext(contextId: string): Promise<ExpressionContext> {
+		return new Promise<ExpressionContext>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getContext", [contextId]).them( (data: string) => {
+				let contextData = <ExpressionContext>JSON.parse(data);
+				let context = ExpressionContext.fromJson(this, contextData);
 
-			callback(newContext);
+				resolve(context);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
 		});
 	}
 
-	public compute(contextId: string, language: string, expression: string, callback: (expression: ExpressionContext) => void): void {
-		this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression], (errorReport, eventData) => {
-			if (!eventData) {
-				// let error = JSON.parse(errorReport);
-				// let expression = new ExpressionContext();
-				// expression.Val = error["Format"];
-				// throw `${error["Serivce"]}: ${error["Format"]}`;
-			}
+	public compute(contextId: string, language: string, expression: string): Promise<ExpressionContext> {
+		return new Promise<ExpressionContext>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression]).then( (data: string) => {
+				let contextData = <ExpressionContext>JSON.parse(data);
+				let context = ExpressionContext.fromJson(this, contextData);
 
-			else {
-				let contextData = <ExpressionContext>JSON.parse(eventData);
-				let newContext = ExpressionContext.fromJson(this, contextData);
-
-				callback(newContext);
-			}
-		})
+				resolve(context);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
+		});
 	}
 
-	public assign(contextId: string, value: string): void {
-		this.dispatcher.sendCommand(this.name, "assign", [contextId, value]);
+	public assign(contextId: string, value: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "assign", [contextId, value]);
 	}
 
-	public dispose(contextId: string): void {
-		this.dispatcher.sendCommand(this.name, "dispose", [contextId]);
+	public dispose(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "dispose", [contextId]);
 	}
 
 

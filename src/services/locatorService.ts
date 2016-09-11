@@ -27,8 +27,8 @@ export class LocatorService extends Service {
 		super("Locator", dispatcher);
 	}
 
-	public sync(callback?: (eventData: any) => void): void {
-		this.dispatcher.sendCommand(this.name, "sync", [], callback)
+	public sync(): Promise<any> {
+		return this.dispatcher.sendCommand(this.name, "sync", []);
 	}
 
 	public hello(callback?: () => void): void {
@@ -94,5 +94,4 @@ export class LocatorService extends Service {
 				this.log(`No matching event handler: ${event}`);
 		}
 	}
-
 }

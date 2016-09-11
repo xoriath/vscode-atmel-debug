@@ -44,8 +44,8 @@ export class LineNumbersContext implements ILineNumbersContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve(); // TODO
 	}
 
 
@@ -76,21 +76,22 @@ export class LineNumbersService extends Service {
 		super("LineNumbers", dispatcher);
 	}
 
-	public mapToSource(parentContext: string, startAddress: number, endAddress: number, callback: (lines: LineNumbersContext[]) => void): void {
-		this.dispatcher.sendCommand(this.name, "mapToSource", [parentContext, startAddress, endAddress], (errorReport, eventData) => {
-			let contexts = <LineNumbersContext[]>JSON.parse(eventData[0]);
+	public mapToSource(parentContext: string, startAddress: number, endAddress: number): Promise<LineNumbersContext[]> {
+		return new Promise<LineNumbersContext[]>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "mapToSource", [parentContext, startAddress, endAddress]).then( (data: string) => {
+				let contexts = <LineNumbersContext[]>JSON.parse(data[0]);
 
-			let newContexts = [];
-			for (let index in contexts) {
-				newContexts.push(LineNumbersContext.fromJson(contexts[index]));
-			}
+				let newContexts = [];
+				for (let index in contexts) {
+					newContexts.push(LineNumbersContext.fromJson(contexts[index]));
+				}
 
-			callback(newContexts);
-		})
-
+				resolve(newContexts);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
+		});
 	}
-
-
 
 	public eventHandler(event: string, eventData: string[]): void {
 		switch(event) {

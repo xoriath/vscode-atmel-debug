@@ -23,8 +23,8 @@ export class DeviceContext implements IDeviceContext {
 		this.deviceService.setProperties(this.ID, properties);
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return this.deviceService.getProperties(this.ID);
 	}
 
 	public static fromJson(service: DeviceService, data: IDeviceContext): DeviceContext {
@@ -77,8 +77,12 @@ export class DeviceService extends Service {
 		return this.contexts[id];
 	}
 
-	public setProperties(contextId: string, properties: any): void {
-		this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+	public setProperties(contextId: string, properties: any): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+	}
+
+	public getProperties(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "getProperties", [contextId]); // TODO; marshal into Context
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
@@ -155,5 +159,4 @@ export class DeviceService extends Service {
 			listener.contextRemoved(ids);
 		}
 	}
-
 }

@@ -42,8 +42,8 @@ export class ToolContext implements IToolContext {
 		this.service.setProperties(this.ID, properties);
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve();
 	}
 
 	public connect() {
@@ -88,7 +88,6 @@ export class ToolService extends Service {
 		super("Tool", dispatcher);
 	}
 
-	public supportedTools: Array<string> = new Array<string>();
 	public attachedTools: Array<IAttachedTool> = new Array<IAttachedTool>();
 
 	public contexts: Map<string, IToolContext> = new Map<string, IToolContext>();
@@ -113,36 +112,44 @@ export class ToolService extends Service {
 		this.dispatcher.sendCommand(this.name, "pollForTools", [shouldPoll])
 	}
 
-	public getSupportedToolTypes(callback: (eventData: string[]) => void) {
-		this.dispatcher.sendCommand(this.name, "getSupportedToolTypes", [], (eventData: any) => {
-			this.supportedTools = JSON.parse(eventData);
-			callback(this.supportedTools);
+	public getSupportedToolTypes(): Promise<string[]> {
+		return new Promise<string[]>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getSupportedToolTypes", []).then( (data: string) => {
+				let supportedTools = <string[]>JSON.parse(data);
+				resolve(supportedTools);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
 		});
 	}
 
-	public getAttachedTools(toolType: string, callback: (eventData: any) => void) {
-		this.dispatcher.sendCommand(this.name, "getAttachedTools", [toolType], callback);
+	// TODO; parse any
+	public getAttachedTools(toolType: string): Promise<any> {
+		return this.dispatcher.sendCommand(this.name, "getAttachedTools", [toolType]);
 	}
 
-	public setupTool(toolType: string, connectionType: string, connectionProperties: any, callback?: (context: IToolContext) => void ): void {
-		this.dispatcher.sendCommand(this.name, "setupTool", [toolType, connectionType, connectionProperties], (errorReport: string, eventData: any) => {
-			let context = JSON.parse(eventData);
-			if (callback) {
-				callback(this.getContext(context));
-			}
-		})
+	public setupTool(toolType: string, connectionType: string, connectionProperties: any): Promise<IToolContext> {
+		return new Promise<IToolContext>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "setupTool", [toolType, connectionType, connectionProperties]).then( (data: string) => {
+				let context = JSON.parse(data);
+
+				resolve(this.getContext(context));
+			}).catch( (error: Error) => {
+				reject(error);
+			});
+		});
 	}
 
-	public connect(id: string): void {
-		this.dispatcher.sendCommand(this.name, "connect", [id]);
+	public connect(id: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "connect", [id]);
 	}
 
-	public tearDownTool(id: string): void {
-		this.dispatcher.sendCommand(this.name, "tearDownTool", [id]);
+	public tearDownTool(id: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "tearDownTool", [id]);
 	}
 
-	public setProperties(contextId: string, properties: any): void {
-		this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+	public setProperties(contextId: string, properties: any): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {

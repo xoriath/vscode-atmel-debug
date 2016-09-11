@@ -26,8 +26,8 @@ export class RegistersContext implements IRegistersContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve();
 	}
 
 	public static fromJson(service: RegistersService, data: IRegistersContext): RegistersContext {
@@ -49,8 +49,8 @@ export class RegistersContext implements IRegistersContext {
 }
 
 export interface IRegistersListener {
-	contextAdded(contexts: RegistersContext[]): void;
-	contextChanged(contexts: RegistersContext[]): void;
+	contextAdded(contexts: IRegistersContext[]): void;
+	contextChanged(contexts: IRegistersContext[]): void;
 	contextRemoved(contextIds: string[]): void;
 }
 
@@ -60,7 +60,7 @@ export class RegistersService extends Service {
 		super("Registers", dispatcher);
 	}
 
-	public contexts: Map<string, RegistersContext> = new Map<string, RegistersContext>();
+	public contexts: Map<string, IRegistersContext> = new Map<string, IRegistersContext>();
 
 	private listeners: Array<IRegistersListener> = new Array<IRegistersListener>();
 

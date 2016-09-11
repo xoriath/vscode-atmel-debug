@@ -9,9 +9,9 @@ export class StreamService extends Service {
 		super("Stream", dispatcher);
 	}
 
-	public setLogBits(level: number) {
+	public setLogBits(level: number): Promise<string> {
 		// level is a bitmask
-		this.dispatcher.sendCommand(this.name, "setLogBits", [level]);
+		return this.dispatcher.sendCommand(this.name, "setLogBits", [level]);
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {

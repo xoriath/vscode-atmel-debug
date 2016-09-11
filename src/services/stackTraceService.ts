@@ -48,8 +48,8 @@ export class StackTraceContext implements IStackTraceContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve(); // TODO
 	}
 
 
@@ -98,32 +98,31 @@ export class StackTraceService extends Service {
 		})
 	}
 
-	public getChildren(parentContext: string, callback: (children: string[]) => void): void {
-
-		this.dispatcher.sendCommand(this.name, "getChildren", [parentContext], (errorReport, eventData) => {
-			let contextIds = <string[]>JSON.parse(eventData);
-			callback(contextIds);
-
+	public getChildren(parentContext: string): Promise<string[]> {
+		return new Promise<string[]>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getChildren", [parentContext]).then( (data: string) => {
+				let contextIds = <string[]>JSON.parse(data);
+				resolve(contextIds);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
 		});
 	}
 
-	public getContext(contextIds: string[], callback: (frames: StackTraceContext[]) => void): void {
-		this.dispatcher.sendCommand(this.name, "getContext", [contextIds], (errorReport, eventData) => {
-			if (!eventData) {
-				let error = JSON.parse(errorReport);
-				throw `${error["Service"]}: ${error["Format"]}`;
-			}
-
-			else {
-				let contextsData = <StackTraceContext[]>JSON.parse(eventData);
+	public getContext(contextIds: string[]): Promise<StackTraceContext[]> {
+		return new Promise<StackTraceContext[]>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "getContext", [contextIds]).then( (data: string) => {
+				let contextsData = <StackTraceContext[]>JSON.parse(data);
 				let newContexts = [];
 
 				for (let index in contextsData) {
 					newContexts.push(StackTraceContext.fromJson(contextsData[index]))
 				}
 
-				callback(newContexts);
-			}
+				resolve(newContexts);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
 		});
 	}
 

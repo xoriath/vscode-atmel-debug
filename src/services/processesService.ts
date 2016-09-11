@@ -42,8 +42,8 @@ export class ProcessesContext implements IProcessesContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve(); // TODO
 	}
 
     //{"ID":"Proc_3",
@@ -66,8 +66,8 @@ export class ProcessesContext implements IProcessesContext {
 		return `${this.ID}`
 	}
 
-	public terminate(): void {
-		this.processesService.terminate(this.ID);
+	public terminate(): Promise<any> {
+		return this.processesService.terminate(this.ID);
 	}
 
 }
@@ -100,16 +100,22 @@ export class ProcessesService extends Service {
 		})
 	}
 
-	public launch(module: string, deviceContext: IDeviceContext, launchParameters: any): void {
-		this.dispatcher.sendCommand(this.name, "launch", [module, deviceContext.ID, launchParameters]);
+	public launch(module: string, deviceContext: IDeviceContext, launchParameters: any): Promise<string> {
+		return new Promise<string>(function(resolve, reject) {
+			this.dispatcher.sendCommand(this.name, "launch", [module, deviceContext.ID, launchParameters]).then( (data: string) => {
+				resolve(data);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
+		});
 	}
 
 	public getContext(id: string): IProcessesContext {
 		return this.contexts[id];
 	}
 
-	public terminate(id: string): void {
-		this.dispatcher.sendCommand(this.name, "terminate", [id]);
+	public terminate(id: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "terminate", [id]);
 	}
 
 

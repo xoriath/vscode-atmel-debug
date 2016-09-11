@@ -29,28 +29,28 @@ export class RunControlContext implements IRunControlContext {
 	private runcontrolservice: RunControlService;
 
 
-	public setProperties(properties: any): void {
-		this.runcontrolservice.setProperties(this.ID, properties);
+	public setProperties(properties: any): Promise<any> {
+		return this.runcontrolservice.setProperties(this.ID, properties);
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve();
 	}
 
-	public resume(mode: ResumeMode, count?: number): void {
-		this.runcontrolservice.resume(this.ID, mode, count);
+	public resume(mode: ResumeMode, count?: number): Promise<any> {
+		return this.runcontrolservice.resume(this.ID, mode, count);
 	}
 
-	public suspend(): void {
-		this.runcontrolservice.suspend(this.ID);
+	public suspend(): Promise<any> {
+		return this.runcontrolservice.suspend(this.ID);
 	}
 
-	public terminate(): void {
-		this.runcontrolservice.terminate(this.ID);
+	public terminate(): Promise<any> {
+		return this.runcontrolservice.terminate(this.ID);
 	}
 
-	public detach(): void {
-		this.runcontrolservice.detach(this.ID);
+	public detach(): Promise<any> {
+		return this.runcontrolservice.detach(this.ID);
 	}
 
 	public static fromJson(service: RunControlService, data: IRunControlContext): RunControlContext {
@@ -130,24 +130,24 @@ export class RunControlService extends Service {
 	}
 
 
-	public resume(contextId: string, mode: ResumeMode, count?: number): void {
-		this.dispatcher.sendCommand(this.name, "resume", [contextId, mode, count | 0]);
+	public resume(contextId: string, mode: ResumeMode, count?: number): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "resume", [contextId, mode, count | 0]);
 	}
 
-	public suspend(contextId: string): void {
-		this.dispatcher.sendCommand(this.name, "suspend", [contextId]);
+	public suspend(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "suspend", [contextId]);
 	}
 
-	public terminate(contextId: string): void {
-		this.dispatcher.sendCommand(this.name, "terminate", [contextId]);
+	public terminate(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "terminate", [contextId]);
 	}
 
-	public detach(contextId: string): void {
-		this.dispatcher.sendCommand(this.name, "detach", [contextId]);
+	public detach(contextId: string): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "detach", [contextId]);
 	}
 
-	public setProperties(contextId: string, properties: any): void {
-		this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+	public setProperties(contextId: string, properties: any): Promise<string> {
+		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
 	}
 
 

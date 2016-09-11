@@ -16,8 +16,8 @@ export class Dispatcher {
 	private nil: string = '\x00';
 	private eom: string = '\x03\x01';
 
-	private pendingHandlers: Map<number, (errorReport: string, eventData: string) => void>
-		= new Map<number, (errorReport: string, eventData: string) => void>();
+	private pendingHandlers: Map<number, any[]>
+		= new Map<number, any[]>();
 	private eventHandlers: Map<string, IEventHandler>
 		= new Map<string, IEventHandler>();
 
@@ -100,13 +100,16 @@ export class Dispatcher {
 		this.ws.send(message);
 	}
 
-	public sendCommand(serviceName: string, commandName: string, args: any[], callback?: (errorReport: string, eventData: any) => void): void {
+	public sendCommand(serviceName: string, commandName: string, args: any[]): Promise<string> {
 		let token = this.sendToken++;
 
-		if (callback)
-			this.pendingHandlers[token] = callback;
+		return new Promise(function(resolve, reject) {
 
-		this.sendMessage(`C${this.nil}${token}${this.nil}${serviceName}${this.nil}${commandName}${this.nil}${this.stringify(args)}${this.eom}`);
+
+			this.pendingHandlers[token] = [ resolve, reject ];
+
+			this.sendMessage(`C${this.nil}${token}${this.nil}${serviceName}${this.nil}${commandName}${this.nil}${this.stringify(args)}${this.eom}`);
+		});
 	}
 
 	public sendEvent(serviceName: string, eventName: string, args: any[]): void {
@@ -224,10 +227,14 @@ export class Dispatcher {
 		}
 
 		if (token in this.pendingHandlers) {
-			let handler = this.pendingHandlers[token];
+			let [resolve, reject] = this.pendingHandlers[token];
+
 			delete this.pendingHandlers[token];
 
-			handler(errorReport, args);
+			if (errorReport)
+				reject(Error(errorReport))
+			else
+				resolve(args);
 		}
 	}
 }

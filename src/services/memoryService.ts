@@ -49,8 +49,8 @@ export class MemoryContext implements IMemoryContext {
 
 	}
 
-	public getProperties(callback: (properties: any) => void): void {
-
+	public getProperties(): Promise<any> {
+		return Promise.resolve(); // TODO
 	}
 
 	public static fromJson(service: MemoryService, data: IMemoryContext): MemoryContext {
