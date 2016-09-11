@@ -86,7 +86,7 @@ export class BreakpointsService extends Service {
 		this.contextCounter = 0;
 	}
 
-	public add(parameters: any, callback: (errorReport:string) => void): Promise<string> {
+	public add(parameters: any): Promise<string> {
 		return this.dispatcher.sendCommand(this.name, "add", [parameters]);
 	}
 

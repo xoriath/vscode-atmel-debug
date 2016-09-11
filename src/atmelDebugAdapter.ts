@@ -235,8 +235,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				breakpoint["Istrue"] = true;
 			}
 
-			breakpointsService.add(breakpoint, (errorReport) => {
-				breakpointsService.getProperties(breakpointId, (breakpoint) => {
+			breakpointsService.add(breakpoint).then( (report) => {
+				breakpointsService.getProperties(breakpointId).then( (breakpoint) => {
 					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
 
 					response.body.breakpoints.push(bp);
@@ -246,8 +246,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					if (--breakpointsToProcess == 0) {
 						this.sendResponse(response);
 					}
-				});
-			});
+				}).catch( (error: Error) => this.log(error.message) );
+			}).catch( (error: Error) => this.log(error.message) );
 		});
 	}
 
@@ -287,8 +287,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				"FunctionColumn": 0
 			};
 
-			breakpointsService.add(breakpoint, (errorReport) => {
-				breakpointsService.getProperties(breakpointId, (breakpoint) => {
+			breakpointsService.add(breakpoint).then( (report) => {
+				breakpointsService.getProperties(breakpointId).then( (breakpoint) => {
 					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, /*breakpoint.Column*/ 0);
 
 					response.body.breakpoints.push(bp);
@@ -297,8 +297,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					if (--breakpointsToProcess == 0) {
 						this.sendResponse(response);
 					}
-				});
-			});
+				}).catch( (error: Error) => this.log(error.message) );
+			}).catch( (error: Error) => this.log(error.message) );
 		});
 
 		super.setFunctionBreakPointsRequest(response, args);
@@ -331,7 +331,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
 			if (!threadID || threadID == this.hashString(context.ID)) {
-				context.resume(mode);
+				context.resume(mode).catch( (error: Error) => this.log(error.message) );
 			}
 		}
 	}
@@ -342,7 +342,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
 			if (threadID == this.hashString(context.ID) || threadID == 0) {
-				context.suspend();
+				context.suspend().catch( (error: Error) => this.log(error.message) );
 			}
 		}
 	}
@@ -425,8 +425,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			/* Support threads (in theory at least) */
 			if (this.hashString(processContext.RunControlId) == args.threadId) {
 
-				stackTraceService.getChildren(processContext.ID, (children) => {
-					stackTraceService.getContext(children, (frames) => {
+				stackTraceService.getChildren(processContext.ID).then( (children) => {
+					stackTraceService.getContext(children).then( (frames) => {
 						frames.forEach(frame => {
 							let frameArgs: string[] = []
 
@@ -459,8 +459,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						});
 
 						this.sendResponse(response);
-					});
-				});
+					}).catch( (error: Error) => this.log(error.message) );
+				}).catch( (error: Error) => this.log(error.message) );
 			}
 		}
 	}
@@ -478,8 +478,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		for (let index in processesService.contexts) {
 			let processContext = <IProcessesContext>processesService.contexts[index];
 
-			stackTraceService.getChildren(processContext.ID, (children) => {
-				stackTraceService.getContext(children, (frames) => {
+			stackTraceService.getChildren(processContext.ID).then( (children) => {
+				stackTraceService.getContext(children).then( (frames) => {
 					frames.forEach(frame => {
 						if (frame.Level == 0) {
 							//response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
@@ -492,8 +492,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					});
 
 					this.sendResponse(response);
-				});
-			});
+				}).catch( (error: Error) => this.log(error.message) );
+			}).catch( (error: Error) => this.log(error.message) );
 		}
 	}
 
@@ -510,15 +510,15 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		for (let index in processesService.contexts) {
 			let processContext = <IProcessesContext>processesService.contexts[index];
 
-			stackTraceService.getChildren(processContext.ID, (children) => {
-				stackTraceService.getContext(children, (frames) => {
+			stackTraceService.getChildren(processContext.ID).then( (children) => {
+				stackTraceService.getContext(children).then( (frames) => {
 					frames.forEach(frame => {
 
 						/* Only evaluate if we are asked for this frame (local variables) */
 						if (args.variablesReference == this.hashString(frame.ID)) {
 
 							/* Get expressions for the frame */
-							expressionsService.getChildren(frame.ID, (children) => {
+							expressionsService.getChildren(frame.ID).then( (children) => {
 								let childrenToEvaluate = children.length;
 
 								if (childrenToEvaluate == 0) {
@@ -526,7 +526,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 								}
 
 								children.forEach(expressionId => {
-									expressionsService.getContext(expressionId, (expression) => {
+									expressionsService.getContext(expressionId).then( (expression) => {
 
 										/* Build the variable from the expression*/
 										response.body.variables.push(
@@ -537,13 +537,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 										if (--childrenToEvaluate == 0) {
 											this.sendResponse(response);
 										}
-									})
+									}).catch( (error: Error) => this.log(error.message) );
 								});
-							});
+							}).catch( (error: Error) => this.log(error.message) );
 						}
 					});
-				});
-			});
+				}).catch( (error: Error) => this.log(error.message) );
+			}).catch( (error: Error) => this.log(error.message) );
 		}
 	}
 
@@ -562,27 +562,27 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			currentProcess = processesService.contexts[index];
 		}
 
-		stackTraceService.getChildren(currentProcess.ID, (children) => {
-			stackTraceService.getContext(children, (frames) => {
+		stackTraceService.getChildren(currentProcess.ID).then( (children) => {
+			stackTraceService.getContext(children).then( (frames) => {
 				let sortedFrames = frames.sort( (a,b) => {
 					return a.Level - b.Level;
 				})
 
 				/* TODO: is this assumption correct? (evaluate the expression based on the lowest frame) */
 				let bottom = sortedFrames.shift();
-				expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
+				expressionsService.compute(bottom.ID, "C", args.name).then( (expression) => {
 					/* Assign value */
 					expression.assign(args.value);
 					expression.dispose();
 
 					/* Read back */
-					expressionsService.compute(bottom.ID, "C", args.name, (expression) => {
+					expressionsService.compute(bottom.ID, "C", args.name).then( (expression) => {
 						response.body.value = expression.Val.trim();
 						this.sendResponse(response);
-					});
-				});
-			});
-		});
+					}).catch( (error: Error) => this.log(error.message) );
+				}).catch( (error: Error) => this.log(error.message) );
+			}).catch( (error: Error) => this.log(error.message) );
+		}).catch( (error: Error) => this.log(error.message) );
 	}
 
 	/* Evaluate using the expression evaluator */
@@ -602,14 +602,14 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			case "hover":
 			case "repl":
 			default:
-				expressionsService.compute(this.hashes[args.frameId], "C", args.expression, (expression) => {
+				expressionsService.compute(this.hashes[args.frameId], "C", args.expression).then( (expression) => {
 					response.body.result = expression.Val.trim();
 					response.body.type = expression.Type;
 
 					expression.dispose();
 
 					this.sendResponse(response);
-				});
+				}).catch( (error: Error) => this.log(error.message) );;
 		}
 	}
 
@@ -683,17 +683,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			runControlContext = (<RunControlContext>runControlService.contexts[index]);
 		}
 
-		stackTraceService.getChildren(processContext.ID, (children) => {
+		stackTraceService.getChildren(processContext.ID).then( (children) => {
 			/* Find address of function identifier */
-			expressionsService.compute(children.shift(), "C", func, (expressionContext) => {
+			expressionsService.compute(children.shift(), "C", func).then( (expressionContext) => {
 				/* Convert address to number */
 				let address = parseInt(expressionContext.Val.replace("0x", ""), 16);
 				expressionContext.dispose();
 
 				/* Goto address */
 				runControlContext.resume(ResumeMode.Goto, address)
-			});
-		});
+			}).catch( (error: Error) => this.log(error.message) );;
+		}).catch( (error: Error) => this.log(error.message) );;
 	}
 }
 
