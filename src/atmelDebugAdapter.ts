@@ -1,8 +1,10 @@
 
 'use strict';
 
-const path = require('path');
+const path 		= require('path');
+const base64 	= require('base-64');
 
+import { DebugProtocol } from 'vscode-debugprotocol';
 import {
 	DebugSession,
 	TerminatedEvent,
@@ -19,10 +21,6 @@ import {
 	Handles,
 	Breakpoint
 } from 'vscode-debugadapter';
-
-import {
-	DebugProtocol
-} from 'vscode-debugprotocol';
 
 import { Dispatcher } from './dispatcher';
 import { LocatorService } from './services/locatorService';
