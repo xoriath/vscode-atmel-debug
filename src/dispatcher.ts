@@ -74,10 +74,12 @@ export class Dispatcher {
 	}
 
 	public escapeNil(str: string): string {
+		let self = this;
 		let ret = "";
+
 		for (let i = 0; i < str.length; ++i) {
-			if (str.charAt(i) == this.nil)
-				ret += (' ');
+			if (str.charAt(i) == self.nil)
+				ret += (' <nil> ');
 			else if (str.charAt(i) == '\x03')
 				ret += ('<');
 			else if (str.charAt(i) == '\x01')
@@ -90,37 +92,43 @@ export class Dispatcher {
 	}
 
 	public eventHandler(service: string, handler: IEventHandler): void {
-		this.log(`[Dispatcher] Registering event handler for ${service}`);
-		this.eventHandlers[service] = handler;
+		let self = this;
+
+		self.log(`[Dispatcher] Registering event handler for ${service}`);
+		self.eventHandlers[service] = handler;
 	}
 
 	private sendMessage(message: string): void {
-		this.debug(`>> ${this.escapeNil(message)}`);
+		let self = this;
 
-		this.ws.send(message);
+		self.debug(`>> ${self.escapeNil(message)}`);
+
+		self.ws.send(message);
 	}
 
 	public sendCommand(serviceName: string, commandName: string, args: any[]): Promise<string> {
+		let self = this;
 		let token = this.sendToken++;
 
 		return new Promise(function(resolve, reject) {
+			self.pendingHandlers[token] = [ resolve, reject ];
 
-
-			this.pendingHandlers[token] = [ resolve, reject ];
-
-			this.sendMessage(`C${this.nil}${token}${this.nil}${serviceName}${this.nil}${commandName}${this.nil}${this.stringify(args)}${this.eom}`);
+			self.sendMessage(`C${self.nil}${token}${self.nil}${serviceName}${self.nil}${commandName}${self.nil}${self.stringify(args)}${self.eom}`);
 		});
 	}
 
 	public sendEvent(serviceName: string, eventName: string, args: any[]): void {
-		this.sendMessage(`E${this.nil}${serviceName}${this.nil}${eventName}${this.nil}${this.stringify(args)}${this.eom}`);
+		let self = this;
+		this.sendMessage(`E${self.nil}${serviceName}${self.nil}${eventName}${self.nil}${self.stringify(args)}${self.eom}`);
 	}
 
 	private stringify(args: any[]): string {
+		let self = this;
 		let str = "";
+
 		if (args) {
 			for (let index in args) {
-				str += JSON.stringify(args[index]) + this.nil;
+				str += JSON.stringify(args[index]) + self.nil;
 			}
 		}
 
@@ -128,7 +136,9 @@ export class Dispatcher {
 	}
 
 	private unstringify(data: string[]): any[] {
-		let args = []
+		let self = this;
+		let args = [];
+
 		for (let index in data) {
 			let element = data[index];
 			if (element == "")
@@ -141,14 +151,16 @@ export class Dispatcher {
 	}
 
 	private handleMessage(data: string): void {
-		this.debug(`<< ${this.escapeNil(data)}`);
+		let self = this;
 
-		let elements = data.split(this.nil);
+		this.debug(`<< ${self.escapeNil(data)}`);
+
+		let elements = data.split(self.nil);
 
 		if (elements.length < 3) {
 			throw `Message has too few parts`;
 		}
-		if (elements.pop() != this.eom) {
+		if (elements.pop() != self.eom) {
 			throw `Message has bad termination`;
 		}
 
@@ -156,22 +168,22 @@ export class Dispatcher {
 
 		switch (message) {
 			case 'E':
-				this.decodeEvent(elements);
+				self.decodeEvent(elements);
 				break;
 			case 'P':
-				this.decodeIntermediateResult(elements);
+				self.decodeIntermediateResult(elements);
 				break;
 			case 'R':
-				this.decodeFinalResult(elements);
+				self.decodeFinalResult(elements);
 				break;
 			case 'N':
-				this.decodeUnknown(elements);
+				self.decodeUnknown(elements);
 				break;
 			case 'F':
-				this.decodeFlowControl(elements);
+				self.decodeFlowControl(elements);
 				break;
 			default:
-				this.log(`Unkown TCF message: ${message}`);
+				self.log(`Unkown TCF message: ${message}`);
 				break;
 		}
 	}

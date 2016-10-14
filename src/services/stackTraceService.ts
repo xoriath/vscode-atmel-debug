@@ -99,8 +99,10 @@ export class StackTraceService extends Service {
 	}
 
 	public getChildren(parentContext: string): Promise<string[]> {
+		let self = this;
+
 		return new Promise<string[]>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getChildren", [parentContext]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "getChildren", [parentContext]).then( (data: string) => {
 				let contextIds = <string[]>JSON.parse(data);
 				resolve(contextIds);
 			}).catch( (error: Error) => {
@@ -110,8 +112,10 @@ export class StackTraceService extends Service {
 	}
 
 	public getContext(contextIds: string[]): Promise<StackTraceContext[]> {
+		let self = this;
+
 		return new Promise<StackTraceContext[]>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getContext", [contextIds]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "getContext", [contextIds]).then( (data: string) => {
 				let contextsData = <StackTraceContext[]>JSON.parse(data);
 				let newContexts = [];
 

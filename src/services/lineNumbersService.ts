@@ -77,8 +77,10 @@ export class LineNumbersService extends Service {
 	}
 
 	public mapToSource(parentContext: string, startAddress: number, endAddress: number): Promise<LineNumbersContext[]> {
+		let self = this;
+
 		return new Promise<LineNumbersContext[]>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "mapToSource", [parentContext, startAddress, endAddress]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "mapToSource", [parentContext, startAddress, endAddress]).then( (data: string) => {
 				let contexts = <LineNumbersContext[]>JSON.parse(data[0]);
 
 				let newContexts = [];

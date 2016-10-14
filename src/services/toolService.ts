@@ -113,8 +113,10 @@ export class ToolService extends Service {
 	}
 
 	public getSupportedToolTypes(): Promise<string[]> {
+		let self = this;
+
 		return new Promise<string[]>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getSupportedToolTypes", []).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "getSupportedToolTypes", []).then( (data: string) => {
 				let supportedTools = <string[]>JSON.parse(data);
 				resolve(supportedTools);
 			}).catch( (error: Error) => {
@@ -129,11 +131,13 @@ export class ToolService extends Service {
 	}
 
 	public setupTool(toolType: string, connectionType: string, connectionProperties: any): Promise<IToolContext> {
+		let self = this;
+
 		return new Promise<IToolContext>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "setupTool", [toolType, connectionType, connectionProperties]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "setupTool", [toolType, connectionType, connectionProperties]).then( (data: string) => {
 				let context = JSON.parse(data);
 
-				resolve(this.getContext(context));
+				resolve(self.getContext(context));
 			}).catch( (error: Error) => {
 				reject(error);
 			});

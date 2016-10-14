@@ -101,8 +101,10 @@ export class ProcessesService extends Service {
 	}
 
 	public launch(module: string, deviceContext: IDeviceContext, launchParameters: any): Promise<string> {
+		let self = this;
+
 		return new Promise<string>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "launch", [module, deviceContext.ID, launchParameters]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "launch", [module, deviceContext.ID, launchParameters]).then( (data: string) => {
 				resolve(data);
 			}).catch( (error: Error) => {
 				reject(error);

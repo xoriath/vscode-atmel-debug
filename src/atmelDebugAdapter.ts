@@ -99,17 +99,18 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
     protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+		let self = this;
 
 		/* Create the dispatcher */
-		this.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort,
+		self.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort,
 										(message: string) => {
-											this.sendEvent(new OutputEvent(message));
+											self.sendEvent(new OutputEvent(message));
 										},
 										(message: string) => {
-											this.debug(message);
+											self.debug(message);
 										});
 
-		this.dispatcher.connect((dispatcher: Dispatcher) => {
+		self.dispatcher.connect((dispatcher: Dispatcher) => {
 			let locator = new LocatorService(dispatcher);
 
 			locator.hello(() => {
@@ -127,26 +128,26 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				let breakpointsService = new BreakpointsService(dispatcher);
 				let streamService = new StreamService(dispatcher);
 
-				this.services = new Map<string, IService>();
-				this.services["Tool"] = toolService;
-				this.services["Device"] = deviceService;
-				this.services["Processes"] = processService;
-				this.services["Memory"] = memoryService;
-				this.services["Registers"] = registersService;
-				this.services["RunControl"] = runControlService;
-				this.services["StackTrace"] = stackTraceService;
-				this.services["Expressions"] = expressionsService;
-				this.services["LineNumbers"] = lineNumbersService;
-				this.services["Breakpoints"] = breakpointsService;
-				this.services["Streams"] = streamService;
+				self.services = new Map<string, IService>();
+				self.services["Tool"] = toolService;
+				self.services["Device"] = deviceService;
+				self.services["Processes"] = processService;
+				self.services["Memory"] = memoryService;
+				self.services["Registers"] = registersService;
+				self.services["RunControl"] = runControlService;
+				self.services["StackTrace"] = stackTraceService;
+				self.services["Expressions"] = expressionsService;
+				self.services["LineNumbers"] = lineNumbersService;
+				self.services["Breakpoints"] = breakpointsService;
+				self.services["Streams"] = streamService;
 
 				/* Crank up the atbackend logging if we run in debug */
-				if (this.DEBUG) {
+				if (self.DEBUG) {
 					streamService.setLogBits(0xFFFFFFFF);
 				}
 
 				/* Let the session be the runcontroller, since it handles most of the debug events anyway */
-				runControlService.addListener(this);
+				runControlService.addListener(self);
 
 				/*
 					Once the process is running, we need to get into a start place
@@ -157,16 +158,22 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					Use this listener to run to main.
 
 				*/
-				processService.addListener(new GoToMain(this));
+				processService.addListener(new GoToMain(self));
 
 				/* Once a device has been instantiated, we need to actually launch with a module */
 				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
 
-				/* Once the tool is ready, start creating the device instance */
-				toolService.addListener(new DeviceLauncher(args.device, args.packPath));
-
 				/* Ignition! TODO: need more properties for USB/IP tools */
-				toolService.setupTool(args.tool, "", {});
+				toolService.setupTool(args.tool, "", {}).then( (tool: IToolContext) => {
+					tool.setProperties({
+								"DeviceName": args.device,
+								"PackPath": args.packPath
+							}).catch( (reason: Error) => {
+								throw reason;
+							});
+				}).catch( (reason: Error) => {
+
+				});
 			});
 		});
 

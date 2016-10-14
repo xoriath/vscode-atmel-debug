@@ -95,8 +95,10 @@ export class ExpressionsService extends Service {
 	}
 
 	public getChildren(parentContext: string): Promise<string[]> {
+		let self = this;
+
 		return new Promise<string[]>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getChildren", [parentContext]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, "getChildren", [parentContext]).then( (data: string) => {
 				resolve(<string[]>JSON.parse(data));
 			}).catch( (error: Error) => {
 				reject(error);
@@ -105,11 +107,12 @@ export class ExpressionsService extends Service {
 	}
 
 	public getContext(contextId: string): Promise<ExpressionContext> {
-		return new Promise<ExpressionContext>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getContext", [contextId]).them( (data: string) => {
-				let contextData = <ExpressionContext>JSON.parse(data);
-				let context = ExpressionContext.fromJson(this, contextData);
+		let self = this;
 
+		return new Promise<ExpressionContext>(function(resolve, reject) {
+			self.dispatcher.sendCommand(self.name, "getContext", [contextId]).then( (data: string) => {
+				let contextData = <ExpressionContext>JSON.parse(data);
+				let context = ExpressionContext.fromJson(self, contextData);
 				resolve(context);
 			}).catch( (error: Error) => {
 				reject(error);
@@ -118,11 +121,12 @@ export class ExpressionsService extends Service {
 	}
 
 	public compute(contextId: string, language: string, expression: string): Promise<ExpressionContext> {
-		return new Promise<ExpressionContext>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "compute", [contextId, language, expression]).then( (data: string) => {
-				let contextData = <ExpressionContext>JSON.parse(data);
-				let context = ExpressionContext.fromJson(this, contextData);
+		let self = this;
 
+		return new Promise<ExpressionContext>(function(resolve, reject) {
+			self.dispatcher.sendCommand(self.name, "compute", [contextId, language, expression]).then( (data: string) => {
+				let contextData = <ExpressionContext>JSON.parse(data);
+				let context = ExpressionContext.fromJson(self, contextData);
 				resolve(context);
 			}).catch( (error: Error) => {
 				reject(error);

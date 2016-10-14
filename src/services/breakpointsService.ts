@@ -91,11 +91,13 @@ export class BreakpointsService extends Service {
 	}
 
 	public getProperties(contextId: string): Promise<BreakpointContext> {
+		let self = this;
+
 		return new Promise<BreakpointContext>(function(resolve, reject) {
-			this.dispatcher.sendCommand(this.name, "getProperties", [contextId]).then( (eventData: string) => {
+			self.dispatcher.sendCommand(self.name, "getProperties", [contextId]).then( (eventData: string) => {
 				let data = <BreakpointContext>JSON.parse(eventData);
-				resolve(BreakpointContext.fromJson(this, data))
-			}).reject( (reason: Error) => {
+				resolve(BreakpointContext.fromJson(self, data))
+			}).catch( (reason: Error) => {
 				reject(reason);
 			});
 		});
