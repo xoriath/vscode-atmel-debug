@@ -74,6 +74,18 @@ export class RegistersService extends Service {
 		})
 	}
 
+	public get(contextId: string): Promise<string> {
+		let self = this;
+
+		return new Promise<string>(function(resolve, reject) {
+			self.dispatcher.sendCommand(self.name, "get", [contextId]).then( (data: string) => {
+				resolve(data);
+			}).catch( (error: Error) => {
+				reject(error);
+			});
+		});
+	}
+
 	public eventHandler(event: string, eventData: string[]): void {
 		switch(event) {
 			case "contextAdded":

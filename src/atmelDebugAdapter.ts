@@ -30,7 +30,7 @@ import { ToolService, IToolContext, IToolListener, IAttachedTool } from './servi
 import { DeviceService, IDeviceContext, IDeviceListener } from './services/deviceService';
 import { ProcessesService, IProcessesContext, IProcessesListener } from './services/processesService';
 import { MemoryService } from './services/memoryService';
-import { RegistersService } from './services/registersService';
+import { RegistersService, IRegistersContext } from './services/registersService';
 import { ExpressionsService, ExpressionContext } from './services/expressionsService';
 import { LineNumbersService, LineNumbersContext } from './services/lineNumbersService';
 import { StackTraceService, StackTraceContext } from './services/stackTraceService';
@@ -497,7 +497,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						}
 					});
 
+					/* Push the registers scope */
+					response.body.scopes.push(new Scope("Registers", this.hashString("Registers"), false));
+
 					this.sendResponse(response);
+
 				}).catch( (error: Error) => this.log(error.message) );
 			}).catch( (error: Error) => this.log(error.message) );
 		}
@@ -505,51 +509,89 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 	/* Variables belong to a scope (which is created above) */
     protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		let stackTraceService = <StackTraceService>this.services["StackTrace"];
-		let processesService = <ProcessesService>this.services["Processes"];
-		let expressionsService = <ExpressionsService>this.services["Expressions"];
+		let self = this;
 
 		response.body = {
 			variables: []
 		}
 
-		for (let index in processesService.contexts) {
-			let processContext = <IProcessesContext>processesService.contexts[index];
+		if (args.variablesReference == this.hashString("Registers")) {
+			let registersService = <RegistersService>this.services["Registers"];
 
-			stackTraceService.getChildren(processContext.ID).then( (children) => {
-				stackTraceService.getContext(children).then( (frames) => {
-					frames.forEach(frame => {
+			let values 	= new Array<Promise<string>>();
+			let names 	= new Array<string>();
+			for (let index in registersService.contexts) {
+				let registersContext = <IRegistersContext>registersService.contexts[index];
+				values.push(registersService.get(registersContext.ID));
+				names.push(registersContext.Name);
+			}
 
-						/* Only evaluate if we are asked for this frame (local variables) */
-						if (args.variablesReference == this.hashString(frame.ID)) {
+			Promise.all(values).then( (values: string[]) => {
+				values.forEach( (value: string, index: number) => {
+					let byteArrayString = <string>base64.decode(JSON.parse(value));
+					let buffer = new Buffer(byteArrayString);
 
-							/* Get expressions for the frame */
-							expressionsService.getChildren(frame.ID).then( (children) => {
-								let childrenToEvaluate = children.length;
+					/* NB: Little endian, so reverse the buffer... (?) */
+					for (var i = 0, j = buffer.length - 1; i < j; ++i, --j) {
+						let t = buffer[j]
 
-								if (childrenToEvaluate == 0) {
-									this.sendResponse(response);
-								}
+						buffer[j] = buffer[i]
+						buffer[i] = t
+					}
 
-								children.forEach(expressionId => {
-									expressionsService.getContext(expressionId).then( (expression) => {
+					let valueString = `0x${buffer.toString('hex')}`;
 
-										/* Build the variable from the expression*/
-										response.body.variables.push(
-											new Variable(expression.Expression, expression.Val.trim())
-										);
-										expression.dispose();
+					response.body.variables.push(
+						new Variable(names[index], valueString)
+					);
+				});
+				this.sendResponse(response);
+			});
+		}
+		else {
+			/* Assume that we are fetching variables from a stack frame */
+			let stackTraceService = <StackTraceService>this.services["StackTrace"];
+			let processesService = <ProcessesService>this.services["Processes"];
+			let expressionsService = <ExpressionsService>this.services["Expressions"];
 
-										if (--childrenToEvaluate == 0) {
-											this.sendResponse(response);
-										}
-									}).catch( (error: Error) => this.log(error.message) );
-								});
-							}).catch( (error: Error) => this.log(error.message) );
-						}
-					});
+			for (let index in processesService.contexts) {
+				let processContext = <IProcessesContext>processesService.contexts[index];
+
+				stackTraceService.getChildren(processContext.ID).then( (children) => {
+					stackTraceService.getContext(children).then( (frames) => {
+						frames.forEach(frame => {
+
+							/* Only evaluate if we are asked for this frame (local variables) */
+							if (args.variablesReference == this.hashString(frame.ID)) {
+
+								/* Get expressions for the frame */
+								expressionsService.getChildren(frame.ID).then( (children) => {
+									let childrenToEvaluate = children.length;
+
+									if (childrenToEvaluate == 0) {
+										this.sendResponse(response);
+									}
+
+									children.forEach(expressionId => {
+										expressionsService.getContext(expressionId).then( (expression) => {
+
+											/* Build the variable from the expression*/
+											response.body.variables.push(
+												new Variable(expression.Expression, expression.Val.trim())
+											);
+											expression.dispose();
+
+											if (--childrenToEvaluate == 0) {
+												this.sendResponse(response);
+											}
+										}).catch( (error: Error) => this.log(error.message) );
+									});
+								}).catch( (error: Error) => this.log(error.message) );
+							}
+						});
+					}).catch( (error: Error) => this.log(error.message) );
 				}).catch( (error: Error) => this.log(error.message) );
-			}).catch( (error: Error) => this.log(error.message) );
+			}
 		}
 	}
 
