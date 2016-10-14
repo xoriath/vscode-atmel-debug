@@ -57,6 +57,7 @@ export class Dispatcher {
 
 		this.ws.on('error', (error) => {
 			this.log(`[Dispatcher] WS:error: ${error}`);
+			throw error;
 		});
 
 		this.ws.on('close', (code, message) => {

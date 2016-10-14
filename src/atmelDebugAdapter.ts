@@ -657,7 +657,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					expression.dispose();
 
 					this.sendResponse(response);
-				}).catch( (error: Error) => this.log(error.message) );;
+				}).catch( (error: Error) => {
+					this.log(error.message);
+					response.body.result = error.message;
+					response.body.type = "Error";
+
+					this.sendResponse(response);
+				});
 		}
 	}
 
