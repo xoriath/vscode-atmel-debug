@@ -1,5 +1,4 @@
 
-/// <reference path='./typings/ws.d.ts' />
 'use strict';
 
 const path = require('path');
@@ -68,7 +67,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		response.body.supportsSetVariable = true;
 
 		response.body.supportsFunctionBreakpoints = true;
-		response.body.supportsConditionalBreakpoints = false;  // TODO: why doesn't this break?
+		response.body.supportsConditionalBreakpoints = false;  		// TODO: why doesn't this break?
+		response.body.supportsHitConditionalBreakpoints = false; 	// TODO: implement
 
 		response.body.supportsRestartFrame = false;
 		response.body.supportsStepBack = false;
