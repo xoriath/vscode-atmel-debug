@@ -737,7 +737,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		stackTraceService.getChildren(processContext.ID).then( (children) => {
 			/* Find address of function identifier */
-			expressionsService.compute(children.shift(), "C", func).then( (expressionContext) => {
+			expressionsService.compute(children.shift(), "C", `${func}`).then( (expressionContext) => {
 				/* Convert address to number */
 				let address = parseInt(expressionContext.Val.replace("0x", ""), 16);
 				expressionContext.dispose();
