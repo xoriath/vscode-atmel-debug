@@ -42,12 +42,11 @@ import { IService } from './services/iservice';
 import { LaunchRequestArguments } from './launchRequestArguments';
 import { GoToMain } from './gotoMain';
 import { ProcessLauncher } from './processLauncher';
-import { DeviceLauncher } from './deviceLauncher';
 
 export class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
 	/* Set to true to output debug log */
-	private DEBUG: boolean = false;
+	private DEBUG: boolean = true;
 
 	private dispatcher: Dispatcher;
 	private services: Map<string, IService>;
