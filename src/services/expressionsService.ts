@@ -42,12 +42,12 @@ export class ExpressionContext implements IExpressionContext {
 
 	private service: ExpressionsService;
 
-	public setProperties(properties: any): void {
-
+	public setProperties(properties: any): Promise<any> {
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.resolve(); // TODO?
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public assign(value: string): Promise<string> {

@@ -38,12 +38,12 @@ export class ProcessesContext implements IProcessesContext {
 
 	public properties: any;
 
-	public setProperties(properties: any): void {
-
+	public setProperties(properties: any): Promise<any> {
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.resolve(); // TODO
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
     //{"ID":"Proc_3",

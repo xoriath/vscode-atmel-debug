@@ -22,12 +22,12 @@ export class RegistersContext implements IRegistersContext {
 	private registersService: RegistersService;
 
 
-	public setProperties(properties: any): void {
-
+	public setProperties(properties: any): Promise<any> {
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.resolve();
+		return this.registersService.get(this.ID);
 	}
 
 	public static fromJson(service: RegistersService, data: IRegistersContext): RegistersContext {

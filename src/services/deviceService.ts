@@ -19,8 +19,8 @@ export class DeviceContext implements IDeviceContext {
 
 	public properties: any;
 
-	public setProperties(properties: any): void {
-		this.deviceService.setProperties(this.ID, properties);
+	public setProperties(properties: any): Promise<any> {
+		return this.deviceService.setProperties(this.ID, properties);
 	}
 
 	public getProperties(): Promise<any> {

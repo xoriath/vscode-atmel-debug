@@ -34,7 +34,7 @@ export class RunControlContext implements IRunControlContext {
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.resolve();
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public resume(mode: ResumeMode, count?: number): Promise<any> {

@@ -38,12 +38,12 @@ export class ToolContext implements IToolContext {
 
 	public properties: any;
 
-	public setProperties(properties: any): void {
-		this.service.setProperties(this.ID, properties);
+	public setProperties(properties: any): Promise<any> {
+		return this.service.setProperties(this.ID, properties);
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.resolve();
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public connect() {

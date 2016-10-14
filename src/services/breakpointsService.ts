@@ -37,8 +37,8 @@ export class BreakpointContext implements IBreakpoint {
 
 	private service: BreakpointsService;
 
-	public setProperties(properties: any): void {
-
+	public setProperties(properties: any): Promise<any> {
+		return Promise.reject(Error("NOT IMPLEMENTED"));
 	}
 
 	public getProperties(): Promise<any> {
