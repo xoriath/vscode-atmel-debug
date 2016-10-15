@@ -38,7 +38,7 @@ import { RunControlService, RunControlContext, IRunControlListener, ResumeMode }
 import { IService } from './services/iservice';
 
 import { LaunchRequestArguments } from './launchRequestArguments';
-import { GoToMain } from './gotoMain';
+import { GotoMain } from './gotoMain';
 import { ProcessLauncher } from './processLauncher';
 
 export class AtmelDebugSession extends DebugSession implements IRunControlListener {
@@ -156,7 +156,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					Use this listener to run to main.
 
 				*/
-				processService.addListener(new GoToMain(self));
+				processService.addListener(new GotoMain(self));
 
 				/* Once a device has been instantiated, we need to actually launch with a module */
 				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
@@ -517,11 +517,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			let registersService = <RegistersService>this.services["Registers"];
 
 			let values 	= new Array<Promise<string>>();
-			let names 	= new Array<string>();
+			let registers 	= new Array<IRegistersContext>();
 			for (let index in registersService.contexts) {
 				let registersContext = <IRegistersContext>registersService.contexts[index];
 				values.push(registersService.get(registersContext.ID));
-				names.push(registersContext.Name);
+				registers.push(registersContext);
 			}
 
 			Promise.all(values).then( (values: string[]) => {
@@ -529,18 +529,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					let byteArrayString = <string>base64.decode(JSON.parse(value));
 					let buffer = new Buffer(byteArrayString);
 
-					/* NB: Little endian, so reverse the buffer... (?) */
-					for (var i = 0, j = buffer.length - 1; i < j; ++i, --j) {
-						let t = buffer[j]
-
-						buffer[j] = buffer[i]
-						buffer[i] = t
+					let valueString = `0x${buffer.readUIntBE(0, registers[index].Size).toString(16)}`;
+					if (registers[index].Name == "CYCLE_COUNTER") {
+						valueString = `${buffer.readUIntBE(0, registers[index].Size)}`;
 					}
 
-					let valueString = `0x${buffer.toString('hex')}`;
-
 					response.body.variables.push(
-						new Variable(names[index], valueString)
+						new Variable(registers[index].Name, valueString)
 					);
 				});
 				this.sendResponse(response);

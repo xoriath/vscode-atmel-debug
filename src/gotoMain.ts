@@ -4,7 +4,7 @@ import { IProcessesListener, IProcessesContext } from './services/processesServi
 import { AtmelDebugSession } from './atmelDebugAdapter';
 import { InitializedEvent } from 'vscode-debugadapter';
 
-export class GoToMain implements IProcessesListener {
+export class GotoMain implements IProcessesListener {
 
 	private session: AtmelDebugSession;
 
