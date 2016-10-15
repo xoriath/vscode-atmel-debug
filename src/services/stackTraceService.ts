@@ -45,25 +45,25 @@ export class StackTraceContext implements IStackTraceContext {
 	public Args: IStackTraceContextArgs[];
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 
 	public static fromJson(data: IStackTraceContext): StackTraceContext {
 		let context = new StackTraceContext();
 
-		context.ID = data["ID"];
-		context.Level = data["Level"];
-		context.IP = data["IP"];
-		context.ArgsString = data["ArgsString"];
-		context.Func = data["Func"];
-		context.File = data["File"];
-		context.Line = data["Line"];
-		context.Args = <IStackTraceContextArgs[]>data["Args"];
+		context.ID = data['ID'];
+		context.Level = data['Level'];
+		context.IP = data['IP'];
+		context.ArgsString = data['ArgsString'];
+		context.Func = data['Func'];
+		context.File = data['File'];
+		context.Line = data['Line'];
+		context.Args = <IStackTraceContextArgs[]>data['Args'];
 
 		return context;
 	}
@@ -81,7 +81,7 @@ export interface IStackTraceListener {
 export class StackTraceService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("StackTrace", dispatcher);
+		super('StackTrace', dispatcher);
 	}
 
 	public contexts: Map<string, StackTraceContext> = new Map<string, StackTraceContext>();
@@ -94,15 +94,15 @@ export class StackTraceService extends Service {
 
 	public removeListener(listener: IStackTraceListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 	public getChildren(parentContext: string): Promise<string[]> {
 		let self = this;
 
 		return new Promise<string[]>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getChildren", [parentContext]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'getChildren', [parentContext]).then( (data: string) => {
 				let contextIds = <string[]>JSON.parse(data);
 				resolve(contextIds);
 			}).catch( (error: Error) => {
@@ -115,12 +115,12 @@ export class StackTraceService extends Service {
 		let self = this;
 
 		return new Promise<StackTraceContext[]>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getContext", [contextIds]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'getContext', [contextIds]).then( (data: string) => {
 				let contextsData = <StackTraceContext[]>JSON.parse(data);
 				let newContexts = [];
 
 				for (let index in contextsData) {
-					newContexts.push(StackTraceContext.fromJson(contextsData[index]))
+					newContexts.push(StackTraceContext.fromJson(contextsData[index]));
 				}
 
 				resolve(newContexts);
@@ -131,7 +131,7 @@ export class StackTraceService extends Service {
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
+		switch (event) {
 			default:
 				this.log(`No matching event handler: ${event}`);
 		}

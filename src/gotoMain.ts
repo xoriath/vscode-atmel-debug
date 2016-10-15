@@ -14,7 +14,7 @@ export class GotoMain implements IProcessesListener {
 
 	public contextAdded(contexts: IProcessesContext[]): void {
 		this.session.sendEvent(new InitializedEvent());
-		this.session.goto("main");
+		this.session.goto('main');
 	}
 
 	public contextChanged(contexts: IProcessesContext[]): void { }

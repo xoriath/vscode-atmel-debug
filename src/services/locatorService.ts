@@ -24,15 +24,15 @@ export class LocatorService extends Service {
 	private onHelloCallback: () => void;
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Locator", dispatcher);
+		super('Locator', dispatcher);
 	}
 
 	public sync(): Promise<any> {
-		return this.dispatcher.sendCommand(this.name, "sync", []);
+		return this.dispatcher.sendCommand(this.name, 'sync', []);
 	}
 
 	public hello(callback?: () => void): void {
-		this.dispatcher.sendEvent(this.name, "Hello", [[]]);
+		this.dispatcher.sendEvent(this.name, 'Hello', [[]]);
 
 		if (callback)
 			this.onHelloCallback = callback;
@@ -74,20 +74,20 @@ export class LocatorService extends Service {
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "peerAdded":
+		switch (event) {
+			case 'peerAdded':
 				this.handlePeerAdded(eventData);
 				break;
-			case "peerChanged":
+			case 'peerChanged':
 				this.handlePeerChanged(eventData);
 				break;
-			case "peerRemoved":
+			case 'peerRemoved':
 				this.handlePeerRemoved(eventData);
 				break;
-			case "peerHeartBeat":
+			case 'peerHeartBeat':
 				this.handlePeerHeartBeat(eventData);
 				break;
-			case "Hello":
+			case 'Hello':
 				this.handleHello(eventData);
 				break;
 			default:

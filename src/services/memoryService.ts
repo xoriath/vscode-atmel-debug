@@ -46,11 +46,11 @@ export class MemoryContext implements IMemoryContext {
 
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public static fromJson(service: MemoryService, data: IMemoryContext): MemoryContext {
@@ -58,12 +58,12 @@ export class MemoryContext implements IMemoryContext {
 
 		context.memoryService = service;
 
-		context.ID = data["ID"];
-		context.Name = data["Name"];
-		context.BigEndian = data["BigEndian"];
-		context.AddressSize = data["AddressSize"];
-		context.StartBound = data["StartBound"];
-		context.EndBound = data["EndBound"];
+		context.ID = data['ID'];
+		context.Name = data['Name'];
+		context.BigEndian = data['BigEndian'];
+		context.AddressSize = data['AddressSize'];
+		context.StartBound = data['StartBound'];
+		context.EndBound = data['EndBound'];
 
 		return context;
 	}
@@ -82,7 +82,7 @@ export interface IMemoryListener {
 export class MemoryService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Memory", dispatcher);
+		super('Memory', dispatcher);
 	}
 
 	public contexts: Map<string, MemoryContext> = new Map<string, MemoryContext>();
@@ -95,8 +95,8 @@ export class MemoryService extends Service {
 
 	public removeListener(listener: IMemoryListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 	public getChildren(context: IContext) {
@@ -113,17 +113,17 @@ export class MemoryService extends Service {
 
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "contextAdded":
+		switch (event) {
+			case 'contextAdded':
 				this.handleContextAdded(eventData);
 				break;
-			case "contextChanged":
+			case 'contextChanged':
 				this.handleContextChanged(eventData);
 				break;
-			case "contextRemoved":
+			case 'contextRemoved':
 				this.handleContextRemoved(eventData);
 				break;
-			case "memoryChanged":
+			case 'memoryChanged':
 				this.handleMemoryChanged(eventData);
 				break;
 			default:
@@ -133,10 +133,10 @@ export class MemoryService extends Service {
 
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <MemoryContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <MemoryContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = MemoryContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -153,10 +153,10 @@ export class MemoryService extends Service {
 
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <MemoryContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <MemoryContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = MemoryContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -175,7 +175,7 @@ export class MemoryService extends Service {
 		// TODO: into Service
 
 		let ids = <string[]>JSON.parse(eventData[0]);
-		for(var index in ids) {
+		for (let index in ids) {
 			let id = ids[index];
 			if (id in this.contexts)
 				delete this.contexts[id];

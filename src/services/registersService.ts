@@ -23,7 +23,7 @@ export class RegistersContext implements IRegistersContext {
 
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
@@ -35,10 +35,10 @@ export class RegistersContext implements IRegistersContext {
 
 		context.registersService = service;
 
-		context.ID = data["ID"];
-		context.Name = data["Name"];
-		context.ProcessID = data["ProcessID"];
-		context.Size = data["Size"];
+		context.ID = data['ID'];
+		context.Name = data['Name'];
+		context.ProcessID = data['ProcessID'];
+		context.Size = data['Size'];
 
 		return context;
 	}
@@ -57,7 +57,7 @@ export interface IRegistersListener {
 export class RegistersService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Registers", dispatcher);
+		super('Registers', dispatcher);
 	}
 
 	public contexts: Map<string, IRegistersContext> = new Map<string, IRegistersContext>();
@@ -70,15 +70,15 @@ export class RegistersService extends Service {
 
 	public removeListener(listener: IRegistersListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 	public get(contextId: string): Promise<string> {
 		let self = this;
 
 		return new Promise<string>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "get", [contextId]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'get', [contextId]).then( (data: string) => {
 				resolve(data);
 			}).catch( (error: Error) => {
 				reject(error);
@@ -87,17 +87,17 @@ export class RegistersService extends Service {
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "contextAdded":
+		switch (event) {
+			case 'contextAdded':
 				this.handleContextAdded(eventData);
 				break;
-			case "contextChanged":
+			case 'contextChanged':
 				this.handleContextChanged(eventData);
 				break;
-			case "contextRemoved":
+			case 'contextRemoved':
 				this.handleContextRemoved(eventData);
 				break;
-			case "registerChanged":
+			case 'registerChanged':
 				this.handleRegisterChanged(eventData);
 				break;
 			default:
@@ -107,10 +107,10 @@ export class RegistersService extends Service {
 
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <RegistersContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <RegistersContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = RegistersContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -127,10 +127,10 @@ export class RegistersService extends Service {
 
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <RegistersContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <RegistersContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = RegistersContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -149,7 +149,7 @@ export class RegistersService extends Service {
 		// TODO: into Service
 
 		let ids = <string[]>JSON.parse(eventData[0]);
-		for(var index in ids) {
+		for (let index in ids) {
 			let id = ids[index];
 			if (id in this.contexts)
 				delete this.contexts[id];

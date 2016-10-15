@@ -32,17 +32,17 @@ export class DeviceContext implements IDeviceContext {
 
 		context.deviceService = service;
 
-		context.ID = data["ID"];
-		context.Name = data["Name"];
-		context.Session = data["Session"];
-		context.MemoryIDs = data["MemoryIDs"];
-		context.RunControlID = data["RunControlID"];
+		context.ID = data['ID'];
+		context.Name = data['Name'];
+		context.Session = data['Session'];
+		context.MemoryIDs = data['MemoryIDs'];
+		context.RunControlID = data['RunControlID'];
 
 		return context;
 	}
 
 	public toString(): string {
-		return `${this.ID} => ${this.Name}`
+		return `${this.ID} => ${this.Name}`;
 	}
 
 }
@@ -56,7 +56,7 @@ export interface IDeviceListener {
 export class DeviceService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Device", dispatcher);
+		super('Device', dispatcher);
 	}
 
 	public contexts: Map<string, IDeviceContext> = new Map<string, IDeviceContext>();
@@ -69,8 +69,8 @@ export class DeviceService extends Service {
 
 	public removeListener(listener: IDeviceListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 	public getContext(id: string): IDeviceContext {
@@ -78,22 +78,22 @@ export class DeviceService extends Service {
 	}
 
 	public setProperties(contextId: string, properties: any): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+		return this.dispatcher.sendCommand(this.name, 'setProperties', [contextId, properties]);
 	}
 
 	public getProperties(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "getProperties", [contextId]); // TODO; marshal into Context
+		return this.dispatcher.sendCommand(this.name, 'getProperties', [contextId]); // TODO; marshal into Context
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "contextAdded":
+		switch (event) {
+			case 'contextAdded':
 				this.handleContextAdded(eventData);
 				break;
-			case "contextChanged":
+			case 'contextChanged':
 				this.handleContextChanged(eventData);
 				break;
-			case "contextRemoved":
+			case 'contextRemoved':
 				this.handleContextRemoved(eventData);
 				break;
 			default:
@@ -103,10 +103,10 @@ export class DeviceService extends Service {
 
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <DeviceContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <DeviceContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = DeviceContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -123,10 +123,10 @@ export class DeviceService extends Service {
 
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <DeviceContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <DeviceContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = DeviceContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -145,7 +145,7 @@ export class DeviceService extends Service {
 		// TODO: into Service
 
 		let ids = <string[]>JSON.parse(eventData[0]);
-		for(var index in ids) {
+		for (let index in ids) {
 			let id = ids[index];
 			if (id in this.contexts)
 				delete this.contexts[id];

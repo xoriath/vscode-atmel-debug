@@ -43,7 +43,7 @@ export class ToolContext implements IToolContext {
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public connect() {
@@ -59,11 +59,11 @@ export class ToolContext implements IToolContext {
 
 		context.service = service;
 
-		context.ID = data["ID"];
-		context.Name = data["Name"];
+		context.ID = data['ID'];
+		context.Name = data['Name'];
 
-		if ("DeviceID" in data) {
-			context.DeviceId = data["DeviceId"];
+		if ('DeviceID' in data) {
+			context.DeviceId = data['DeviceId'];
 		}
 
 		return context;
@@ -85,7 +85,7 @@ export interface IToolListener {
 export class ToolService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Tool", dispatcher);
+		super('Tool', dispatcher);
 	}
 
 	public attachedTools: Array<IAttachedTool> = new Array<IAttachedTool>();
@@ -100,8 +100,8 @@ export class ToolService extends Service {
 
 	public removeListener(listener: IToolListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 	public getContext(id: string): IToolContext {
@@ -109,14 +109,14 @@ export class ToolService extends Service {
 	}
 
 	public pollForTools(shouldPoll: boolean) {
-		this.dispatcher.sendCommand(this.name, "pollForTools", [shouldPoll])
+		this.dispatcher.sendCommand(this.name, 'pollForTools', [shouldPoll]);
 	}
 
 	public getSupportedToolTypes(): Promise<string[]> {
 		let self = this;
 
 		return new Promise<string[]>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getSupportedToolTypes", []).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'getSupportedToolTypes', []).then( (data: string) => {
 				let supportedTools = <string[]>JSON.parse(data);
 				resolve(supportedTools);
 			}).catch( (error: Error) => {
@@ -127,14 +127,14 @@ export class ToolService extends Service {
 
 	// TODO; parse any
 	public getAttachedTools(toolType: string): Promise<any> {
-		return this.dispatcher.sendCommand(this.name, "getAttachedTools", [toolType]);
+		return this.dispatcher.sendCommand(this.name, 'getAttachedTools', [toolType]);
 	}
 
 	public setupTool(toolType: string, connectionType: string, connectionProperties: any): Promise<IToolContext> {
 		let self = this;
 
 		return new Promise<IToolContext>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "setupTool", [toolType, connectionType, connectionProperties]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'setupTool', [toolType, connectionType, connectionProperties]).then( (data: string) => {
 				let context = JSON.parse(data);
 
 				resolve(self.getContext(context));
@@ -145,29 +145,29 @@ export class ToolService extends Service {
 	}
 
 	public connect(id: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "connect", [id]);
+		return this.dispatcher.sendCommand(this.name, 'connect', [id]);
 	}
 
 	public tearDownTool(id: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "tearDownTool", [id]);
+		return this.dispatcher.sendCommand(this.name, 'tearDownTool', [id]);
 	}
 
 	public setProperties(contextId: string, properties: any): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+		return this.dispatcher.sendCommand(this.name, 'setProperties', [contextId, properties]);
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "attachedToolsChanged":
+		switch (event) {
+			case 'attachedToolsChanged':
 				this.handleAttachedToolsChanged(eventData);
 				break;
-			case "contextAdded":
+			case 'contextAdded':
 				this.handleContextAdded(eventData);
 				break;
-			case "contextChanged":
+			case 'contextChanged':
 				this.handleContextChanged(eventData);
 				break;
-			case "contextRemoved":
+			case 'contextRemoved':
 				this.handleContextRemoved(eventData);
 				break;
 			default:
@@ -189,10 +189,10 @@ export class ToolService extends Service {
 
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <ToolContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = ToolContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -209,10 +209,10 @@ export class ToolService extends Service {
 
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <ToolContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = ToolContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -231,7 +231,7 @@ export class ToolService extends Service {
 		// TODO: into Service
 
 		let ids = <string[]>JSON.parse(eventData[0]);
-		for(var index in ids) {
+		for (let index in ids) {
 			let id = ids[index];
 			if (id in this.contexts)
 				delete this.contexts[id];
@@ -245,5 +245,4 @@ export class ToolService extends Service {
 			listener.contextRemoved(ids);
 		}
 	}
-
 }

@@ -10,8 +10,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let disposable = vscode.commands.registerCommand('extension.getProgramName', () => {
 		return vscode.window.showInputBox({
-			placeHolder: "Please enter the name of an elf file",
-			value: "*.elf"
+			placeHolder: 'Please enter the name of an elf file',
+			value: '*.elf'
 		});
 	});
 

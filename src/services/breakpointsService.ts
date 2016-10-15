@@ -38,7 +38,7 @@ export class BreakpointContext implements IBreakpoint {
 	private service: BreakpointsService;
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
@@ -54,14 +54,14 @@ export class BreakpointContext implements IBreakpoint {
 
 		context.service = service;
 
-		context.ID = data["ID"];
-		context.AccessMode = data["AccessMode"];
-		context.Enabled = data["Enabled"];
-		context.File =  data["File"];
-		context.Line = data["Line"];
-		context.Column = data["Column"];
-		context.Address = +data["Address"];
-		context.HitCount = data["HitCount"];
+		context.ID = data['ID'];
+		context.AccessMode = data['AccessMode'];
+		context.Enabled = data['Enabled'];
+		context.File =  data['File'];
+		context.Line = data['Line'];
+		context.Column = data['Column'];
+		context.Address = +data['Address'];
+		context.HitCount = data['HitCount'];
 
 		return context;
 	}
@@ -71,7 +71,7 @@ export class BreakpointContext implements IBreakpoint {
 			return `${this.ID}`;
 		}
 		else {
-			return "";
+			return '';
 		}
 	}
 }
@@ -81,22 +81,22 @@ export class BreakpointsService extends Service {
 	private contextCounter: number;
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Breakpoints", dispatcher);
+		super('Breakpoints', dispatcher);
 
 		this.contextCounter = 0;
 	}
 
 	public add(parameters: any): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "add", [parameters]);
+		return this.dispatcher.sendCommand(this.name, 'add', [parameters]);
 	}
 
 	public getProperties(contextId: string): Promise<BreakpointContext> {
 		let self = this;
 
 		return new Promise<BreakpointContext>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getProperties", [contextId]).then( (eventData: string) => {
+			self.dispatcher.sendCommand(self.name, 'getProperties', [contextId]).then( (eventData: string) => {
 				let data = <BreakpointContext>JSON.parse(eventData);
-				resolve(BreakpointContext.fromJson(self, data))
+				resolve(BreakpointContext.fromJson(self, data));
 			}).catch( (reason: Error) => {
 				reject(reason);
 			});
@@ -104,11 +104,11 @@ export class BreakpointsService extends Service {
 	}
 
 	public getError(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "getError", [contextId]);
+		return this.dispatcher.sendCommand(this.name, 'getError', [contextId]);
 	}
 
 	public remove(contextIds: string[]): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "remove", [contextIds]);
+		return this.dispatcher.sendCommand(this.name, 'remove', [contextIds]);
 	}
 
 	public getNextBreakpointId(): string {
@@ -116,7 +116,7 @@ export class BreakpointsService extends Service {
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
+		switch (event) {
 			default:
 				this.log(`No matching event handler: ${event}`);
 		}

@@ -41,26 +41,26 @@ export class LineNumbersContext implements ILineNumbersContext {
 	public IsStmt: number;
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 
 	public static fromJson(data: ILineNumbersContext): LineNumbersContext {
 		let context = new LineNumbersContext();
 
-		context.ID = data["ID"];
-		context.SLine = data["SLine"];
-		context.ELine = data["ELine"];
-		context.ECol = data["ECol"];
-		context.Function = data["Function"];
-		context.File = data["File"];
-		context.SAddr = data["SAddr"];
-		context.EAddr = data["EAddr"];
-		context.IsStmt = data["IsStmt"];
+		context.ID = data['ID'];
+		context.SLine = data['SLine'];
+		context.ELine = data['ELine'];
+		context.ECol = data['ECol'];
+		context.Function = data['Function'];
+		context.File = data['File'];
+		context.SAddr = data['SAddr'];
+		context.EAddr = data['EAddr'];
+		context.IsStmt = data['IsStmt'];
 
 		return context;
 	}
@@ -73,14 +73,14 @@ export class LineNumbersContext implements ILineNumbersContext {
 export class LineNumbersService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("LineNumbers", dispatcher);
+		super('LineNumbers', dispatcher);
 	}
 
 	public mapToSource(parentContext: string, startAddress: number, endAddress: number): Promise<LineNumbersContext[]> {
 		let self = this;
 
 		return new Promise<LineNumbersContext[]>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "mapToSource", [parentContext, startAddress, endAddress]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'mapToSource', [parentContext, startAddress, endAddress]).then( (data: string) => {
 				let contexts = <LineNumbersContext[]>JSON.parse(data[0]);
 
 				let newContexts = [];
@@ -96,7 +96,7 @@ export class LineNumbersService extends Service {
 	}
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
+		switch (event) {
 			default:
 				this.log(`No matching event handler: ${event}`);
 		}

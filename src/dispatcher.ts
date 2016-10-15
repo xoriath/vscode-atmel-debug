@@ -50,7 +50,7 @@ export class Dispatcher {
 	}
 
 	public connect(callback: (dispatcher: Dispatcher) => void): void {
-		let url = "ws://" + this.host + ":" + this.port;
+		let url = 'ws://' + this.host + ':' + this.port;
 		this.log(`[Dispatcher] Connect to: ${url}`);
 
 		this.ws = new WebSocket(url);
@@ -76,14 +76,14 @@ export class Dispatcher {
 
 	public escapeNil(str: string): string {
 		let self = this;
-		let ret = "";
+		let ret = '';
 
 		for (let i = 0; i < str.length; ++i) {
-			if (str.charAt(i) == self.nil)
+			if (str.charAt(i) === self.nil)
 				ret += (' <nil> ');
-			else if (str.charAt(i) == '\x03')
+			else if (str.charAt(i) === '\x03')
 				ret += ('<');
-			else if (str.charAt(i) == '\x01')
+			else if (str.charAt(i) === '\x01')
 				ret += ('>');
 			else
 				ret += str.charAt(i);
@@ -125,7 +125,7 @@ export class Dispatcher {
 
 	private stringify(args: any[]): string {
 		let self = this;
-		let str = "";
+		let str = '';
 
 		if (args) {
 			for (let index in args) {
@@ -142,7 +142,7 @@ export class Dispatcher {
 
 		for (let index in data) {
 			let element = data[index];
-			if (element == "")
+			if (element === '')
 				args.push(null);
 			else
 				args.push(JSON.parse(element));
@@ -161,7 +161,7 @@ export class Dispatcher {
 		if (elements.length < 3) {
 			throw `Message has too few parts`;
 		}
-		if (elements.pop() != self.eom) {
+		if (elements.pop() !== self.eom) {
 			throw `Message has bad termination`;
 		}
 
@@ -207,7 +207,7 @@ export class Dispatcher {
 
 	private decodeFinalResult(data: string[]): void {
 		let token = +data[0];
-		let errorReport = data[1]
+		let errorReport = data[1];
 		let eventData = data[2];
 
 		this.handleResponse(token, errorReport, eventData);
@@ -236,7 +236,7 @@ export class Dispatcher {
 
 	private handleResponse(token: number, errorReport: string, args: string) {
 		if (errorReport) {
-			this.log(`[Dispatcher] Response error (${token}): ${errorReport}`)
+			this.log(`[Dispatcher] Response error (${token}): ${errorReport}`);
 		}
 
 		if (token in this.pendingHandlers) {
@@ -245,7 +245,7 @@ export class Dispatcher {
 			delete this.pendingHandlers[token];
 
 			if (errorReport)
-				reject(Error(errorReport))
+				reject(Error(errorReport));
 			else
 				resolve(args);
 		}

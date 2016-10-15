@@ -76,10 +76,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		this.sendResponse(response);
 	}
 
-    protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
+	protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
 		/* Terminate the processes */
-		if ("Processes" in this.services) {
-			let processService = <ProcessesService>this.services["Processes"];
+		if ('Processes' in this.services) {
+			let processService = <ProcessesService>this.services['Processes'];
 			for (let index in processService.contexts) {
 				let context = <IProcessesContext>processService.contexts[index];
 				context.terminate();
@@ -87,8 +87,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 
 		/* Tear down the tools */
-		if ("Tools" in this.services) {
-			let toolService = <ToolService>this.services["Tools"];
+		if ('Tools' in this.services) {
+			let toolService = <ToolService>this.services['Tools'];
 			for (let index in toolService.contexts) {
 				let context = <IToolContext>toolService.contexts[index];
 				context.tearDownTool();
@@ -96,7 +96,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 	}
 
-    protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		let self = this;
 
 		/* Create the dispatcher */
@@ -127,17 +127,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				let streamService = new StreamService(dispatcher);
 
 				self.services = new Map<string, IService>();
-				self.services["Tool"] = toolService;
-				self.services["Device"] = deviceService;
-				self.services["Processes"] = processService;
-				self.services["Memory"] = memoryService;
-				self.services["Registers"] = registersService;
-				self.services["RunControl"] = runControlService;
-				self.services["StackTrace"] = stackTraceService;
-				self.services["Expressions"] = expressionsService;
-				self.services["LineNumbers"] = lineNumbersService;
-				self.services["Breakpoints"] = breakpointsService;
-				self.services["Streams"] = streamService;
+				self.services['Tool'] = toolService;
+				self.services['Device'] = deviceService;
+				self.services['Processes'] = processService;
+				self.services['Memory'] = memoryService;
+				self.services['Registers'] = registersService;
+				self.services['RunControl'] = runControlService;
+				self.services['StackTrace'] = stackTraceService;
+				self.services['Expressions'] = expressionsService;
+				self.services['LineNumbers'] = lineNumbersService;
+				self.services['Breakpoints'] = breakpointsService;
+				self.services['Streams'] = streamService;
 
 				/* Crank up the atbackend logging if we run in debug */
 				if (self.DEBUG) {
@@ -162,10 +162,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
 
 				/* Ignition! TODO: need more properties for USB/IP tools */
-				toolService.setupTool(args.tool, "", {}).then( (tool: IToolContext) => {
+				toolService.setupTool(args.tool, '', {}).then( (tool: IToolContext) => {
 					tool.setProperties({
-								"DeviceName": args.device,
-								"PackPath": args.packPath
+								'DeviceName': args.device,
+								'PackPath': args.packPath
 							}).catch( (reason: Error) => {
 								throw reason;
 							});
@@ -188,17 +188,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		For SAM, attach is supported without prior setup
 
 	*/
-    protected attachRequest(response: DebugProtocol.AttachResponse, args: DebugProtocol.AttachRequestArguments): void {
-		this.log("[NOT IMPLEMENTED] attachRequest");
+	protected attachRequest(response: DebugProtocol.AttachResponse, args: DebugProtocol.AttachRequestArguments): void {
+		this.log('[NOT IMPLEMENTED] attachRequest');
 		super.attachRequest(response, args);
 	}
 
 	private activeBreakpoints = [];
 
 	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
-    protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		let processService = <ProcessesService>this.services["Processes"];
-		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
+	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
+		let processService = <ProcessesService>this.services['Processes'];
+		let breakpointsService = <BreakpointsService>this.services['Breakpoints'];
 
 		response.body = {
 			breakpoints: []
@@ -220,23 +220,23 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			let breakpointId = breakpointsService.getNextBreakpointId();
 
 			let breakpoint = {
-				"ContextIds": [ processContext.ID ],
-				"AccessMode": AccessMode.Execute,
-				"ID": breakpointId,
-				"Enabled": true,
-				"IgnoreCount": 1,
-				"IgnoreType": "always",
-				"Line": breakpointArgs.line,
-				"Column": breakpointArgs.column | 0
+				'ContextIds': [ processContext.ID ],
+				'AccessMode': AccessMode.Execute,
+				'ID': breakpointId,
+				'Enabled': true,
+				'IgnoreCount': 1,
+				'IgnoreType': 'always',
+				'Line': breakpointArgs.line,
+				'Column': breakpointArgs.column | 0
 			};
 
 			if (args.source.path) {
-				breakpoint["File"] = args.source.path;
+				breakpoint['File'] = args.source.path;
 			} // else use args.source.sourceReference
 
 			if (breakpointArgs.condition) {
-				breakpoint["Condition"] = breakpointArgs.condition;
-				breakpoint["Istrue"] = true;
+				breakpoint['Condition'] = breakpointArgs.condition;
+				breakpoint['Istrue'] = true;
 			}
 
 			breakpointsService.add(breakpoint).then( (report) => {
@@ -247,7 +247,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					this.activeBreakpoints.push(breakpointId);
 
 					/* Since we need to bind all the requested breakpoints before responding, wait until the last is bound */
-					if (--breakpointsToProcess == 0) {
+					if (--breakpointsToProcess === 0) {
 						this.sendResponse(response);
 					}
 				}).catch( (error: Error) => this.log(error.message) );
@@ -258,9 +258,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	private activeFunctionBreakpoints = [];
 
 	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
-    protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		let processService = <ProcessesService>this.services["Processes"];
-		let breakpointsService = <BreakpointsService>this.services["Breakpoints"];
+	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
+		let processService = <ProcessesService>this.services['Processes'];
+		let breakpointsService = <BreakpointsService>this.services['Breakpoints'];
 
 		response.body = {
 			breakpoints: []
@@ -280,15 +280,15 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			let breakpointId = breakpointsService.getNextBreakpointId();
 
 			let breakpoint = {
-				"ContextIds": [ processContext.ID ],
-				"AccessMode": AccessMode.Execute,
-				"ID": breakpointId,
-				"Enabled": true,
-				"IgnoreCount": 1,
-				"IgnoreType": "always",
-				"Function": breakpointArgs.name,
-				"FunctionLine": 1,
-				"FunctionColumn": 0
+				'ContextIds': [ processContext.ID ],
+				'AccessMode': AccessMode.Execute,
+				'ID': breakpointId,
+				'Enabled': true,
+				'IgnoreCount': 1,
+				'IgnoreType': 'always',
+				'Function': breakpointArgs.name,
+				'FunctionLine': 1,
+				'FunctionColumn': 0
 			};
 
 			breakpointsService.add(breakpoint).then( (report) => {
@@ -298,7 +298,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					response.body.breakpoints.push(bp);
 					this.activeFunctionBreakpoints.push(breakpointId);
 
-					if (--breakpointsToProcess == 0) {
+					if (--breakpointsToProcess === 0) {
 						this.sendResponse(response);
 					}
 				}).catch( (error: Error) => this.log(error.message) );
@@ -317,77 +317,77 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			SAM (vector of functions with weak binding to default handler)
 
 	*/
-    protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
-		this.log("[NOT IMPLEMENTED] setExceptionBreakPointsRequest");
+	protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, args: DebugProtocol.SetExceptionBreakpointsArguments): void {
+		this.log('[NOT IMPLEMENTED] setExceptionBreakPointsRequest');
 		super.setExceptionBreakPointsRequest(response, args);
 	}
 
 	/* TODO: should this be supported? */
-    protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
-		this.log("[NOT IMPLEMENTED] configurationDoneRequest");
+	protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
+		this.log('[NOT IMPLEMENTED] configurationDoneRequest');
 		super.configurationDoneRequest(response, args);
 	}
 
 	/* Resume is any form of resume */
 	private resume(mode: ResumeMode, threadID?: number): void {
-		let runControlService = <RunControlService>this.services["RunControl"];
+		let runControlService = <RunControlService>this.services['RunControl'];
 
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
-			if (!threadID || threadID == this.hashString(context.ID)) {
+			if (!threadID || threadID === this.hashString(context.ID)) {
 				context.resume(mode).catch( (error: Error) => this.log(error.message) );
 			}
 		}
 	}
 
 	private suspend(threadID?: number): void {
-		let runControlService = <RunControlService>this.services["RunControl"];
+		let runControlService = <RunControlService>this.services['RunControl'];
 
 		for (let index in runControlService.contexts) {
 			let context = <RunControlContext>runControlService.contexts[index];
-			if (threadID == this.hashString(context.ID) || threadID == 0) {
+			if (threadID === this.hashString(context.ID) || threadID === 0) {
 				context.suspend().catch( (error: Error) => this.log(error.message) );
 			}
 		}
 	}
 
-    protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
+	protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
 		this.sendResponse(response);
 		this.resume(ResumeMode.Resume, args.threadId);
 	}
 
-    protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+	protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
 		this.sendResponse(response);
 		this.resume(ResumeMode.StepOverLine, args.threadId);
 	}
 
-    protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
+	protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
 		this.sendResponse(response);
 		this.resume(ResumeMode.StepIntoLine, args.threadId);
 	}
 
-    protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
+	protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
 		this.sendResponse(response);
 		this.resume(ResumeMode.StepOut, args.threadId);
 	}
 
-    protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
+	protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void {
 		this.sendResponse(response);
 		this.suspend(args.threadId);
 	}
 
 	/* Goto is a resume with type goto and count = address of target */
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
-		this.log("[NOT IMPLEMENTED] gotoRequest");
+		this.log('[NOT IMPLEMENTED] gotoRequest');
 	}
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
-		this.log("[NOT IMPLEMENTED] gotoTargetsRequest");
+		this.log('[NOT IMPLEMENTED] gotoTargetsRequest');
 	}
 
 	/* TODO: May do this through the fileSystem TCF service and the disassembly service (for locations without source) */
-    protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
-		this.log("[NOT IMPLEMENTED] sourceRequest");
+	protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
+		this.log('[NOT IMPLEMENTED] sourceRequest');
 		super.sourceRequest(response, args);
 	}
 
@@ -396,8 +396,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		The thread ID is based on the runcontroller of a process
 	*/
-    protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-		let processService = <ProcessesService>this.services["Processes"];
+	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
+		let processService = <ProcessesService>this.services['Processes'];
 
 		response.body = {
 			threads: []
@@ -414,28 +414,28 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
 	/* Stack frames are organized as children of a process (violates our thread assumptions) */
-    protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		let stackTraceService = <StackTraceService>this.services["StackTrace"];
-		let processesService = <ProcessesService>this.services["Processes"];
+	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
+		let stackTraceService = <StackTraceService>this.services['StackTrace'];
+		let processesService = <ProcessesService>this.services['Processes'];
 
 		response.body = {
 			stackFrames: [],
 			totalFrames: 0
-		}
+		};
 
 		for (let index in processesService.contexts) {
 			let processContext = <IProcessesContext>processesService.contexts[index];
 
 			/* Support threads (in theory at least) */
-			if (this.hashString(processContext.RunControlId) == args.threadId) {
+			if (this.hashString(processContext.RunControlId) === args.threadId) {
 
 				stackTraceService.getChildren(processContext.ID).then( (children) => {
 					stackTraceService.getContext(children).then( (frames) => {
 						frames.forEach(frame => {
-							let frameArgs: string[] = []
+							let frameArgs: string[] = [];
 
 							/* Sort frames based on the Order (depth in the stack) */
-							let sortedArgs = frame.Args.sort((a,b) => {
+							let sortedArgs = frame.Args.sort( (a, b) => {
 								return a.Order - b.Order;
 							});
 
@@ -448,7 +448,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 							}
 
 							/* Create frame name based on function and arguments */
-							let frameName = `${frame.Func.trim()} (${frameArgs.join(", ")})`
+							let frameName = `${frame.Func.trim()} (${frameArgs.join(', ')})`;
 
 							/* Create the source */
 							let source = new Source(path.basename(frame.File.trim()),
@@ -471,13 +471,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 	/* Scopes describes a collection of variables */
 	/* TODO: is registers a scope? Global scope? */
-    protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
-		let stackTraceService = <StackTraceService>this.services["StackTrace"];
-		let processesService = <ProcessesService>this.services["Processes"];
+	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
+		let stackTraceService = <StackTraceService>this.services['StackTrace'];
+		let processesService = <ProcessesService>this.services['Processes'];
 
 		response.body = {
 			scopes: []
-		}
+		};
 
 		for (let index in processesService.contexts) {
 			let processContext = <IProcessesContext>processesService.contexts[index];
@@ -485,18 +485,18 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			stackTraceService.getChildren(processContext.ID).then( (children) => {
 				stackTraceService.getContext(children).then( (frames) => {
 					frames.forEach(frame => {
-						if (frame.Level == 0) {
-							//response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
+						if (frame.Level === 0) {
+							// response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
 						}
 
 						/* Create local scope if we are asked for a frame that we found */
-						if (args.frameId == this.hashString(frame.ID)) {
-							response.body.scopes.push(new Scope("Local", this.hashString(frame.ID), false));
+						if (args.frameId === this.hashString(frame.ID)) {
+							response.body.scopes.push(new Scope('Local', this.hashString(frame.ID), false));
 						}
 					});
 
 					/* Push the registers scope */
-					response.body.scopes.push(new Scope("Registers", this.hashString("Registers"), false));
+					response.body.scopes.push(new Scope('Registers', this.hashString('Registers'), false));
 
 					this.sendResponse(response);
 
@@ -506,15 +506,15 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
 	/* Variables belong to a scope (which is created above) */
-    protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
+	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
 		let self = this;
 
 		response.body = {
 			variables: []
-		}
+		};
 
-		if (args.variablesReference == this.hashString("Registers")) {
-			let registersService = <RegistersService>this.services["Registers"];
+		if (args.variablesReference === this.hashString('Registers')) {
+			let registersService = <RegistersService>this.services['Registers'];
 
 			let values 	= new Array<Promise<string>>();
 			let registers 	= new Array<IRegistersContext>();
@@ -530,7 +530,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					let buffer = new Buffer(byteArrayString);
 
 					let valueString = `0x${buffer.readUIntBE(0, registers[index].Size).toString(16)}`;
-					if (registers[index].Name == "CYCLE_COUNTER") {
+					if (registers[index].Name === 'CYCLE_COUNTER') {
 						valueString = `${buffer.readUIntBE(0, registers[index].Size)}`;
 					}
 
@@ -543,9 +543,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 		else {
 			/* Assume that we are fetching variables from a stack frame */
-			let stackTraceService = <StackTraceService>this.services["StackTrace"];
-			let processesService = <ProcessesService>this.services["Processes"];
-			let expressionsService = <ExpressionsService>this.services["Expressions"];
+			let stackTraceService = <StackTraceService>this.services['StackTrace'];
+			let processesService = <ProcessesService>this.services['Processes'];
+			let expressionsService = <ExpressionsService>this.services['Expressions'];
 
 			for (let index in processesService.contexts) {
 				let processContext = <IProcessesContext>processesService.contexts[index];
@@ -555,13 +555,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						frames.forEach(frame => {
 
 							/* Only evaluate if we are asked for this frame (local variables) */
-							if (args.variablesReference == this.hashString(frame.ID)) {
+							if (args.variablesReference === this.hashString(frame.ID)) {
 
 								/* Get expressions for the frame */
 								expressionsService.getChildren(frame.ID).then( (children) => {
 									let childrenToEvaluate = children.length;
 
-									if (childrenToEvaluate == 0) {
+									if (childrenToEvaluate === 0) {
 										this.sendResponse(response);
 									}
 
@@ -574,7 +574,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 											);
 											expression.dispose();
 
-											if (--childrenToEvaluate == 0) {
+											if (--childrenToEvaluate === 0) {
 												this.sendResponse(response);
 											}
 										}).catch( (error: Error) => this.log(error.message) );
@@ -589,13 +589,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
 	/* Set a variable to a value */
-    protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
-		let expressionsService = <ExpressionsService>this.services["Expressions"];
-		let processesService = <ProcessesService>this.services["Processes"];
-		let stackTraceService = <StackTraceService>this.services["StackTrace"];
+	protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
+		let expressionsService = <ExpressionsService>this.services['Expressions'];
+		let processesService = <ProcessesService>this.services['Processes'];
+		let stackTraceService = <StackTraceService>this.services['StackTrace'];
 
 		response.body = {
-			value: ""
+			value: ''
 		};
 
 		let currentProcess: IProcessesContext;
@@ -605,19 +605,19 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		stackTraceService.getChildren(currentProcess.ID).then( (children) => {
 			stackTraceService.getContext(children).then( (frames) => {
-				let sortedFrames = frames.sort( (a,b) => {
+				let sortedFrames = frames.sort( (a, b) => {
 					return a.Level - b.Level;
-				})
+				});
 
 				/* TODO: is this assumption correct? (evaluate the expression based on the lowest frame) */
 				let bottom = sortedFrames.shift();
-				expressionsService.compute(bottom.ID, "C", args.name).then( (expression) => {
+				expressionsService.compute(bottom.ID, 'C', args.name).then( (expression) => {
 					/* Assign value */
 					expression.assign(args.value);
 					expression.dispose();
 
 					/* Read back */
-					expressionsService.compute(bottom.ID, "C", args.name).then( (expression) => {
+					expressionsService.compute(bottom.ID, 'C', args.name).then( (expression) => {
 						response.body.value = expression.Val.trim();
 						this.sendResponse(response);
 					}).catch( (error: Error) => this.log(error.message) );
@@ -627,23 +627,23 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
 	/* Evaluate using the expression evaluator */
-    protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
-		let expressionsService = <ExpressionsService>this.services["Expressions"];
+	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
+		let expressionsService = <ExpressionsService>this.services['Expressions'];
 
 		response.body = {
-			result: "",
-            type: "",
-            variablesReference: 0,
-            namedVariables: 0,
-            indexedVariables: 0
-		}
+			result: '',
+			type: '',
+			variablesReference: 0,
+			namedVariables: 0,
+			indexedVariables: 0
+		};
 
-		switch(args.context) {
-			case "watch":
-			case "hover":
-			case "repl":
+		switch (args.context) {
+			case 'watch':
+			case 'hover':
+			case 'repl':
 			default:
-				expressionsService.compute(this.hashes[args.frameId], "C", args.expression).then( (expression) => {
+				expressionsService.compute(this.hashes[args.frameId], 'C', args.expression).then( (expression) => {
 					response.body.result = expression.Val.trim();
 					response.body.type = expression.Type;
 
@@ -653,7 +653,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				}).catch( (error: Error) => {
 					this.log(error.message);
 					response.body.result = error.message;
-					response.body.type = "Error";
+					response.body.type = 'Error';
 
 					this.sendResponse(response);
 				});
@@ -668,10 +668,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		/* Java odd-shift object hash (more or less at least) */
 		/* TODO: change for something common? Need only to translate strings to numbers wihtout colliding */
-		let hash = Math.abs(str.split("").reduce(function (a, b) {
+		let hash = Math.abs(str.split('').reduce(function (a, b) {
 				a = ((a << 5) - a) + b.charCodeAt(0);
-				return a & a
-			}, 0))
+				return a & a;
+			}, 0));
 
 		this.hashes[hash] = str;
 
@@ -681,12 +681,12 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	private getStringFromHash(hash: number): string {
 		if (hash in this.hashes)
 			return this.hashes[hash];
-		return "";
+		return '';
 	}
 
 	/* IRunControlListener */
 	public contextSuspended(contextId: string, pc: number, reason: string, state: any): void {
-		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), ""));
+		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), ''));
 	}
 
 	public contextResumed(contextId: string): void {
@@ -715,10 +715,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	/* Goto helper */
 	/* TODO, doesn't really belong here... */
 	public goto(func: string): void {
-		let expressionsService = <ExpressionsService>this.services["Expressions"];
-		let runControlService = <RunControlService>this.services["RunControl"];
-		let stackTraceService = <StackTraceService>this.services["StackTrace"];
-		let processesService = <ProcessesService>this.services["Processes"];
+		let expressionsService = <ExpressionsService>this.services['Expressions'];
+		let runControlService = <RunControlService>this.services['RunControl'];
+		let stackTraceService = <StackTraceService>this.services['StackTrace'];
+		let processesService = <ProcessesService>this.services['Processes'];
 
 		let processContext: IProcessesContext;
 		for (let index in processesService.contexts) {
@@ -732,15 +732,15 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		stackTraceService.getChildren(processContext.ID).then( (children) => {
 			/* Find address of function identifier */
-			expressionsService.compute(children.shift(), "C", `${func}`).then( (expressionContext) => {
+			expressionsService.compute(children.shift(), 'C', `${func}`).then( (expressionContext) => {
 				/* Convert address to number */
-				let address = parseInt(expressionContext.Val.replace("0x", ""), 16);
+				let address = parseInt(expressionContext.Val.replace('0x', ''), 16);
 				expressionContext.dispose();
 
 				/* Goto address */
-				runControlContext.resume(ResumeMode.Goto, address)
-			}).catch( (error: Error) => this.log(error.message) );;
-		}).catch( (error: Error) => this.log(error.message) );;
+				runControlContext.resume(ResumeMode.Goto, address);
+			}).catch( (error: Error) => this.log(error.message) );
+		}).catch( (error: Error) => this.log(error.message) );
 	}
 }
 

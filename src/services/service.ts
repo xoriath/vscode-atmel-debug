@@ -21,7 +21,7 @@ class Service implements IService {
 	}
 
 	protected log(message: string): void {
-		this.dispatcher.log(`[${this.name}] ${message}`)
+		this.dispatcher.log(`[${this.name}] ${message}`);
 	}
 
 }

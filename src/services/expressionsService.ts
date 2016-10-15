@@ -43,11 +43,11 @@ export class ExpressionContext implements IExpressionContext {
 	private service: ExpressionsService;
 
 	public setProperties(properties: any): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public assign(value: string): Promise<string> {
@@ -60,15 +60,15 @@ export class ExpressionContext implements IExpressionContext {
 
 		context.service = service;
 
-		context.ID = data["ID"];
-		context.Numchildren = data["Numchildren"];
-		context.Val = data["Val"];
-		context.CanAssign = data["CanAssign"];
-		context.Expression = data["Expression"];
-		context.ExprPath = data["ExprPath"];
-		context.FormatString = data["FormatString"];
-		context.Type = data["Type"];
-		context.Size = data["Size"];
+		context.ID = data['ID'];
+		context.Numchildren = data['Numchildren'];
+		context.Val = data['Val'];
+		context.CanAssign = data['CanAssign'];
+		context.Expression = data['Expression'];
+		context.ExprPath = data['ExprPath'];
+		context.FormatString = data['FormatString'];
+		context.Type = data['Type'];
+		context.Size = data['Size'];
 
 		return context;
 	}
@@ -78,7 +78,7 @@ export class ExpressionContext implements IExpressionContext {
 			return `${this.ID}`;
 		}
 		else {
-			return "";
+			return '';
 		}
 	}
 
@@ -91,14 +91,14 @@ export class ExpressionContext implements IExpressionContext {
 export class ExpressionsService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("Expressions", dispatcher);
+		super('Expressions', dispatcher);
 	}
 
 	public getChildren(parentContext: string): Promise<string[]> {
 		let self = this;
 
 		return new Promise<string[]>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getChildren", [parentContext]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'getChildren', [parentContext]).then( (data: string) => {
 				resolve(<string[]>JSON.parse(data));
 			}).catch( (error: Error) => {
 				reject(error);
@@ -110,7 +110,7 @@ export class ExpressionsService extends Service {
 		let self = this;
 
 		return new Promise<ExpressionContext>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "getContext", [contextId]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'getContext', [contextId]).then( (data: string) => {
 				let contextData = <ExpressionContext>JSON.parse(data);
 				let context = ExpressionContext.fromJson(self, contextData);
 				resolve(context);
@@ -124,7 +124,7 @@ export class ExpressionsService extends Service {
 		let self = this;
 
 		return new Promise<ExpressionContext>(function(resolve, reject) {
-			self.dispatcher.sendCommand(self.name, "compute", [contextId, language, expression]).then( (data: string) => {
+			self.dispatcher.sendCommand(self.name, 'compute', [contextId, language, expression]).then( (data: string) => {
 				let contextData = <ExpressionContext>JSON.parse(data);
 				let context = ExpressionContext.fromJson(self, contextData);
 				resolve(context);
@@ -135,17 +135,15 @@ export class ExpressionsService extends Service {
 	}
 
 	public assign(contextId: string, value: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "assign", [contextId, value]);
+		return this.dispatcher.sendCommand(this.name, 'assign', [contextId, value]);
 	}
 
 	public dispose(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "dispose", [contextId]);
+		return this.dispatcher.sendCommand(this.name, 'dispose', [contextId]);
 	}
 
-
-
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
+		switch (event) {
 			default:
 				this.log(`No matching event handler: ${event}`);
 		}

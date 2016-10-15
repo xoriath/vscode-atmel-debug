@@ -34,7 +34,7 @@ export class RunControlContext implements IRunControlContext {
 	}
 
 	public getProperties(): Promise<any> {
-		return Promise.reject(Error("NOT IMPLEMENTED"));
+		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
 	public resume(mode: ResumeMode, count?: number): Promise<any> {
@@ -58,13 +58,13 @@ export class RunControlContext implements IRunControlContext {
 
 		context.runcontrolservice = service;
 
-		context.ID = data["ID"];
-		context.CanSuspend = data["CanSuspend"];
-		context.CanResume = data["CanResume"];
-		context.CanCount = data["CanCount"];
-		context.IsContainer = data["IsContainer"];
-		context.HasState = data["HasState"];
-		context.CanTerminate = data["CanTerminate"];
+		context.ID = data['ID'];
+		context.CanSuspend = data['CanSuspend'];
+		context.CanResume = data['CanResume'];
+		context.CanCount = data['CanCount'];
+		context.IsContainer = data['IsContainer'];
+		context.HasState = data['HasState'];
+		context.CanTerminate = data['CanTerminate'];
 
 		return context;
 	}
@@ -112,7 +112,7 @@ export enum ResumeMode {
 export class RunControlService extends Service {
 
 	public constructor(dispatcher: Dispatcher) {
-		super("RunControl", dispatcher);
+		super('RunControl', dispatcher);
 	}
 
 	public contexts: Map<string, RunControlContext> = new Map<string, RunControlContext>();
@@ -125,47 +125,47 @@ export class RunControlService extends Service {
 
 	public removeListener(listener: IRunControlListener): void {
 		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value != listener;
-		})
+			return value !== listener;
+		});
 	}
 
 
 	public resume(contextId: string, mode: ResumeMode, count?: number): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "resume", [contextId, mode, count | 0]);
+		return this.dispatcher.sendCommand(this.name, 'resume', [contextId, mode, count | 0]);
 	}
 
 	public suspend(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "suspend", [contextId]);
+		return this.dispatcher.sendCommand(this.name, 'suspend', [contextId]);
 	}
 
 	public terminate(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "terminate", [contextId]);
+		return this.dispatcher.sendCommand(this.name, 'terminate', [contextId]);
 	}
 
 	public detach(contextId: string): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "detach", [contextId]);
+		return this.dispatcher.sendCommand(this.name, 'detach', [contextId]);
 	}
 
 	public setProperties(contextId: string, properties: any): Promise<string> {
-		return this.dispatcher.sendCommand(this.name, "setProperties", [contextId, properties]);
+		return this.dispatcher.sendCommand(this.name, 'setProperties', [contextId, properties]);
 	}
 
 
 	public eventHandler(event: string, eventData: string[]): void {
-		switch(event) {
-			case "contextAdded":
+		switch (event) {
+			case 'contextAdded':
 				this.handleContextAdded(eventData);
 				break;
-			case "contextChanged":
+			case 'contextChanged':
 				this.handleContextChanged(eventData);
 				break;
-			case "contextRemoved":
+			case 'contextRemoved':
 				this.handleContextRemoved(eventData);
 				break;
-			case "contextSuspended":
+			case 'contextSuspended':
 				this.handleContextSuspended(eventData);
 				break;
-			case "contextResumed":
+			case 'contextResumed':
 				this.handleContextResumed(eventData);
 				break;
 			default:
@@ -175,10 +175,10 @@ export class RunControlService extends Service {
 
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <RunControlContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = RunControlContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -195,10 +195,10 @@ export class RunControlService extends Service {
 
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
-		let contextsData = <RunControlContext[]>JSON.parse(eventData[0])
-		let newContexts = []
+		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
+		let newContexts = [];
 
-		for (var index in contextsData) {
+		for (let index in contextsData) {
 			let context = RunControlContext.fromJson(this, contextsData[index]);
 			this.contexts[context.ID] = context;
 			newContexts.push(context);
@@ -217,7 +217,7 @@ export class RunControlService extends Service {
 		// TODO: into Service
 
 		let ids = <string[]>JSON.parse(eventData[0]);
-		for(var index in ids) {
+		for (let index in ids) {
 			let id = ids[index];
 			if (id in this.contexts)
 				delete this.contexts[id];
