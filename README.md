@@ -4,7 +4,7 @@ Debug adapter for Visual Studio code for the Atmel debug backend.
 
 <p align="center">
   <a href="https://travis-ci.org/xoriath/vscode-atmel-debug"><img src="https://travis-ci.org/xoriath/vscode-atmel-debug.svg?branch=master" alt="Travis"></a>
-  <a href="https://xoriath/vscode-atmel-debug/releases"><img src="https://img.shields.io/github/release/xoriath/vscode-atmel-debug.svg" alt="Release"></a>
+  <a href="https://github.com/xoriath/vscode-atmel-debug/releases"><img src="https://img.shields.io/github/release/xoriath/vscode-atmel-debug.svg" alt="Release"></a>
 </p>
 
 This debug extension connect the Visual Studio Code debug system onto 
