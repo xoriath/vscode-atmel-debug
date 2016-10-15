@@ -35,6 +35,7 @@
     "vscode": "^1.0.0",
     "mocha": "^2.4.5",
     "vscode-debugadapter-testsupport": "1.13.1",
+    "tslint": "^3.14.0",
     "@types/mocha": "^2.2.32",
     "@types/node": "^6.0.40",
     "@types/ws": "^0.0.34"
@@ -44,7 +45,8 @@
     "compile": "node ./node_modules/typescript/bin/tsc -p ./src",
     "watch": "node ./node_modules/typescript/bin/tsc -w -p ./src",
     "test": "node ./node_modules/mocha/bin/mocha -u tdd ./out/tests/",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "lint": "node ./node_modules/tslint/bin/tslint ./src/*.ts ./src/services/*.ts ./tests/*.ts"
   },
   "main": "./out/extension",
   "activationEvents": [
