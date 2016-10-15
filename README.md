@@ -11,6 +11,9 @@ This debug extension connect the Visual Studio Code debug system onto
 the Atmel debug backend (atbackend). This enabled debugging of all Atmel microcontrollers
 that are supported in the Atmel Studio 7.0 environment. 
 
+<p align="center">
+  <img src="https://github.com/xoriath/vscode-atmel-debug/blob/master/images/screenshot-1.png" alt="Travis">
+</p>
 ## Status
 Launching, stepping, breakpoints, call stack, registers and variable inspection is working. 
 Only tested using the simulator in atbackend. 
