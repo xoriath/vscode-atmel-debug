@@ -83,8 +83,9 @@ export class ExpressionContext implements IExpressionContext {
 	}
 
 	public dispose(): void {
-		if (this.service)
+		if (this.service) {
 			this.service.dispose(this.ID);
+		}
 	}
 }
 

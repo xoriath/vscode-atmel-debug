@@ -177,8 +177,9 @@ export class MemoryService extends Service {
 		let ids = <string[]>JSON.parse(eventData[0]);
 		for (let index in ids) {
 			let id = ids[index];
-			if (id in this.contexts)
+			if (id in this.contexts) {
 				delete this.contexts[id];
+			}
 		}
 
 		this.log(`ContextRemoved: ${ids}`);
@@ -191,8 +192,8 @@ export class MemoryService extends Service {
 	}
 
 	private handleMemoryChanged(eventData: string[]): void {
-		let contextId = JSON.parse(eventData[0]);
-		let ranges = <IAddressRange[]>JSON.parse(eventData[1]);
+		// let contextId = JSON.parse(eventData[0]);
+		// let ranges = <IAddressRange[]>JSON.parse(eventData[1]);
 
 		this.log(`MemoryChanged: ${eventData}`);
 	}

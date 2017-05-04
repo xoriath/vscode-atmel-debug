@@ -16,10 +16,8 @@ export class Dispatcher {
 	private nil: string = '\x00';
 	private eom: string = '\x03\x01';
 
-	private pendingHandlers: Map<number, any[]>
-		= new Map<number, any[]>();
-	private eventHandlers: Map<string, IEventHandler>
-		= new Map<string, IEventHandler>();
+	private pendingHandlers = new Map<number, any[]>();
+	private eventHandlers = new Map<string, IEventHandler>();
 
 	private logger: (message: string) => void;
 	private debugLogger: (message: string) => void;
@@ -28,10 +26,12 @@ export class Dispatcher {
 		this.host = host;
 		this.port = port;
 
-		if (logger)
+		if (logger) {
 			this.logger = logger;
-		if (debugLogger)
+		}
+		if (debugLogger) {
 			this.debugLogger = debugLogger;
+		}
 	}
 
 	public log(data: string): void {
@@ -79,14 +79,18 @@ export class Dispatcher {
 		let ret = '';
 
 		for (let i = 0; i < str.length; ++i) {
-			if (str.charAt(i) === self.nil)
+			if (str.charAt(i) === self.nil) {
 				ret += (' <nil> ');
-			else if (str.charAt(i) === '\x03')
+			}
+			else if (str.charAt(i) === '\x03') {
 				ret += ('<');
-			else if (str.charAt(i) === '\x01')
+			}
+			else if (str.charAt(i) === '\x01') {
 				ret += ('>');
-			else
+			}
+			else {
 				ret += str.charAt(i);
+			}
 		}
 
 		return ret;
@@ -137,15 +141,16 @@ export class Dispatcher {
 	}
 
 	private unstringify(data: string[]): any[] {
-		let self = this;
 		let args = new Array<{}>();
 
 		for (let index in data) {
 			let element = data[index];
-			if (element === '')
+			if (element === '') {
 				args.push(null);
-			else
+			}
+			else {
 				args.push(JSON.parse(element));
+			}
 		}
 
 		return args;
@@ -199,7 +204,7 @@ export class Dispatcher {
 
 
 	private decodeIntermediateResult(data: string[]): void {
-		let token = +data[0];
+		// let token = +data[0];
 		let eventData = data[1];
 
 		this.log(`[Dispatcher] Progress: ${eventData}`);
@@ -244,10 +249,12 @@ export class Dispatcher {
 
 			delete this.pendingHandlers[token];
 
-			if (errorReport)
+			if (errorReport) {
 				reject(Error(errorReport));
-			else
+			}
+			else {
 				resolve(args);
+			}
 		}
 	}
 }

@@ -34,8 +34,9 @@ export class LocatorService extends Service {
 	public hello(callback?: () => void): void {
 		this.dispatcher.sendEvent(this.name, 'Hello', [[]]);
 
-		if (callback)
+		if (callback) {
 			this.onHelloCallback = callback;
+		}
 	}
 
 	private handlePeerAdded(eventData: string[]): void {

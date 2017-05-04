@@ -219,8 +219,9 @@ export class RunControlService extends Service {
 		let ids = <string[]>JSON.parse(eventData[0]);
 		for (let index in ids) {
 			let id = ids[index];
-			if (id in this.contexts)
+			if (id in this.contexts) {
 				delete this.contexts[id];
+			}
 		}
 
 		this.log(`ContextRemoved: ${ids}`);

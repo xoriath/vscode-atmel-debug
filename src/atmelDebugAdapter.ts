@@ -169,10 +169,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				/* Ignition! TODO: need more properties for USB/IP tools */
 				toolService.setupTool(args.tool, args.toolConnection, args.connectionProperties).then( (tool: IToolContext) => {
 					tool.setProperties({
-						"DeviceName": args.device,
-						"PackPath": args.packPath,
-						"InterfaceName": args.interface,
-						"InterfaceProperties": args.interfaceProperties
+						'DeviceName': args.device,
+						'PackPath': args.packPath,
+						'InterfaceName': args.interface,
+						'InterfaceProperties': args.interfaceProperties
 					}).catch( (reason: Error) => {
 								throw reason;
 							});
@@ -521,7 +521,6 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 	/* Variables belong to a scope (which is created above) */
 	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		let self = this;
 
 		response.body = {
 			variables: []
@@ -677,8 +676,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	private hashes: Map<number, string>;
 
 	private hashString(str: string): number {
-		if (!this.hashes)
+		if (!this.hashes) {
 			this.hashes = new Map<number, string>();
+		}
 
 		/* Java odd-shift object hash (more or less at least) */
 		/* TODO: change for something common? Need only to translate strings to numbers wihtout colliding */
@@ -693,8 +693,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	}
 
 	private getStringFromHash(hash: number): string {
-		if (hash in this.hashes)
+		if (hash in this.hashes) {
 			return this.hashes[hash];
+		}
 		return '';
 	}
 
