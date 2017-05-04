@@ -63,6 +63,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		response.body.supportsEvaluateForHovers = true;
 		response.body.supportsSetVariable = true;
 
+		/** The debug adapter supports a 'format' attribute on the stackTraceRequest, variablesRequest, and evaluateRequest. */
+		response.body.supportsValueFormattingOptions = false;
+
+		response.body.supportsModulesRequest = false;
+
 		response.body.supportsFunctionBreakpoints = true;
 		response.body.supportsConditionalBreakpoints = false;  		// TODO: why doesn't this break?
 		response.body.supportsHitConditionalBreakpoints = false; 	// TODO: implement
@@ -72,6 +77,18 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		response.body.supportsStepInTargetsRequest = false;
 		response.body.supportsGotoTargetsRequest = true;
+
+		response.body.supportsExceptionOptions = false;
+		response.body.supportsExceptionInfoRequest = false;
+		response.body.exceptionBreakpointFilters = null;
+		response.body.additionalModuleColumns = null;
+		response.body.supportedChecksumAlgorithms = null;
+
+        /** The debug adapter supports the RestartRequest. In this case a client should not implement 'restart' by terminating and relaunching the adapter but by calling the RestartRequest. */
+		response.body.supportsRestartRequest = false;
+
+        /** The debug adapter supports the 'terminateDebuggee' attribute on the 'disconnect' request. */
+		response.body.supportTerminateDebuggee = false;
 
 		this.sendResponse(response);
 	}
@@ -387,6 +404,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.log('[NOT IMPLEMENTED] gotoRequest');
 		super.gotoRequest(response, args);
+	}
+
+	protected stepInTargetsRequest(response: DebugProtocol.StepInTargetsResponse, args: DebugProtocol.StepInTargetsArguments): void {
+		this.log('[NOT IMPLEMENTED] stepInTargetsRequest');
+		super.stepInTargetsRequest(response, args);
 	}
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
