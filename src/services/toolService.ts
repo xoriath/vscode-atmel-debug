@@ -190,7 +190,7 @@ export class ToolService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IToolContext>();
 
 		for (let index in contextsData) {
 			let context = ToolContext.fromJson(this, contextsData[index]);
@@ -210,7 +210,7 @@ export class ToolService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IToolContext>();
 
 		for (let index in contextsData) {
 			let context = ToolContext.fromJson(this, contextsData[index]);

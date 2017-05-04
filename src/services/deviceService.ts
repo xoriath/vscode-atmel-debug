@@ -104,7 +104,7 @@ export class DeviceService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <DeviceContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IDeviceContext>();
 
 		for (let index in contextsData) {
 			let context = DeviceContext.fromJson(this, contextsData[index]);
@@ -124,7 +124,7 @@ export class DeviceService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <DeviceContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IDeviceContext>();
 
 		for (let index in contextsData) {
 			let context = DeviceContext.fromJson(this, contextsData[index]);

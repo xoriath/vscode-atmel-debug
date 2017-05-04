@@ -193,7 +193,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		super.attachRequest(response, args);
 	}
 
-	private activeBreakpoints = [];
+	private activeBreakpointIds = new Array<string>();
 
 	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
 	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
@@ -211,8 +211,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 
 		/* Remove all active breakpoints */
-		breakpointsService.remove(this.activeBreakpoints);
-		this.activeBreakpoints = [];
+		breakpointsService.remove(this.activeBreakpointIds);
+		this.activeBreakpointIds = [];
 
 		let breakpointsToProcess = args.breakpoints.length;
 
@@ -244,7 +244,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, breakpoint.Column);
 
 					response.body.breakpoints.push(bp);
-					this.activeBreakpoints.push(breakpointId);
+					this.activeBreakpointIds.push(breakpointId);
 
 					/* Since we need to bind all the requested breakpoints before responding, wait until the last is bound */
 					if (--breakpointsToProcess === 0) {
@@ -255,7 +255,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		});
 	}
 
-	private activeFunctionBreakpoints = [];
+	private activeFunctionBreakpointIds = new Array<string>();
 
 	/* TODO: this is called once PER SOURCE FILE. Need to extend acitveBreakpoints etc */
 	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
@@ -271,8 +271,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			processContext = processService.contexts[index];
 		}
 
-		breakpointsService.remove(this.activeFunctionBreakpoints);
-		this.activeFunctionBreakpoints = [];
+		breakpointsService.remove(this.activeFunctionBreakpointIds);
+		this.activeFunctionBreakpointIds = [];
 
 		let breakpointsToProcess = args.breakpoints.length;
 
@@ -296,7 +296,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					let bp = new Breakpoint(breakpoint.Enabled, breakpoint.Line, /*breakpoint.Column*/ 0);
 
 					response.body.breakpoints.push(bp);
-					this.activeFunctionBreakpoints.push(breakpointId);
+					this.activeFunctionBreakpointIds.push(breakpointId);
 
 					if (--breakpointsToProcess === 0) {
 						this.sendResponse(response);

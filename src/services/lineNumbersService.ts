@@ -83,7 +83,7 @@ export class LineNumbersService extends Service {
 			self.dispatcher.sendCommand(self.name, 'mapToSource', [parentContext, startAddress, endAddress]).then( (data: string) => {
 				let contexts = <LineNumbersContext[]>JSON.parse(data[0]);
 
-				let newContexts = [];
+				let newContexts = new Array<ILineNumbersContext>();
 				for (let index in contexts) {
 					newContexts.push(LineNumbersContext.fromJson(contexts[index]));
 				}

@@ -134,7 +134,7 @@ export class MemoryService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <MemoryContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IMemoryContext>();
 
 		for (let index in contextsData) {
 			let context = MemoryContext.fromJson(this, contextsData[index]);
@@ -154,7 +154,7 @@ export class MemoryService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <MemoryContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IMemoryContext>();
 
 		for (let index in contextsData) {
 			let context = MemoryContext.fromJson(this, contextsData[index]);

@@ -75,8 +75,8 @@ export class RunControlContext implements IRunControlContext {
 }
 
 export interface IRunControlListener {
-	contextAdded(contexts: RunControlContext[]): void;
-	contextChanged(contexts: RunControlContext[]): void;
+	contextAdded(contexts: IRunControlContext[]): void;
+	contextChanged(contexts: IRunControlContext[]): void;
 	contextRemoved(contextIds: string[]): void;
 
 	contextSuspended(contextId: string, pc: number, reason: string, state: any): void;
@@ -176,7 +176,7 @@ export class RunControlService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IRunControlContext>();
 
 		for (let index in contextsData) {
 			let context = RunControlContext.fromJson(this, contextsData[index]);
@@ -196,7 +196,7 @@ export class RunControlService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IRunControlContext>();
 
 		for (let index in contextsData) {
 			let context = RunControlContext.fromJson(this, contextsData[index]);

@@ -64,7 +64,7 @@ export class Dispatcher {
 			this.log(`[Dispatcher] WS:close: ${code} => ${message}`);
 		});
 
-		this.ws.on('message', (data: string, flags) => {
+		this.ws.on('message', (data: string, flags: { binary: boolean }) => {
 			this.handleMessage(data);
 		});
 
@@ -138,7 +138,7 @@ export class Dispatcher {
 
 	private unstringify(data: string[]): any[] {
 		let self = this;
-		let args = [];
+		let args = new Array<{}>();
 
 		for (let index in data) {
 			let element = data[index];

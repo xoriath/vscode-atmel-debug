@@ -147,7 +147,7 @@ export class ProcessesService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <ProcessesContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IProcessesContext>();
 
 		for (let index in contextsData) {
 			let context = ProcessesContext.fromJson(this, contextsData[index]);
@@ -167,7 +167,7 @@ export class ProcessesService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <ProcessesContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IProcessesContext>();
 
 		for (let index in contextsData) {
 			let context = ProcessesContext.fromJson(this, contextsData[index]);

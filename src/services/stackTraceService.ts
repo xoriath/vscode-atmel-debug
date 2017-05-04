@@ -117,7 +117,7 @@ export class StackTraceService extends Service {
 		return new Promise<StackTraceContext[]>(function(resolve, reject) {
 			self.dispatcher.sendCommand(self.name, 'getContext', [contextIds]).then( (data: string) => {
 				let contextsData = <StackTraceContext[]>JSON.parse(data);
-				let newContexts = [];
+				let newContexts = new Array<IStackTraceContext>();
 
 				for (let index in contextsData) {
 					newContexts.push(StackTraceContext.fromJson(contextsData[index]));

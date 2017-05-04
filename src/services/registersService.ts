@@ -108,7 +108,7 @@ export class RegistersService extends Service {
 	private handleContextAdded(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <RegistersContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IRegistersContext>();
 
 		for (let index in contextsData) {
 			let context = RegistersContext.fromJson(this, contextsData[index]);
@@ -128,7 +128,7 @@ export class RegistersService extends Service {
 	private handleContextChanged(eventData: string[]): void {
 		// TODO: into Service
 		let contextsData = <RegistersContext[]>JSON.parse(eventData[0]);
-		let newContexts = [];
+		let newContexts = new Array<IRegistersContext>();
 
 		for (let index in contextsData) {
 			let context = RegistersContext.fromJson(this, contextsData[index]);
