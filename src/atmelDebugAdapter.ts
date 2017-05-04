@@ -96,8 +96,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 	}
 
+	private remapSourcePathFrom: string;
+	private remapSourcePathTo: string;
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		let self = this;
+
+		self.remapSourcePathFrom = args.remapSourcePathFrom;
+		self.remapSourcePathTo = args.remapSourcePathTo;
 
 		/* Create the dispatcher */
 		self.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort,
@@ -162,11 +167,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
 
 				/* Ignition! TODO: need more properties for USB/IP tools */
-				toolService.setupTool(args.tool, '', {}).then( (tool: IToolContext) => {
+				toolService.setupTool(args.tool, args.toolConnection, args.connectionProperties).then( (tool: IToolContext) => {
 					tool.setProperties({
-								'DeviceName': args.device,
-								'PackPath': args.packPath
-							}).catch( (reason: Error) => {
+						"DeviceName": args.device,
+						"PackPath": args.packPath,
+						"InterfaceName": args.interface,
+						"InterfaceProperties": args.interfaceProperties
+					}).catch( (reason: Error) => {
 								throw reason;
 							});
 				}).catch( (reason: Error) => {
@@ -379,6 +386,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	/* Goto is a resume with type goto and count = address of target */
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.log('[NOT IMPLEMENTED] gotoRequest');
+		super.gotoRequest(response, args);
 	}
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
@@ -387,7 +395,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 	/* TODO: May do this through the fileSystem TCF service and the disassembly service (for locations without source) */
 	protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
-		this.log('[NOT IMPLEMENTED] sourceRequest');
+		this.log(`[NOT IMPLEMENTED] sourceRequest: ${args.sourceReference}`);
 		super.sourceRequest(response, args);
 	}
 
@@ -451,11 +459,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 							let frameName = `${frame.Func.trim()} (${frameArgs.join(', ')})`;
 
 							/* Create the source */
-							let source = new Source(path.basename(frame.File.trim()),
-													path.normalize(frame.File.trim()),
-													this.hashString(frame.File.trim()),
-													frame.File,
-													frame.File);
+							let remappedFile = path.normalize(frame.File.replace(this.remapSourcePathFrom, this.remapSourcePathTo).trim());
+							this.log(`[SRC] ${frame.File} => ${remappedFile}`);
+
+							let source = new Source(path.basename(remappedFile),
+													this.convertDebuggerPathToClient(remappedFile),
+													0 /* 0 == Do not use source request to get content */
+													// this.hashString(frame.File.trim()),
+													// this.convertDebuggerPathToClient(remappedFile),
+													// this.convertDebuggerPathToClient(remappedFile)
+													);
+							this.log(`[SOURCE] ${source.path} => ${source.name}`);
 
 							/* Push the frame */
 							response.body.stackFrames.push(

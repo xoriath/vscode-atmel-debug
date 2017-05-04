@@ -14,7 +14,13 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 
 	program: string;
 	tool: string;
+	toolConnection: string;
+	connectionProperties: any;
+
 	device: string;
+
+	interface: string;
+	interfaceProperties: any;
 
 	launchSuspended: boolean;
 	launchAttached: boolean;
@@ -31,4 +37,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	bootSegment: number; // enum
 
 	packPath: string;
+
+	remapSourcePathFrom: string;
+	remapSourcePathTo: string;
 }

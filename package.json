@@ -44,7 +44,6 @@
     "prepublish": "node ./node_modules/typescript/bin/tsc -p ./src",
     "compile": "node ./node_modules/typescript/bin/tsc -p ./src",
     "watch": "node ./node_modules/typescript/bin/tsc -w -p ./src",
-    "test": "node ./node_modules/mocha/bin/mocha -u tdd ./out/tests/",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "lint": "node ./node_modules/tslint/bin/tslint ./src/*.ts ./src/services/*.ts ./tests/*.ts"
   },
@@ -75,8 +74,22 @@
               "atbackendPort",
               "program",
               "tool",
+              "toolConnection",
+              "connectionProperties",
+              "device",
+              "interface",
+              "interfaceProperties",
               "launchSuspended",
-              "launchAttached"
+              "launchAttached",
+              "cacheFlash",
+              "eraseRule",
+              "preserveEeprom",
+              "ramSnippetAddress",
+              "progFlashFromRam",
+              "useGdb",
+              "gdbLocation",
+              "bootSegment",
+              "packPath"
             ],
             "properties": {
               "atbackendHost": {
@@ -86,7 +99,7 @@
               },
               "atbackendPort": {
                 "type": "number",
-                "description": "Port to connect to.",
+                "description": "websocket port to connect to.",
                 "default": 4712
               },
               "program": {
@@ -97,12 +110,41 @@
               "tool": {
                 "type": "string",
                 "description": "Identifier of tool to launch on.",
-                "default": "com.atmel.avrdbg.tool.simulator"
+                "default": "com.atmel.avrdbg.tool.edbg"
+              },
+              "toolConnection": {
+                "type": "string",
+                "description": "Connection to connect with.",
+                "default": "com.atmel.avrdbg.connection.cmsis-dap"
+              },
+              "connectionProperties": {
+                "type": "any",
+                "description": "Properties of the connection interface.",
+                "default": {
+                  "SerialNumber": "ATML2407080200003415",
+                  "Type": "com.atmel.avrdbg.connection.cmsis-dap",
+                  "DapProduct": "EDBG CMSIS-DAP",
+                  "UsbVendorId": 1003,
+                  "UsbProductId": 8465
+                }
               },
               "device": {
                 "type": "string",
                 "description": "Name of device.",
                 "default": ""
+              },
+              "interface": {
+                "type": "string",
+                "description": "",
+                "default": "SWD"
+              },
+              "interfaceProperties": {
+                "type": "any",
+                "description": "",
+                "default": {
+                  "SwdClock": 2000000,
+                  "KeepTimersRunning": true
+                }
               },
               "launchSuspended": {
                 "type": "boolean",
@@ -158,6 +200,16 @@
                 "type": "string",
                 "description": "Path to the Device Support Pack for the device.",
                 "default": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+              },
+              "remapSourcePathFrom": {
+                "type": "string",
+                "description": "Remap part of source reference path from this path.",
+                "default": ""
+              },
+              "remapSourcePathTo": {
+                "type": "string",
+                "description": "Remap part of source reference path to this path.",
+                "default": ""
               }
             }
           }
@@ -167,9 +219,35 @@
             "name": "atmel-debug",
             "type": "atbackend",
             "request": "launch",
-            "program": "${workspaceRoot}/GccApplication2/Debug/GccApplication2.elf",
-            "tool": "com.atmel.avrdbg.tool.simulator",
-            "device": "ATmega128"
+            "atbackendHost": "127.0.0.1",
+            "atbackendPort": 4712,
+            "program": "${workspaceRoot}/Debug/GccApplication1.elf",
+            "tool": "com.atmel.avrdbg.tool.edbg",
+            "toolConnection": "com.atmel.avrdbg.connection.cmsis-dap",
+            "connectionProperties": {
+              "SerialNumber": "ATML2407080200003415",
+              "Type": "com.atmel.avrdbg.connection.cmsis-dap",
+              "DapProduct": "EDBG CMSIS-DAP",
+              "UsbVendorId": 1003,
+              "UsbProductId": 8465
+            },
+            "device": "ATSAMV71Q21",
+            "interface": "SWD",
+            "interfaceProperties": {
+              "SwdClock": 2000000,
+              "KeepTimersRunning": true
+            },
+            "launchSuspended": true,
+            "launchAttached": true,
+            "cacheFlash": true,
+            "eraseRule": 0,
+            "preserveEeprom": true,
+            "progFlashFromRam": true,
+            "ramSnippetAddress": "0x20000000",
+            "useGdb": true,
+            "gdbLocation": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gdb.exe",
+            "bootSegment": 2,
+            "packPath": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
           }
         ]
       }
