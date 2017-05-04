@@ -162,11 +162,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				deviceService.addListener(new ProcessLauncher(args.program, processService, args));
 
 				/* Ignition! TODO: need more properties for USB/IP tools */
-				toolService.setupTool(args.tool, '', {}).then( (tool: IToolContext) => {
+				toolService.setupTool(args.tool, args.toolConnection, args.connectionProperties).then( (tool: IToolContext) => {
 					tool.setProperties({
-								'DeviceName': args.device,
-								'PackPath': args.packPath
-							}).catch( (reason: Error) => {
+						"DeviceName": args.device,
+						"PackPath": args.packPath,
+						"InterfaceName": args.interface,
+						"InterfaceProperties": args.interfaceProperties
+					}).catch( (reason: Error) => {
 								throw reason;
 							});
 				}).catch( (reason: Error) => {
