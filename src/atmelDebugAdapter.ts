@@ -386,6 +386,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	/* Goto is a resume with type goto and count = address of target */
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.log('[NOT IMPLEMENTED] gotoRequest');
+		super.gotoRequest(response, args);
 	}
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
@@ -394,7 +395,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 	/* TODO: May do this through the fileSystem TCF service and the disassembly service (for locations without source) */
 	protected sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments): void {
-		this.log('[NOT IMPLEMENTED] sourceRequest');
+		this.log(`[NOT IMPLEMENTED] sourceRequest: ${args.sourceReference}`);
 		super.sourceRequest(response, args);
 	}
 
