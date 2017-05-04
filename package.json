@@ -201,6 +201,16 @@
                 "type": "string",
                 "description": "Path to the Device Support Pack for the device.",
                 "default": "C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.0.106/Atmel.ATmega_DFP.pdsc"
+              },
+              "remapSourcePathFrom": {
+                "type": "string",
+                "description": "Remap part of source reference path from this path.",
+                "default": ""
+              },
+              "remapSourcePathTo": {
+                "type": "string",
+                "description": "Remap part of source reference path to this path.",
+                "default": ""
               }
             }
           }

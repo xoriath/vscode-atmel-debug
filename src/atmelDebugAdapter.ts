@@ -96,8 +96,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 	}
 
+	private remapSourcePathFrom: string;
+	private remapSourcePathTo: string;
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		let self = this;
+
+		self.remapSourcePathFrom = args.remapSourcePathFrom;
+		self.remapSourcePathTo = args.remapSourcePathTo;
 
 		/* Create the dispatcher */
 		self.dispatcher = new Dispatcher(args.atbackendHost, args.atbackendPort,
@@ -453,11 +458,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 							let frameName = `${frame.Func.trim()} (${frameArgs.join(', ')})`;
 
 							/* Create the source */
-							let source = new Source(path.basename(frame.File.trim()),
-													path.normalize(frame.File.trim()),
-													this.hashString(frame.File.trim()),
-													frame.File,
-													frame.File);
+							let remappedFile = path.normalize(frame.File.replace(this.remapSourcePathFrom, this.remapSourcePathTo).trim());
+							this.log(`[SRC] ${frame.File} => ${remappedFile}`);
+
+							let source = new Source(path.basename(remappedFile),
+													this.convertDebuggerPathToClient(remappedFile),
+													0 /* 0 == Do not use source request to get content */
+													// this.hashString(frame.File.trim()),
+													// this.convertDebuggerPathToClient(remappedFile),
+													// this.convertDebuggerPathToClient(remappedFile)
+													);
+							this.log(`[SOURCE] ${source.path} => ${source.name}`);
 
 							/* Push the frame */
 							response.body.stackFrames.push(

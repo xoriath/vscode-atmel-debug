@@ -37,4 +37,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	bootSegment: number; // enum
 
 	packPath: string;
+
+	remapSourcePathFrom: string;
+	remapSourcePathTo: string;
 }
