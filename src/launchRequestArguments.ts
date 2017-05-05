@@ -1,8 +1,6 @@
 'use strict';
 
-import {
-	DebugProtocol
-} from 'vscode-debugprotocol';
+import { DebugProtocol } from 'vscode-debugprotocol';
 
 /**
  * This interface should always match the schema found in the mock-debug extension manifest.

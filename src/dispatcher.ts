@@ -144,11 +144,9 @@ export class Dispatcher {
 		let self = this;
 		let str = '';
 
-		if (args) {
-			args.forEach(arg => {
-				str += JSON.stringify(arg) + self.nil;
-			});
-		}
+		str = args.map( (arg) => {
+			return JSON.stringify(arg) + self.nil;
+		}).join('');
 
 		return str;
 	}
