@@ -2,7 +2,7 @@
 
 import * as WebSocket from 'ws';
 
-import { IEventHandler } from './services/iservice';
+import { IEventHandler, IProgressEventHandler, ICongestionHandler } from './services/iservice';
 
 export class Dispatcher {
 
@@ -18,6 +18,8 @@ export class Dispatcher {
 
 	private pendingHandlers = new Map<number, any[]>();
 	private eventHandlers = new Map<string, IEventHandler>();
+	private progressHandlers = new Array<IProgressEventHandler>();
+	private congestionHandlers = new Array<ICongestionHandler>();
 
 	private logger: (message: string) => void;
 	private debugLogger: (message: string) => void;
@@ -103,6 +105,17 @@ export class Dispatcher {
 		self.eventHandlers[service] = handler;
 	}
 
+
+	public progressHandler(handler: IProgressEventHandler): void {
+		let self = this;
+		self.progressHandlers.push(handler);
+	}
+
+	public congestionHandler(handler: ICongestionHandler): void {
+		let self = this;
+		self.congestionHandlers.push(handler);
+	}
+
 	private sendMessage(message: string): void {
 		let self = this;
 
@@ -132,9 +145,9 @@ export class Dispatcher {
 		let str = '';
 
 		if (args) {
-			for (let index in args) {
-				str += JSON.stringify(args[index]) + self.nil;
-			}
+			args.forEach(arg => {
+				str += JSON.stringify(arg) + self.nil;
+			});
 		}
 
 		return str;
@@ -143,15 +156,14 @@ export class Dispatcher {
 	private unstringify(data: string[]): any[] {
 		let args = new Array<{}>();
 
-		for (let index in data) {
-			let element = data[index];
+		data.forEach(element => {
 			if (element === '') {
 				args.push(null);
 			}
 			else {
 				args.push(JSON.parse(element));
 			}
-		}
+		});
 
 		return args;
 	}
@@ -205,7 +217,11 @@ export class Dispatcher {
 
 	private decodeIntermediateResult(data: string[]): void {
 		// let token = +data[0];
-		let eventData = data[1];
+		let eventData = JSON.parse(data[1]);
+
+		this.progressHandlers.forEach(handler => {
+			handler.progress(+eventData['ProgressComplete'], +eventData['ProgressTotal'], eventData['Description'])
+		});
 
 		this.log(`[Dispatcher] Progress: ${eventData}`);
 	}
@@ -224,6 +240,10 @@ export class Dispatcher {
 
 	private decodeFlowControl(data: string[]): void {
 		let congestion = +data.shift();
+
+		this.congestionHandlers.forEach(handler => {
+			handler.congestion(congestion);
+		});
 
 		this.log(`[Dispatcher] Congestion: ${congestion}`);
 
