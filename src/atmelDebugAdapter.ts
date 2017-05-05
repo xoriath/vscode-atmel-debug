@@ -24,16 +24,16 @@ import {
 
 import { Dispatcher } from './dispatcher';
 import { LocatorService } from './services/locatorService';
-import { ToolService, IToolContext, IToolListener, IAttachedTool } from './services/toolService';
-import { DeviceService, IDeviceContext, IDeviceListener } from './services/deviceService';
-import { ProcessesService, IProcessesContext, IProcessesListener } from './services/processesService';
+import { ToolService, IToolContext } from './services/toolService';
+import { DeviceService } from './services/deviceService';
+import { ProcessesService, IProcessesContext } from './services/processesService';
 import { MemoryService } from './services/memoryService';
 import { RegistersService, IRegistersContext } from './services/registersService';
-import { ExpressionsService, ExpressionContext } from './services/expressionsService';
-import { LineNumbersService, LineNumbersContext } from './services/lineNumbersService';
-import { StackTraceService, StackTraceContext } from './services/stackTraceService';
+import { ExpressionsService } from './services/expressionsService';
+import { LineNumbersService } from './services/lineNumbersService';
+import { StackTraceService } from './services/stackTraceService';
 import { StreamService } from './services/streamService';
-import { BreakpointsService, BreakpointContext, AccessMode } from './services/breakpointsService';
+import { BreakpointsService, AccessMode } from './services/breakpointsService';
 import { RunControlService, RunControlContext, IRunControlListener, ResumeMode } from './services/runControlService';
 import { IService } from './services/iservice';
 
