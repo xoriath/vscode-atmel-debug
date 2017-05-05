@@ -2,7 +2,7 @@
 'use strict';
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 
 // {
@@ -40,7 +40,7 @@ export class ExpressionContext implements IExpressionContext {
 	public Type: string;
 	public Size: number;
 
-	private service: ExpressionsService;
+	public service: ExpressionsService;
 
 	public setProperties(properties: any): Promise<any> {
 		return Promise.reject(Error('NOT IMPLEMENTED'));
@@ -52,25 +52,6 @@ export class ExpressionContext implements IExpressionContext {
 
 	public assign(value: string): Promise<string> {
 		return this.service.assign(this.ID, value);
-	}
-
-
-	public static fromJson(service: ExpressionsService, data: IExpressionContext): ExpressionContext {
-		let context = new ExpressionContext();
-
-		context.service = service;
-
-		context.ID = data['ID'];
-		context.Numchildren = data['Numchildren'];
-		context.Val = data['Val'];
-		context.CanAssign = data['CanAssign'];
-		context.Expression = data['Expression'];
-		context.ExprPath = data['ExprPath'];
-		context.FormatString = data['FormatString'];
-		context.Type = data['Type'];
-		context.Size = data['Size'];
-
-		return context;
 	}
 
 	public toString(): string {
@@ -89,7 +70,13 @@ export class ExpressionContext implements IExpressionContext {
 	}
 }
 
-export class ExpressionsService extends Service {
+
+export interface ILineNumbersListener extends IContextListener<IExpressionContext> {
+	exited(id: string, exitCode: number): void;
+}
+
+
+export class ExpressionsService extends Service<IExpressionContext, ILineNumbersListener> {
 
 	public constructor(dispatcher: Dispatcher) {
 		super('Expressions', dispatcher);
@@ -113,7 +100,8 @@ export class ExpressionsService extends Service {
 		return new Promise<ExpressionContext>(function(resolve, reject) {
 			self.dispatcher.sendCommand(self.name, 'getContext', [contextId]).then( (data: string) => {
 				let contextData = <ExpressionContext>JSON.parse(data);
-				let context = ExpressionContext.fromJson(self, contextData);
+				let context = self.fromJson(self, contextData);
+				this.contexts[context.ID] = context;
 				resolve(context);
 			}).catch( (error: Error) => {
 				reject(error);
@@ -127,7 +115,7 @@ export class ExpressionsService extends Service {
 		return new Promise<ExpressionContext>(function(resolve, reject) {
 			self.dispatcher.sendCommand(self.name, 'compute', [contextId, language, expression]).then( (data: string) => {
 				let contextData = <ExpressionContext>JSON.parse(data);
-				let context = ExpressionContext.fromJson(self, contextData);
+				let context = self.fromJson(self, contextData);
 				resolve(context);
 			}).catch( (error: Error) => {
 				reject(error);
@@ -143,10 +131,33 @@ export class ExpressionsService extends Service {
 		return this.dispatcher.sendCommand(this.name, 'dispose', [contextId]);
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
 			default:
-				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
 	}
+
+	public fromJson(service: ExpressionsService, data: IExpressionContext): ExpressionContext {
+		let context = new ExpressionContext();
+
+		context.service = service;
+
+		context.ID = data['ID'];
+		context.Numchildren = data['Numchildren'];
+		context.Val = data['Val'];
+		context.CanAssign = data['CanAssign'];
+		context.Expression = data['Expression'];
+		context.ExprPath = data['ExprPath'];
+		context.FormatString = data['FormatString'];
+		context.Type = data['Type'];
+		context.Size = data['Size'];
+
+		return context;
+	}
+
 }

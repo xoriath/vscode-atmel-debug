@@ -3,7 +3,7 @@
 // http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Run%20Control.html
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 // [{"ID":"GdbRC_7","CanSuspend":true,"CanResume":262143,"CanCount":262143,"IsContainer":false,"HasState":true,"CanTerminate":true}]
 export interface IRunControlContext extends IContext {
@@ -13,6 +13,11 @@ export interface IRunControlContext extends IContext {
 	IsContainer: boolean;
 	HasState: boolean;
 	CanTerminate: boolean;
+
+	resume(mode: ResumeMode, count?: number): Promise<any>;
+	suspend(): Promise<any>;
+	terminate(): Promise<any>;
+	detach(): Promise<any>;
 }
 
 
@@ -25,8 +30,7 @@ export class RunControlContext implements IRunControlContext {
 	public HasState: boolean;
 	public CanTerminate: boolean;
 
-
-	private runcontrolservice: RunControlService;
+	public runcontrolservice: RunControlService;
 
 
 	public setProperties(properties: any): Promise<any> {
@@ -53,32 +57,12 @@ export class RunControlContext implements IRunControlContext {
 		return this.runcontrolservice.detach(this.ID);
 	}
 
-	public static fromJson(service: RunControlService, data: IRunControlContext): RunControlContext {
-		let context = new RunControlContext();
-
-		context.runcontrolservice = service;
-
-		context.ID = data['ID'];
-		context.CanSuspend = data['CanSuspend'];
-		context.CanResume = data['CanResume'];
-		context.CanCount = data['CanCount'];
-		context.IsContainer = data['IsContainer'];
-		context.HasState = data['HasState'];
-		context.CanTerminate = data['CanTerminate'];
-
-		return context;
-	}
-
 	public toString(): string {
 		return `${this.ID}`;
 	}
 }
 
-export interface IRunControlListener {
-	contextAdded(contexts: IRunControlContext[]): void;
-	contextChanged(contexts: IRunControlContext[]): void;
-	contextRemoved(contextIds: string[]): void;
-
+export interface IRunControlListener extends IContextListener<IRunControlContext> {
 	contextSuspended(contextId: string, pc: number, reason: string, state: any): void;
 	contextResumed(contextId: string): void;
 	contextException(contextId: string, description: string): void;
@@ -109,26 +93,11 @@ export enum ResumeMode {
 	Goto = 17
 }
 
-export class RunControlService extends Service {
+export class RunControlService extends Service<IRunControlContext, IRunControlListener> {
 
 	public constructor(dispatcher: Dispatcher) {
 		super('RunControl', dispatcher);
 	}
-
-	public contexts: Map<string, RunControlContext> = new Map<string, RunControlContext>();
-
-	private listeners: Array<IRunControlListener> = new Array<IRunControlListener>();
-
-	public addListener(listener: IRunControlListener): void {
-		this.listeners.push(listener);
-	}
-
-	public removeListener(listener: IRunControlListener): void {
-		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value !== listener;
-		});
-	}
-
 
 	public resume(contextId: string, mode: ResumeMode, count?: number): Promise<string> {
 		return this.dispatcher.sendCommand(this.name, 'resume', [contextId, mode, count | 0]);
@@ -151,85 +120,21 @@ export class RunControlService extends Service {
 	}
 
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
-			case 'contextAdded':
-				this.handleContextAdded(eventData);
-				break;
-			case 'contextChanged':
-				this.handleContextChanged(eventData);
-				break;
-			case 'contextRemoved':
-				this.handleContextRemoved(eventData);
-				break;
 			case 'contextSuspended':
 				this.handleContextSuspended(eventData);
-				break;
+				return true;
 			case 'contextResumed':
 				this.handleContextResumed(eventData);
-				break;
+				return true;
 			default:
 				this.log(`No matching event handler: ${event}`);
-		}
-	}
-
-	private handleContextAdded(eventData: string[]): void {
-		// TODO: into Service
-		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
-		let newContexts = new Array<IRunControlContext>();
-
-		for (let index in contextsData) {
-			let context = RunControlContext.fromJson(this, contextsData[index]);
-			this.contexts[context.ID] = context;
-			newContexts.push(context);
-		}
-
-		this.log(`ContextAdded: ${newContexts}`);
-
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
-			listener.contextAdded(newContexts);
-		}
-	}
-
-	private handleContextChanged(eventData: string[]): void {
-		// TODO: into Service
-		let contextsData = <RunControlContext[]>JSON.parse(eventData[0]);
-		let newContexts = new Array<IRunControlContext>();
-
-		for (let index in contextsData) {
-			let context = RunControlContext.fromJson(this, contextsData[index]);
-			this.contexts[context.ID] = context;
-			newContexts.push(context);
-		}
-
-		this.log(`ContextAdded: ${newContexts}`);
-
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
-			listener.contextChanged(newContexts);
-		}
-	}
-
-	private handleContextRemoved(eventData: string[]): void {
-		// TODO: into Service
-
-		let ids = <string[]>JSON.parse(eventData[0]);
-		for (let index in ids) {
-			let id = ids[index];
-			if (id in this.contexts) {
-				delete this.contexts[id];
-			}
-		}
-
-		this.log(`ContextRemoved: ${ids}`);
-
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
-			listener.contextRemoved(ids);
+				return false;
 		}
 	}
 
@@ -241,11 +146,9 @@ export class RunControlService extends Service {
 
 		this.log(`ContextSuspended: ${id} => ${pc} (${reason})`);
 
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
+		this.listeners.forEach(listener => {
 			listener.contextSuspended(id, pc, reason, state);
-		}
+		});
 	}
 
 	private handleContextResumed(eventData: string[]): void {
@@ -253,11 +156,25 @@ export class RunControlService extends Service {
 
 		this.log(`ContextResumed: ${id}`);
 
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
+		this.listeners.forEach(listener => {
 			listener.contextResumed(id);
-		}
+		});
+	}
+
+	public fromJson(service: RunControlService, data: IRunControlContext): RunControlContext {
+		let context = new RunControlContext();
+
+		context.runcontrolservice = service;
+
+		context.ID = data['ID'];
+		context.CanSuspend = data['CanSuspend'];
+		context.CanResume = data['CanResume'];
+		context.CanCount = data['CanCount'];
+		context.IsContainer = data['IsContainer'];
+		context.HasState = data['HasState'];
+		context.CanTerminate = data['CanTerminate'];
+
+		return context;
 	}
 
 }

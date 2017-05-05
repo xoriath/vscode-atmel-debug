@@ -2,7 +2,7 @@
 'use strict';
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 
 // {
@@ -48,29 +48,18 @@ export class LineNumbersContext implements ILineNumbersContext {
 		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
-
-	public static fromJson(data: ILineNumbersContext): LineNumbersContext {
-		let context = new LineNumbersContext();
-
-		context.ID = data['ID'];
-		context.SLine = data['SLine'];
-		context.ELine = data['ELine'];
-		context.ECol = data['ECol'];
-		context.Function = data['Function'];
-		context.File = data['File'];
-		context.SAddr = data['SAddr'];
-		context.EAddr = data['EAddr'];
-		context.IsStmt = data['IsStmt'];
-
-		return context;
-	}
-
 	public toString(): string {
 		return `${this.ID}`;
 	}
 }
 
-export class LineNumbersService extends Service {
+
+export interface ILineNumbersListener extends IContextListener<ILineNumbersContext> {
+	exited(id: string, exitCode: number): void;
+}
+
+
+export class LineNumbersService extends Service<ILineNumbersContext, ILineNumbersListener> {
 
 	public constructor(dispatcher: Dispatcher) {
 		super('LineNumbers', dispatcher);
@@ -84,9 +73,9 @@ export class LineNumbersService extends Service {
 				let contexts = <LineNumbersContext[]>JSON.parse(data[0]);
 
 				let newContexts = new Array<ILineNumbersContext>();
-				for (let index in contexts) {
-					newContexts.push(LineNumbersContext.fromJson(contexts[index]));
-				}
+				contexts.forEach(context => {
+					newContexts.push(self.fromJson(self, context));
+				});
 
 				resolve(newContexts);
 			}).catch( (error: Error) => {
@@ -95,10 +84,30 @@ export class LineNumbersService extends Service {
 		});
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
 			default:
-				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
+	}
+
+	public fromJson(service: LineNumbersService, data: ILineNumbersContext): LineNumbersContext {
+		let context = new LineNumbersContext();
+
+		context.ID = data['ID'];
+		context.SLine = data['SLine'];
+		context.ELine = data['ELine'];
+		context.ECol = data['ECol'];
+		context.Function = data['Function'];
+		context.File = data['File'];
+		context.SAddr = data['SAddr'];
+		context.EAddr = data['EAddr'];
+		context.IsStmt = data['IsStmt'];
+
+		return context;
 	}
 }

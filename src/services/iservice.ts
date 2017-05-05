@@ -2,11 +2,10 @@
 
 export interface IService extends IEventHandler {
 	name: string;
-
 }
 
 export interface IEventHandler {
-	eventHandler(event: string, eventData: string[]): void;
+	eventHandler(event: string, eventData: string[]): boolean;
 }
 
 export interface IProgressEventHandler {

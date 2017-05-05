@@ -4,7 +4,7 @@
 // http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Stack%20Trace.html
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 	// { "ID": "gdbProc_3:0:210",
 	//   "Level": 0,
@@ -52,50 +52,20 @@ export class StackTraceContext implements IStackTraceContext {
 		return Promise.reject(Error('NOT IMPLEMENTED'));
 	}
 
-
-	public static fromJson(data: IStackTraceContext): StackTraceContext {
-		let context = new StackTraceContext();
-
-		context.ID = data['ID'];
-		context.Level = data['Level'];
-		context.IP = data['IP'];
-		context.ArgsString = data['ArgsString'];
-		context.Func = data['Func'];
-		context.File = data['File'];
-		context.Line = data['Line'];
-		context.Args = <IStackTraceContextArgs[]>data['Args'];
-
-		return context;
-	}
-
 	public toString(): string {
 		return `${this.ID}`;
 	}
 }
 
-export interface IStackTraceListener {
+export interface IStackTraceListener extends IContextListener<IStackTraceContext> {
 
 }
 
 
-export class StackTraceService extends Service {
+export class StackTraceService extends Service<IStackTraceContext, IStackTraceListener> {
 
 	public constructor(dispatcher: Dispatcher) {
 		super('StackTrace', dispatcher);
-	}
-
-	public contexts: Map<string, StackTraceContext> = new Map<string, StackTraceContext>();
-
-	private listeners: Array<IStackTraceListener> = new Array<IStackTraceListener>();
-
-	public addListener(listener: IStackTraceListener): void {
-		this.listeners.push(listener);
-	}
-
-	public removeListener(listener: IStackTraceListener): void {
-		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value !== listener;
-		});
 	}
 
 	public getChildren(parentContext: string): Promise<string[]> {
@@ -111,7 +81,16 @@ export class StackTraceService extends Service {
 		});
 	}
 
-	public getContext(contextIds: string[]): Promise<StackTraceContext[]> {
+	public getContext(contextId: string): Promise<StackTraceContext> {
+		let self = this;
+		return new Promise<StackTraceContext>( (resolve, reject) => {
+			self.getContexts([contextId])
+				.then( contexts => resolve(contexts[0]))
+				.catch( reason => reject(reason));
+		});
+	}
+
+	public getContexts(contextIds: string[]): Promise<StackTraceContext[]> {
 		let self = this;
 
 		return new Promise<StackTraceContext[]>(function(resolve, reject) {
@@ -120,7 +99,9 @@ export class StackTraceService extends Service {
 				let newContexts = new Array<IStackTraceContext>();
 
 				for (let index in contextsData) {
-					newContexts.push(StackTraceContext.fromJson(contextsData[index]));
+					let context = self.fromJson(self, contextsData[index]);
+					this.contexts[context.ID] = context;
+					newContexts.push(context);
 				}
 
 				resolve(newContexts);
@@ -130,10 +111,31 @@ export class StackTraceService extends Service {
 		});
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
 			default:
-				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
 	}
+
+
+	public fromJson(service: StackTraceService, data: IStackTraceContext): StackTraceContext {
+		let context = new StackTraceContext();
+
+		context.ID = data['ID'];
+		context.Level = data['Level'];
+		context.IP = data['IP'];
+		context.ArgsString = data['ArgsString'];
+		context.Func = data['Func'];
+		context.File = data['File'];
+		context.Line = data['Line'];
+		context.Args = <IStackTraceContextArgs[]>data['Args'];
+
+		return context;
+	}
+
 }

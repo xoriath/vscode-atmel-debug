@@ -4,7 +4,7 @@
  // http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Service%20-%20Breakpoints.html
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 export enum AccessMode {
 	Read = 0x01,
@@ -13,7 +13,7 @@ export enum AccessMode {
 	Change = 0x08
 }
 
-export interface IBreakpoint extends IContext {
+export interface IBreakpointContext extends IContext {
 	Enabled: boolean;
 	AccessMode: AccessMode;
 	File: string;
@@ -24,7 +24,7 @@ export interface IBreakpoint extends IContext {
 }
 
 
-export class BreakpointContext implements IBreakpoint {
+export class BreakpointContext implements IBreakpointContext {
 
 	public ID: string;
 	public Enabled: boolean;
@@ -35,7 +35,7 @@ export class BreakpointContext implements IBreakpoint {
 	public Address: number;
 	public HitCount: number;
 
-	private service: BreakpointsService;
+	public service: BreakpointsService;
 
 	public setProperties(properties: any): Promise<any> {
 		return Promise.reject(Error('NOT IMPLEMENTED'));
@@ -49,23 +49,6 @@ export class BreakpointContext implements IBreakpoint {
 		this.service.remove([this.ID]);
 	}
 
-	public static fromJson(service: BreakpointsService, data: IBreakpoint): BreakpointContext {
-		let context = new BreakpointContext();
-
-		context.service = service;
-
-		context.ID = data['ID'];
-		context.AccessMode = data['AccessMode'];
-		context.Enabled = data['Enabled'];
-		context.File =  data['File'];
-		context.Line = data['Line'];
-		context.Column = data['Column'];
-		context.Address = +data['Address'];
-		context.HitCount = data['HitCount'];
-
-		return context;
-	}
-
 	public toString(): string {
 		if (this.ID) {
 			return `${this.ID}`;
@@ -76,7 +59,11 @@ export class BreakpointContext implements IBreakpoint {
 	}
 }
 
-export class BreakpointsService extends Service {
+export interface IBreakpointListener extends IContextListener<IBreakpointContext> {
+
+}
+
+export class BreakpointsService extends Service<IBreakpointContext, IBreakpointListener> {
 
 	private contextCounter: number;
 
@@ -90,13 +77,13 @@ export class BreakpointsService extends Service {
 		return this.dispatcher.sendCommand(this.name, 'add', [parameters]);
 	}
 
-	public getProperties(contextId: string): Promise<BreakpointContext> {
+	public getProperties(contextId: string): Promise<IBreakpointContext> {
 		let self = this;
 
-		return new Promise<BreakpointContext>(function(resolve, reject) {
+		return new Promise<IBreakpointContext>(function(resolve, reject) {
 			self.dispatcher.sendCommand(self.name, 'getProperties', [contextId]).then( (eventData: string) => {
-				let data = <BreakpointContext>JSON.parse(eventData);
-				resolve(BreakpointContext.fromJson(self, data));
+				let data = <IBreakpointContext>JSON.parse(eventData);
+				resolve(self.fromJson(self, data));
 			}).catch( (reason: Error) => {
 				reject(reason);
 			});
@@ -115,10 +102,32 @@ export class BreakpointsService extends Service {
 		return `${++this.contextCounter}`;
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
 			default:
-				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
+	}
+
+
+	public fromJson(service: BreakpointsService, data: IBreakpointContext): IBreakpointContext {
+		let context = new BreakpointContext();
+
+		context.service = service;
+
+		context.ID = data['ID'];
+		context.AccessMode = data['AccessMode'];
+		context.Enabled = data['Enabled'];
+		context.File =  data['File'];
+		context.Line = data['Line'];
+		context.Column = data['Column'];
+		context.Address = +data['Address'];
+		context.HitCount = data['HitCount'];
+
+		return context;
 	}
 }

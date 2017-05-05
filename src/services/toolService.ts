@@ -1,7 +1,7 @@
 'use strict';
 
 import { Dispatcher, Service } from './service';
-import { IContext } from './icontext';
+import { IContext, IContextListener } from './icontext';
 
 export interface IConnectionProperties {
 	Type: string;
@@ -14,8 +14,6 @@ export interface IAttachedTool {
 	ToolType: string;
 	ConnectionProperties?: IConnectionProperties;
 }
-
-
 
 export interface IToolContext extends IContext {
 	Name: string;
@@ -54,63 +52,23 @@ export class ToolContext implements IToolContext {
 		this.service.tearDownTool(this.ID);
 	}
 
-	public static fromJson(service: ToolService, data: IToolContext): ToolContext {
-		let context = new ToolContext();
-
-		context.service = service;
-
-		context.ID = data['ID'];
-		context.Name = data['Name'];
-
-		if ('DeviceID' in data) {
-			context.DeviceId = data['DeviceId'];
-		}
-
-		return context;
-	}
-
 	public toString(): string {
 		return `${this.ID} (${this.Name})`;
 	}
 
 }
 
-export interface IToolListener {
-	contextAdded(contexts: IToolContext[]): void;
-	contextChanged(contexts: IToolContext[]): void;
-	contextRemoved(contextIds: string[]): void;
+export interface IToolListener extends IContextListener<IToolContext> {
 	attachedToolsChanged(attachedTools: IAttachedTool[]): void;
 }
 
-export class ToolService extends Service {
+export class ToolService extends Service<IToolContext, IToolListener> {
 
 	public constructor(dispatcher: Dispatcher) {
 		super('Tool', dispatcher);
 	}
 
 	public attachedTools: Array<IAttachedTool> = new Array<IAttachedTool>();
-
-	public contexts: Map<string, IToolContext> = new Map<string, IToolContext>();
-
-	private listeners: Array<IToolListener> = new  Array<IToolListener>();
-
-	public addListener(listener: IToolListener): void {
-		this.listeners.push(listener);
-	}
-
-	public removeListener(listener: IToolListener): void {
-		this.listeners = this.listeners.filter( (value, index, array): boolean => {
-			return value !== listener;
-		});
-	}
-
-	public getContext(id: string): IToolContext {
-		return this.contexts[id];
-	}
-
-	public pollForTools(shouldPoll: boolean) {
-		this.dispatcher.sendCommand(this.name, 'pollForTools', [shouldPoll]);
-	}
 
 	public getSupportedToolTypes(): Promise<string[]> {
 		let self = this;
@@ -123,6 +81,10 @@ export class ToolService extends Service {
 				reject(error);
 			});
 		});
+	}
+
+	public pollForTools(shouldPoll: boolean) {
+		this.dispatcher.sendCommand(this.name, 'pollForTools', [shouldPoll]);
 	}
 
 	// TODO; parse any
@@ -156,22 +118,17 @@ export class ToolService extends Service {
 		return this.dispatcher.sendCommand(this.name, 'setProperties', [contextId, properties]);
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
+		if (super.eventHandler(event, eventData)) {
+			return true;
+		}
+
 		switch (event) {
 			case 'attachedToolsChanged':
 				this.handleAttachedToolsChanged(eventData);
-				break;
-			case 'contextAdded':
-				this.handleContextAdded(eventData);
-				break;
-			case 'contextChanged':
-				this.handleContextChanged(eventData);
-				break;
-			case 'contextRemoved':
-				this.handleContextRemoved(eventData);
-				break;
+				return true;
 			default:
-				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
 	}
 
@@ -180,70 +137,23 @@ export class ToolService extends Service {
 		this.log(`AttachedToolsChanged: ${eventData}`);
 
 
-		for (let index in this.listeners) {
-			let listener: IToolListener = this.listeners[index];
-
+		this.listeners.forEach(listener => {
 			listener.attachedToolsChanged(this.attachedTools);
-		}
+		});
 	}
 
-	private handleContextAdded(eventData: string[]): void {
-		// TODO: into Service
-		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
-		let newContexts = new Array<IToolContext>();
+	public fromJson(service: ToolService, data: IToolContext): ToolContext {
+		let context = new ToolContext();
 
-		for (let index in contextsData) {
-			let context = ToolContext.fromJson(this, contextsData[index]);
-			this.contexts[context.ID] = context;
-			newContexts.push(context);
+		context.service = service;
+
+		context.ID = data['ID'];
+		context.Name = data['Name'];
+
+		if ('DeviceID' in data) {
+			context.DeviceId = data['DeviceId'];
 		}
 
-		this.log(`ContextAdded: ${newContexts}`);
-
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
-			listener.contextAdded(newContexts);
-		}
-	}
-
-	private handleContextChanged(eventData: string[]): void {
-		// TODO: into Service
-		let contextsData = <ToolContext[]>JSON.parse(eventData[0]);
-		let newContexts = new Array<IToolContext>();
-
-		for (let index in contextsData) {
-			let context = ToolContext.fromJson(this, contextsData[index]);
-			this.contexts[context.ID] = context;
-			newContexts.push(context);
-		}
-
-		this.log(`ContextAdded: ${newContexts}`);
-
-		for (let index in this.listeners) {
-			let listener = this.listeners[index];
-
-			listener.contextChanged(newContexts);
-		}
-	}
-
-	private handleContextRemoved(eventData: string[]): void {
-		// TODO: into Service
-
-		let ids = <string[]>JSON.parse(eventData[0]);
-		for (let index in ids) {
-			let id = ids[index];
-			if (id in this.contexts) {
-				delete this.contexts[id];
-			}
-		}
-
-		this.log(`ContextRemoved: ${ids}`);
-
-		for (let index in this.listeners) {
-			let listener: IToolListener = this.listeners[index];
-
-			listener.contextRemoved(ids);
-		}
+		return context;
 	}
 }

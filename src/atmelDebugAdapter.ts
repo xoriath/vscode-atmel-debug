@@ -97,19 +97,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		/* Terminate the processes */
 		if ('Processes' in this.services) {
 			let processService = <ProcessesService>this.services['Processes'];
-			for (let index in processService.contexts) {
-				let context = <IProcessesContext>processService.contexts[index];
+			processService.contexts.forEach(context => {
 				context.terminate();
-			}
+			});
 		}
 
 		/* Tear down the tools */
 		if ('Tools' in this.services) {
 			let toolService = <ToolService>this.services['Tools'];
-			for (let index in toolService.contexts) {
-				let context = <IToolContext>toolService.contexts[index];
+			toolService.contexts.forEach(context => {
 				context.tearDownTool();
-			}
+			});
 		}
 	}
 
@@ -356,23 +354,21 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	private resume(mode: ResumeMode, threadID?: number): void {
 		let runControlService = <RunControlService>this.services['RunControl'];
 
-		for (let index in runControlService.contexts) {
-			let context = <RunControlContext>runControlService.contexts[index];
+		runControlService.contexts.forEach(context => {
 			if (!threadID || threadID === this.hashString(context.ID)) {
 				context.resume(mode).catch( (error: Error) => this.log(error.message) );
 			}
-		}
+		});
 	}
 
 	private suspend(threadID?: number): void {
 		let runControlService = <RunControlService>this.services['RunControl'];
 
-		for (let index in runControlService.contexts) {
-			let context = <RunControlContext>runControlService.contexts[index];
+		runControlService.contexts.forEach(context => {
 			if (threadID === this.hashString(context.ID) || threadID === 0) {
 				context.suspend().catch( (error: Error) => this.log(error.message) );
 			}
-		}
+		});
 	}
 
 	protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
@@ -433,12 +429,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			threads: []
 		};
 
-		for (let index in processService.contexts) {
-			let context = <IProcessesContext>processService.contexts[index];
-			response.body.threads.push(new Thread(
-				this.hashString(context.RunControlId),
-				context.Name));
-		}
+		processService.contexts.forEach(context => {
+			response.body.threads.push(
+				new Thread(this.hashString(context.RunControlId), context.Name));
+		});
 
 		this.sendResponse(response);
 	}
@@ -453,14 +447,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			totalFrames: 0
 		};
 
-		for (let index in processesService.contexts) {
-			let processContext = <IProcessesContext>processesService.contexts[index];
+		processesService.contexts.forEach(context => {
 
 			/* Support threads (in theory at least) */
-			if (this.hashString(processContext.RunControlId) === args.threadId) {
+			if (this.hashString(context.RunControlId) === args.threadId) {
 
-				stackTraceService.getChildren(processContext.ID).then( (children) => {
-					stackTraceService.getContext(children).then( (frames) => {
+				stackTraceService.getChildren(context.ID).then( (children) => {
+					stackTraceService.getContexts(children).then( (frames) => {
 						frames.forEach(frame => {
 							let frameArgs: string[] = [];
 
@@ -470,12 +463,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 							});
 
 							/* Create list of all arguments to the function frame */
-							for (let frameArgIndex in sortedArgs) {
-								let frameArg = sortedArgs[frameArgIndex];
+							sortedArgs.forEach(frameArg => {
 								frameArgs.push(
 									`${frameArg.Type.trim()} ${frameArg.Name.trim()} = ${frameArg.Value.trim()}`
 								);
-							}
+							});
 
 							/* Create frame name based on function and arguments */
 							let frameName = `${frame.Func.trim()} (${frameArgs.join(', ')})`;
@@ -502,7 +494,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 					}).catch( (error: Error) => this.log(error.message) );
 				}).catch( (error: Error) => this.log(error.message) );
 			}
-		}
+		});
 	}
 
 	/* Scopes describes a collection of variables */
@@ -515,11 +507,10 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			scopes: []
 		};
 
-		for (let index in processesService.contexts) {
-			let processContext = <IProcessesContext>processesService.contexts[index];
+		processesService.contexts.forEach(context => {
 
-			stackTraceService.getChildren(processContext.ID).then( (children) => {
-				stackTraceService.getContext(children).then( (frames) => {
+			stackTraceService.getChildren(context.ID).then( (children) => {
+				stackTraceService.getContexts(children).then( (frames) => {
 					frames.forEach(frame => {
 						if (frame.Level === 0) {
 							// response.body.scopes.push(new Scope("Global", this.hashString(frame.ID), false));
@@ -538,7 +529,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 				}).catch( (error: Error) => this.log(error.message) );
 			}).catch( (error: Error) => this.log(error.message) );
-		}
+		});
 	}
 
 	/* Variables belong to a scope (which is created above) */
@@ -553,11 +544,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 			let values 	= new Array<Promise<string>>();
 			let registers 	= new Array<IRegistersContext>();
-			for (let index in registersService.contexts) {
-				let registersContext = <IRegistersContext>registersService.contexts[index];
-				values.push(registersService.get(registersContext.ID));
-				registers.push(registersContext);
-			}
+
+			registersService.contexts.forEach(context => {
+				values.push(registersService.get(context.ID));
+				registers.push(context);
+			});
 
 			Promise.all(values).then( (values: string[]) => {
 				values.forEach( (value: string, index: number) => {
@@ -582,11 +573,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			let processesService = <ProcessesService>this.services['Processes'];
 			let expressionsService = <ExpressionsService>this.services['Expressions'];
 
-			for (let index in processesService.contexts) {
-				let processContext = <IProcessesContext>processesService.contexts[index];
-
-				stackTraceService.getChildren(processContext.ID).then( (children) => {
-					stackTraceService.getContext(children).then( (frames) => {
+			processesService.contexts.forEach(context => {
+				stackTraceService.getChildren(context.ID).then( (children) => {
+					stackTraceService.getContexts(children).then( (frames) => {
 						frames.forEach(frame => {
 
 							/* Only evaluate if we are asked for this frame (local variables) */
@@ -619,7 +608,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						});
 					}).catch( (error: Error) => this.log(error.message) );
 				}).catch( (error: Error) => this.log(error.message) );
-			}
+			});
 		}
 	}
 
@@ -639,7 +628,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 
 		stackTraceService.getChildren(currentProcess.ID).then( (children) => {
-			stackTraceService.getContext(children).then( (frames) => {
+			stackTraceService.getContexts(children).then( (frames) => {
 				let sortedFrames = frames.sort( (a, b) => {
 					return a.Level - b.Level;
 				});
@@ -678,7 +667,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			case 'hover':
 			case 'repl':
 			default:
-				expressionsService.compute(this.hashes[args.frameId], 'C', args.expression).then( (expression) => {
+				expressionsService.compute(this.hashes[args.frameId], 'C' /* language */, args.expression).then( (expression) => {
 					response.body.result = expression.Val.trim();
 					response.body.type = expression.Type;
 
@@ -703,7 +692,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		}
 
 		/* Java odd-shift object hash (more or less at least) */
-		/* TODO: change for something common? Need only to translate strings to numbers wihtout colliding */
+		/* TODO: change for something common? Need only to translate strings to numbers without colliding */
 		let hash = Math.abs(str.split('').reduce(function (a, b) {
 				a = ((a << 5) - a) + b.charCodeAt(0);
 				return a & a;
