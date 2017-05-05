@@ -1,7 +1,7 @@
 {
   "name": "atmel-debug",
   "displayName": "Atmel Debug",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "xoriath",
   "description": "Debug using the Atmel Studio backend",
   "author": {
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "typescript": "^2.0.3",
-    "vscode": "^1.0.0",
+    "vscode": "^1.1.0",
     "mocha": "^2.4.5",
     "vscode-debugadapter-testsupport": "1.19.0",
     "tslint": "^3.14.0",
