@@ -1,6 +1,8 @@
 'use strict';
 
-import { Dispatcher, Service } from './service';
+import { Dispatcher } from './service';
+import { IEventHandler } from './iservice';
+
 
 // From http://git.eclipse.org/c/tcf/org.eclipse.tcf.git/plain/docs/TCF%20Specification.html#LocatorPeer
 export interface IPeer {
@@ -16,15 +18,21 @@ export interface IPeer {
 	Port?: string;
 }
 
-export class LocatorService extends Service {
+export class LocatorService implements IEventHandler {
 
 	public peers: Array<IPeer> = new Array<IPeer>();
 	public services: Array<string> = new Array<string>();
 
 	private onHelloCallback: () => void;
+	private dispatcher: Dispatcher;
+	private name = 'Locator';
 
 	public constructor(dispatcher: Dispatcher) {
-		super('Locator', dispatcher);
+		this.dispatcher = dispatcher;
+	}
+
+	private log(message: string): void {
+		this.dispatcher.log(`[${this.name}] ${message}`);
 	}
 
 	public sync(): Promise<any> {
@@ -74,25 +82,26 @@ export class LocatorService extends Service {
 		}
 	}
 
-	public eventHandler(event: string, eventData: string[]): void {
+	public eventHandler(event: string, eventData: string[]): boolean {
 		switch (event) {
 			case 'peerAdded':
 				this.handlePeerAdded(eventData);
-				break;
+				return true;
 			case 'peerChanged':
 				this.handlePeerChanged(eventData);
-				break;
+				return true;
 			case 'peerRemoved':
 				this.handlePeerRemoved(eventData);
-				break;
+				return true;
 			case 'peerHeartBeat':
 				this.handlePeerHeartBeat(eventData);
-				break;
+				return true;
 			case 'Hello':
 				this.handleHello(eventData);
-				break;
+				return true;
 			default:
 				this.log(`No matching event handler: ${event}`);
+				return false;
 		}
 	}
 }
