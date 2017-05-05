@@ -6,8 +6,8 @@ Debug adapter for Visual Studio code for the Atmel debug backend.
   <a href="https://travis-ci.org/xoriath/vscode-atmel-debug"><img src="https://travis-ci.org/xoriath/vscode-atmel-debug.svg?branch=master" alt="Travis"></a>
   <a href="https://github.com/xoriath/vscode-atmel-debug/releases">
     <img src="https://img.shields.io/github/release/xoriath/vscode-atmel-debug.svg" alt="Release">
-    <img src="https://img.shields.io/github/downloads/atom/atom/latest/total.svg" alt="Downloads - Total">
-    <img src="https://img.shields.io/github/downloads/atom/atom/total.svg" alt="Downloads - Latest">
+    <img src="https://img.shields.io/github/downloads/xoriath/vscode-atmel-debug/latest/total.svg" alt="Downloads - Total">
+    <img src="https://img.shields.io/github/downloads/xoriath/vscode-atmel-debug/total.svg" alt="Downloads - Latest">
   </a>
 </p>
 
