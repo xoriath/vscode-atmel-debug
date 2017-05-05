@@ -220,7 +220,7 @@ export class Dispatcher {
 		let eventData = JSON.parse(data[1]);
 
 		this.progressHandlers.forEach(handler => {
-			handler.progress(+eventData['ProgressComplete'], +eventData['ProgressTotal'], eventData['Description'])
+			handler.progress(+eventData['ProgressComplete'], +eventData['ProgressTotal'], eventData['Description']);
 		});
 
 		this.log(`[Dispatcher] Progress: ${eventData}`);
