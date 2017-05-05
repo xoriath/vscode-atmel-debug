@@ -250,7 +250,11 @@ export class Dispatcher {
 	private handleEvent(serviceName: string, eventName: string, eventData: string[]): void {
 		if (serviceName in this.eventHandlers) {
 			let handler: IEventHandler = this.eventHandlers[serviceName];
-			handler.eventHandler(eventName, eventData);
+
+			let handled = handler.eventHandler(eventName, eventData);
+			if (!handled) {
+				this.log(`[${serviceName}] Event handler failed to handle event '${eventName}'`);
+			}
 		}
 		else {
 			this.debug(`[Dispatcher] Event handler for ${serviceName} is not registered`);
