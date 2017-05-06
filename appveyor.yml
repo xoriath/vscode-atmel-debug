@@ -1,16 +1,26 @@
+
+environment:
+  VSCODE_BUILD_VERBOSE: true
+
 install:
-  - ps: Install-Product node 6.5 x64
-  - node --version
-  - npm --version
-  - npm install
+  - ps: Install-Product node 7.8.0 x64
+  - npm install -g npm vsce > log.txt
+  - npm install >> log.txt
+
+cache:
+  - node_modules
 
 build_script:
-
+  - npm run compile
 
 test_script:
-  - npm install appveyor-mocha
+  - node --version
+  - npm --version
+  - npm install -g appveyor-mocha >> log.txt
   - npm test
 
 artifacts:
-  - path: '*.vsix'
-    name: vscode-atmel-debug
+  - path: '**\*.vsix'
+
+  - path: 'log.txt'
+    name: build logs
