@@ -16,7 +16,7 @@ build_script:
 test_script:
   - node --version
   - npm --version
-  - npm install -g appveyor-mocha >> log.txt
+  - npm install -g mocha appveyor-mocha >> log.txt
   - npm test
 
 artifacts:
