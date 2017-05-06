@@ -1,9 +1,13 @@
 install:
   - ps: Install-Product node 6.5 x64
+  - node --version
+  - npm --version
+  - npm install
 
 build_script:
-  - npm install
-  - ps: vsce package
+  - npm compile
+  - npm lint
+  - vsce package
 
 test_script:
   - npm install appveyor-mocha
