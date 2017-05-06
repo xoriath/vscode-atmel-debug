@@ -2,6 +2,8 @@
 environment:
   VSCODE_BUILD_VERBOSE: true
 
+version: 0.0.{build}
+
 install:
   - ps: Install-Product node 7.8.0 x64
   - npm install -g npm vsce > log.txt
@@ -11,6 +13,7 @@ cache:
   - node_modules
 
 build_script:
+  - npm version {version}
   - npm run package
 
 test_script:
