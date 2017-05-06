@@ -5,8 +5,6 @@ environment:
     - nodejs_version: "4"
     - nodejs_version: "7"
 
-version: 0.0.{build}
-
 install:
   - ps: Install-Product node $env:nodejs_version
   - npm install -g npm vsce > log.txt
@@ -16,7 +14,7 @@ cache:
   - node_modules
 
 build_script:
-  - npm version "0.0.{build}"
+  - ps: npm version "$env:APPVEYOR_BUILD_VERSION"
   - npm run package
 
 test_script:
