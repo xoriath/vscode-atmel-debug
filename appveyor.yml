@@ -13,7 +13,7 @@ cache:
   - node_modules
 
 build_script:
-  - npm version {version}
+  - npm version "{version}"
   - npm run package
 
 test_script:
