@@ -5,9 +5,7 @@ install:
   - npm install
 
 build_script:
-  - npm compile
-  - npm lint
-  - vsce package
+  - cmd: "vsce package"
 
 test_script:
   - npm install appveyor-mocha
