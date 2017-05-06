@@ -1,7 +1,7 @@
 {
   "name": "atmel-debug",
   "displayName": "Atmel Debug",
-  "version": "0.0.2",
+  "version": "0.0.61",
   "publisher": "xoriath",
   "description": "Debug using the Atmel Studio backend",
   "author": {
