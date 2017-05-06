@@ -3,9 +3,10 @@ install:
 
 build_script:
   - npm install
-  - vsce package
+  - ps: vsce package
 
 test_script:
+  - npm install appveyor-mocha
   - npm test
 
 artifacts:
