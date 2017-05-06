@@ -11,7 +11,7 @@ cache:
   - node_modules
 
 build_script:
-  - npm run compile
+  - npm run package
 
 test_script:
   - node --version
