@@ -42,7 +42,6 @@
     "@types/ws": "^0.0.34"
   },
   "scripts": {
-    "prepublish": "node ./node_modules/typescript/bin/tsc -p ./src",
     "compile": "node ./node_modules/typescript/bin/tsc -p ./src",
     "watch": "node ./node_modules/typescript/bin/tsc -w -p ./src",
     "test": "node ./node_modules/mocha/bin/mocha -u tdd ./test/",
