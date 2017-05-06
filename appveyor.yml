@@ -3,6 +3,11 @@ install:
 
 build_script:
   - npm install
+  - vsce package
 
-# test_script:
-#  - npm test
+test_script:
+  - npm test
+
+artifacts:
+  - path: '*.vsix'
+  - name: vscode-atmel-debug
