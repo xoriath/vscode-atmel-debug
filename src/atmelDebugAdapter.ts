@@ -4,8 +4,8 @@
 const path 		= require('path');
 const base64 	= require('base-64');
 
-import { IDispatcher } from './IDispatcher';
-import { WebsocketDispatcher } from './WebsocketDispatcher';
+import { IDispatcher } from './idispatcher';
+import { WebsocketDispatcher } from './websocketDispatcher';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 import {
@@ -38,7 +38,7 @@ import {
 	StreamService,
 	BreakpointsService,
 	RunControlService
-} from './services/Services';
+} from './services/services';
 
 import {
 	IToolContext,
@@ -46,12 +46,12 @@ import {
 	IRegisterContext,
 	IRunControlContext,
 
-} from './services/Contexts';
+} from './services/contexts';
 
-import { AccessMode } from './services/breakpoint/AccessMode';
-import { ResumeMode } from './services/runcontrol/ResumeMode';
-import { IRunControlListener } from './services/runcontrol/IRunControlListener';
-import { IService } from './services/IService';
+import { AccessMode } from './services/breakpoint/accessMode';
+import { ResumeMode } from './services/runcontrol/resumeMode';
+import { IRunControlListener } from './services/runcontrol/irunControlListener';
+import { IService } from './services/iservice';
 
 import { LaunchRequestArguments } from './launchRequestArguments';
 import { GotoMain } from './gotoMain';
