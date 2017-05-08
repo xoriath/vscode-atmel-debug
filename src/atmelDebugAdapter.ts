@@ -56,6 +56,7 @@ import { IService } from './services/iservice';
 import { LaunchRequestArguments } from './launchRequestArguments';
 import { GotoMain } from './gotoMain';
 import { ProcessLauncher } from './processLauncher';
+import { NumericalHashCode } from './numericalHashCode';
 
 export class AtmelDebugSession extends DebugSession implements IRunControlListener {
 
@@ -63,7 +64,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	private DEBUG: boolean = true;
 
 	private dispatcher: IDispatcher;
-	private services: Map<string, IService>;
+	private services = new Map<string, IService>();
+	private hasher = new NumericalHashCode();
 
 	public constructor() {
 		super();
@@ -162,7 +164,6 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 				let breakpointService = new BreakpointsService(dispatcher);
 				let streamService = new StreamService(dispatcher);
 
-				self.services = new Map<string, IService>();
 				self.services['Tool'] = toolService;
 				self.services['Device'] = deviceService;
 				self.services['Processes'] = processService;
@@ -371,7 +372,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		let runControlService = <RunControlService>this.services['RunControl'];
 
 		runControlService.contexts.forEach(context => {
-			if (!threadID || threadID === this.hashString(context.ID)) {
+			if (!threadID || threadID === this.hasher.hash(context.ID)) {
 				context.resume(mode).catch( (error: Error) => this.log(error.message) );
 			}
 		});
@@ -381,7 +382,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		let runControlService = <RunControlService>this.services['RunControl'];
 
 		runControlService.contexts.forEach(context => {
-			if (threadID === this.hashString(context.ID) || threadID === 0) {
+			if (threadID === this.hasher.hash(context.ID) || threadID === 0) {
 				context.suspend().catch( (error: Error) => this.log(error.message) );
 			}
 		});
@@ -447,7 +448,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 		processService.contexts.forEach(context => {
 			response.body.threads.push(
-				new Thread(this.hashString(context.RunControlId), context.Name));
+				new Thread(this.hasher.hash(context.RunControlId), context.Name));
 		});
 
 		this.sendResponse(response);
@@ -466,7 +467,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		ProcessService.contexts.forEach(context => {
 
 			/* Support threads (in theory at least) */
-			if (this.hashString(context.RunControlId) === args.threadId) {
+			if (this.hasher.hash(context.RunControlId) === args.threadId) {
 
 				stackTraceService.getChildren(context.ID).then( (children) => {
 					stackTraceService.getContexts(children).then( (frames) => {
@@ -503,7 +504,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 							/* Push the frame */
 							response.body.stackFrames.push(
-								new StackFrame(this.hashString(frame.ID), frameName, source, frame.Line));
+								new StackFrame(this.hasher.hash(frame.ID), frameName, source, frame.Line));
 						});
 
 						this.sendResponse(response);
@@ -533,13 +534,13 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						}
 
 						/* Create local scope if we are asked for a frame that we found */
-						if (args.frameId === this.hashString(frame.ID)) {
-							response.body.scopes.push(new Scope('Local', this.hashString(frame.ID), false));
+						if (args.frameId === this.hasher.hash(frame.ID)) {
+							response.body.scopes.push(new Scope('Local', this.hasher.hash(frame.ID), false));
 						}
 					});
 
 					/* Push the registers scope */
-					response.body.scopes.push(new Scope('Registers', this.hashString('Registers'), false));
+					response.body.scopes.push(new Scope('Registers', this.hasher.hash('Registers'), false));
 
 					this.sendResponse(response);
 
@@ -555,7 +556,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			variables: []
 		};
 
-		if (args.variablesReference === this.hashString('Registers')) {
+		if (args.variablesReference === this.hasher.hash('Registers')) {
 			let registerService = <RegisterService>this.services['Registers'];
 
 			let values 	= new Array<Promise<string>>();
@@ -595,7 +596,7 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 						frames.forEach(frame => {
 
 							/* Only evaluate if we are asked for this frame (local variables) */
-							if (args.variablesReference === this.hashString(frame.ID)) {
+							if (args.variablesReference === this.hasher.hash(frame.ID)) {
 
 								/* Get expressions for the frame */
 								expressionService.getChildren(frame.ID).then( (children) => {
@@ -669,6 +670,9 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 	/* Evaluate using the expression evaluator */
 	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
 		let expressionsService = <ExpressionService>this.services['Expressions'];
+		let stackTraceService = <StackTraceService>this.services['StackTrace'];
+
+		let stackTraceContextId = this.hasher.retrieve(args.frameId);
 
 		response.body = {
 			result: '',
@@ -683,7 +687,8 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 			case 'hover':
 			case 'repl':
 			default:
-				expressionsService.compute(this.hashes[args.frameId], 'C' /* language */, args.expression).then( (expression) => {
+				stackTraceService.getContext(stackTraceContextId).then(context => {
+					expressionsService.compute(context, 'C' /* language */, args.expression).then( (expression) => {
 					response.body.result = expression.Val.trim();
 					response.body.type = expression.Type;
 
@@ -697,42 +702,17 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 
 					this.sendResponse(response);
 				});
+			});
 		}
-	}
-
-	private hashes: Map<number, string>;
-
-	private hashString(str: string): number {
-		if (!this.hashes) {
-			this.hashes = new Map<number, string>();
-		}
-
-		/* Java odd-shift object hash (more or less at least) */
-		/* TODO: change for something common? Need only to translate strings to numbers without colliding */
-		let hash = Math.abs(str.split('').reduce(function (a, b) {
-				a = ((a << 5) - a) + b.charCodeAt(0);
-				return a & a;
-			}, 0));
-
-		this.hashes[hash] = str;
-
-		return hash;
-	}
-
-	private getStringFromHash(hash: number): string {
-		if (hash in this.hashes) {
-			return this.hashes[hash];
-		}
-		return '';
 	}
 
 	/* IRunControlListener */
 	public contextSuspended(contextId: string, pc: number, reason: string, state: any): void {
-		this.sendEvent(new StoppedEvent(reason, this.hashString(contextId), ''));
+		this.sendEvent(new StoppedEvent(reason, this.hasher.hash(contextId), ''));
 	}
 
 	public contextResumed(contextId: string): void {
-		this.sendEvent(new ContinuedEvent(this.hashString(contextId)));
+		this.sendEvent(new ContinuedEvent(this.hasher.hash(contextId)));
 	}
 
 	public contextAdded(contexts: IRunControlContext[]): void {	}
@@ -760,11 +740,11 @@ export class AtmelDebugSession extends DebugSession implements IRunControlListen
 		let expressionsService = <ExpressionService>this.services['Expressions'];
 		let runControlService = <RunControlService>this.services['RunControl'];
 		let stackTraceService = <StackTraceService>this.services['StackTrace'];
-		let ProcessService = <ProcessService>this.services['Processes'];
+		let processService = <ProcessService>this.services['Processes'];
 
 		let processContext: IProcessContext;
-		for (let index in ProcessService.contexts) {
-			processContext = <IProcessContext>ProcessService.contexts[index];
+		for (let index in processService.contexts) {
+			processContext = <IProcessContext>processService.contexts[index];
 		}
 
 		let runControlContext: IRunControlContext;
