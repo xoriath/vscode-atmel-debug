@@ -1,10 +1,12 @@
 'use strict';
 
-import { IProcessesListener, IProcessesContext } from './services/processesService';
+import { IProcessListener } from './services/process/IProcessListener';
+import { IProcessContext } from './services/process/IProcessContext';
+
 import { AtmelDebugSession } from './atmelDebugAdapter';
 import { InitializedEvent } from 'vscode-debugadapter';
 
-export class GotoMain implements IProcessesListener {
+export class GotoMain implements IProcessListener {
 
 	private session: AtmelDebugSession;
 
@@ -12,12 +14,12 @@ export class GotoMain implements IProcessesListener {
 		this.session = session;
 	}
 
-	public contextAdded(contexts: IProcessesContext[]): void {
+	public contextAdded(contexts: IProcessContext[]): void {
 		this.session.sendEvent(new InitializedEvent());
 		this.session.goto('main');
 	}
 
-	public contextChanged(contexts: IProcessesContext[]): void { }
+	public contextChanged(contexts: IProcessContext[]): void { }
 	public contextRemoved(contextIds: string[]): void {	}
 	public exited(id: string, exitCode: number): void {	}
 }

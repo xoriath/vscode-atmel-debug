@@ -1,16 +1,17 @@
 'use strict';
 
-import { IDeviceContext, IDeviceListener } from './services/deviceService';
-import { ProcessesService } from './services/processesService';
+import { IDeviceContext } from './services/device/IDeviceContext';
+import { IDeviceListener } from './services/device/IDeviceListener';
+import { ProcessService } from './services/process/ProcessService';
 import { LaunchRequestArguments } from './launchRequestArguments';
 
 export class ProcessLauncher implements IDeviceListener {
-	private processService: ProcessesService;
+	private processService: ProcessService;
 	private module: string;
 	private launchArgs: LaunchRequestArguments;
 	private launchParameters = {};
 
-	public constructor(module: string, processService: ProcessesService, args: LaunchRequestArguments) {
+	public constructor(module: string, processService: ProcessService, args: LaunchRequestArguments) {
 		this.processService = processService;
 		this.module = module;
 		this.launchArgs = args;
