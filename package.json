@@ -120,7 +120,7 @@
                 "default": "com.atmel.avrdbg.connection.cmsis-dap"
               },
               "connectionProperties": {
-                "type": "any",
+                "type": "object",
                 "description": "Properties of the connection interface.",
                 "default": {
                   "SerialNumber": "ATML2407080200003415",
@@ -141,7 +141,7 @@
                 "default": "SWD"
               },
               "interfaceProperties": {
-                "type": "any",
+                "type": "object",
                 "description": "",
                 "default": {
                   "SwdClock": 2000000,
